@@ -1,0 +1,2746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Government Crossword Puzzle Generator | TCC Trailblazer Trek</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #005A87;
+            --primary-green: #00695C;
+            --secondary-blue: #0277BD;
+            --secondary-green: #00897B;
+            --success: #1B5E20;
+            --error: #B71C1C;
+            --warning: #F57C00;
+            --text-primary: #212121;
+            --text-secondary: #424242;
+            --bg-white: #FFFFFF;
+            --bg-light: #F5F5F5;
+            --bg-section: #E0F2F1;
+            --highlight-yellow: #FFD54F;
+            --highlight-blue: #E3F2FD;
+            --highlight-green: #E8F5E9;
+        }
+
+        body {
+            font-family: Georgia, serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: var(--bg-light);
+        }
+
+        /* Fixed Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-green));
+            color: white;
+            padding: 15px 30px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 100px auto 40px;
+            padding: 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #4FC3F7, #4DB6AC);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .hero h2 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        /* Page Navigation */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .card h3 {
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Select Dropdown */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1em;
+            font-family: Georgia, serif;
+            border: 2px solid var(--primary-blue);
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:hover, select:focus {
+            border-color: var(--primary-green);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,105,92,0.1);
+        }
+
+        /* Terms Grid */
+        .terms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .term-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .term-item:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+
+        .term-item.selected {
+            background: var(--highlight-green);
+            border-color: var(--success);
+        }
+
+        .term-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary-green);
+        }
+
+        .term-info {
+            flex: 1;
+        }
+
+        .term-word {
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .term-clue {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+
+        /* Selection Controls */
+        .selection-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .selection-controls button {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-select-all {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-select-none {
+            background: #757575;
+            color: white;
+        }
+
+        .btn-random {
+            background: var(--warning);
+            color: white;
+        }
+
+        .selection-controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .selection-count {
+            padding: 8px 16px;
+            background: var(--highlight-blue);
+            border-radius: 5px;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        /* Primary Button */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-green));
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-family: Georgia, serif;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,90,135,0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+            padding: 12px 30px;
+            font-size: 1em;
+            font-family: Georgia, serif;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--highlight-blue);
+        }
+
+        /* Crossword Container */
+        .crossword-container {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .puzzle-section {
+            flex-shrink: 0;
+        }
+
+        .clues-section {
+            min-width: 350px;
+            max-width: 500px;
+        }
+
+        @media (max-width: 1000px) {
+            .crossword-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .clues-section {
+                max-width: 100%;
+            }
+        }
+
+        /* Crossword Grid */
+        .crossword-grid {
+            display: inline-block;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .crossword-row {
+            display: flex;
+        }
+
+        .crossword-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: white;
+        }
+
+        .crossword-cell.empty {
+            background: #333;
+            border-color: #333;
+        }
+
+        .crossword-cell input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-family: Georgia, serif;
+            background: transparent;
+        }
+
+        .crossword-cell input:focus {
+            outline: 3px solid var(--primary-blue);
+            background: var(--highlight-blue);
+        }
+
+        .crossword-cell input.correct {
+            background: #C8E6C9;
+            color: var(--success);
+        }
+
+        .crossword-cell input.incorrect {
+            background: #FFCDD2;
+            color: var(--error);
+        }
+
+        .cell-number {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            font-size: 0.6em;
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+
+        /* Clues List */
+        .clues-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            overflow: visible;
+        }
+
+        .clues-card h4 {
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--bg-section);
+            font-size: 1.1em;
+        }
+
+        .clue-item {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.5;
+        }
+
+        .clue-item:hover {
+            background: var(--highlight-blue);
+            padding-left: 12px;
+        }
+
+        .clue-item:last-child {
+            border-bottom: none;
+        }
+
+        .clue-number {
+            font-weight: bold;
+            color: var(--primary-green);
+            flex-shrink: 0;
+            min-width: 28px;
+        }
+
+        .clue-text {
+            flex: 1;
+            word-wrap: break-word;
+        }
+
+        .clue-item.completed {
+            color: var(--success);
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: #ddd;
+            border-radius: 10px;
+            height: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-green));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        /* Answer Key */
+        .answer-key {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .answer-key h3 {
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .answer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .answer-item {
+            padding: 8px 12px;
+            background: var(--bg-light);
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .answer-number {
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+
+        .answer-word {
+            font-weight: bold;
+            color: var(--primary-blue);
+            text-transform: uppercase;
+        }
+
+        /* Print Styles */
+        @media print {
+            .header, .hero, .btn-primary, .btn-secondary, .selection-controls, .no-print {
+                display: none !important;
+            }
+
+            .container {
+                margin: 0;
+                padding: 10px;
+            }
+
+            .crossword-container {
+                flex-direction: column;
+            }
+
+            .crossword-cell input {
+                border: 1px solid #999;
+            }
+
+            .answer-key {
+                page-break-before: always;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.1em;
+            }
+
+            .hero h2 {
+                font-size: 1.6em;
+            }
+
+            .crossword-cell {
+                width: 32px;
+                height: 32px;
+            }
+
+            .crossword-cell input {
+                font-size: 1em;
+            }
+
+            .terms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Stats Display */
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: none;
+            animation: slideIn 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Loading Spinner */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        /* Add Custom Term Section */
+        .add-term-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #ddd;
+        }
+
+        .btn-add-term {
+            background: linear-gradient(135deg, var(--secondary-green), var(--primary-green));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1em;
+            font-family: Georgia, serif;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add-term:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,105,92,0.3);
+        }
+
+        .add-term-form {
+            background: var(--highlight-blue);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+            border: 2px solid var(--primary-blue);
+        }
+
+        .add-term-form h4 {
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .add-term-form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .add-term-form input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 1em;
+            font-family: Georgia, serif;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            transition: border-color 0.3s ease;
+        }
+
+        .add-term-form input[type="text"]:focus {
+            border-color: var(--primary-blue);
+            outline: none;
+        }
+
+        .form-hint {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-confirm-add {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-family: Georgia, serif;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-confirm-add:hover {
+            background: #145214;
+        }
+
+        .btn-cancel-add {
+            background: #757575;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-family: Georgia, serif;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel-add:hover {
+            background: #616161;
+        }
+
+        .custom-terms-list {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ccc;
+        }
+
+        .custom-terms-list h5 {
+            color: var(--primary-green);
+            margin-bottom: 10px;
+        }
+
+        .custom-term-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border: 2px solid var(--primary-green);
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.9em;
+        }
+
+        .custom-term-chip .term-name {
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .custom-term-chip .remove-term {
+            background: var(--error);
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .custom-term-chip .remove-term:hover {
+            background: #8B0000;
+        }
+
+        .term-item.custom-term {
+            border-left: 4px solid var(--primary-green);
+            background: linear-gradient(90deg, var(--highlight-green) 0%, white 100%);
+        }
+
+        .custom-badge {
+            background: var(--primary-green);
+            color: white;
+            font-size: 0.7em;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--bg-light);
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Completion Banner */
+        .completion-banner {
+            background: linear-gradient(135deg, #FFD700, #FFA000);
+            color: #333;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .completion-banner.show {
+            display: block;
+            animation: pulse 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .completion-banner h3 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        /* Placement Notice */
+        .placement-notice {
+            background: var(--highlight-blue);
+            border: 1px solid var(--primary-blue);
+            border-radius: 10px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .placement-notice .notice-icon {
+            font-size: 1.2em;
+        }
+
+        .placement-notice-warning {
+            background: #FFF3E0;
+            border-color: var(--warning);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1>🧩 Government Crossword Generator</h1>
+        <span class="header-badge">TCC Trailblazer Trek</span>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Page 1: Setup -->
+        <div id="page-setup" class="page active">
+            <div class="hero">
+                <h2>🏛️ Federal Government Crossword Creator</h2>
+                <p>Generate interactive crossword puzzles for your students</p>
+            </div>
+
+            <!-- Topic Selection -->
+            <div class="card">
+                <h3>📚 Step 1: Select a Topic</h3>
+                <div class="form-group">
+                    <label for="topic-select">Choose a government topic:</label>
+                    <select id="topic-select" onchange="loadTerms()">
+                        <option value="">-- Select a Topic --</option>
+                        <option value="constitution">Chapter 2: The Constitution</option>
+                        <option value="federalism">Chapter 3: American Federalism</option>
+                        <option value="civil-liberties">Chapter 4: Civil Liberties</option>
+                        <option value="civil-rights">Chapter 5: Civil Rights</option>
+                        <option value="congress">Chapter 6: Congress</option>
+                        <option value="public-opinion">Chapter 7: Public Opinion</option>
+                        <option value="voting-elections">Chapter 8: Voting & Elections</option>
+                        <option value="media">Chapter 9: The Media</option>
+                        <option value="political-parties">Chapter 10: Political Parties</option>
+                        <option value="interest-groups">Chapter 11: Interest Groups</option>
+                        <option value="presidency">Chapter 12: The Presidency</option>
+                        <option value="courts">Chapter 13: The Courts</option>
+                        <option value="bureaucracy">Chapter 14: The Bureaucracy</option>
+                        <option value="domestic-policy">Chapter 15: Domestic Policy</option>
+                        <option value="foreign-policy">Chapter 16: Foreign Policy</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Term Selection -->
+            <div class="card" id="terms-card" style="display: none;">
+                <h3>✅ Step 2: Select Terms for Your Puzzle</h3>
+                <div class="selection-controls">
+                    <button class="btn-select-all" onclick="selectAll()">Select All</button>
+                    <button class="btn-select-none" onclick="selectNone()">Clear All</button>
+                    <button class="btn-random" onclick="selectRandom(10)">Random 10</button>
+                    <button class="btn-random" onclick="selectRandom(15)">Random 15</button>
+                    <span class="selection-count" id="selection-count">0 terms selected</span>
+                </div>
+                <div class="terms-grid" id="terms-grid"></div>
+                
+                <!-- Add Custom Term Section -->
+                <div class="add-term-section">
+                    <button class="btn-add-term" onclick="toggleAddTermForm()">
+                        ➕ Add Custom Term
+                    </button>
+                    <div class="add-term-form" id="add-term-form" style="display: none;">
+                        <h4>📝 Add Your Own Term</h4>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="custom-word">Term/Word:</label>
+                                <input type="text" id="custom-word" placeholder="e.g., FILIBUSTER" maxlength="20">
+                                <small class="form-hint">Letters only, no spaces (max 20 characters)</small>
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label for="custom-clue">Clue/Hint:</label>
+                                <input type="text" id="custom-clue" placeholder="e.g., Extended debate to delay Senate action">
+                                <small class="form-hint">The hint students will see</small>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-confirm-add" onclick="addCustomTerm()">✓ Add Term</button>
+                            <button class="btn-cancel-add" onclick="toggleAddTermForm()">✕ Cancel</button>
+                        </div>
+                        <div class="custom-terms-list" id="custom-terms-list" style="display: none;">
+                            <h5>📋 Your Custom Terms:</h5>
+                            <div id="custom-terms-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generate Button -->
+            <div class="card" id="generate-card" style="display: none; text-align: center;">
+                <h3>🎯 Step 3: Generate Your Puzzle</h3>
+                <p style="margin-bottom: 20px;">Click below to create your crossword puzzle with the selected terms.</p>
+                <button class="btn-primary" id="generate-btn" onclick="generatePuzzle()" disabled>
+                    🧩 Generate Crossword Puzzle
+                </button>
+                <p id="min-warning" style="color: var(--error); margin-top: 10px; display: none;">
+                    ⚠️ Please select at least 5 terms to generate a puzzle.
+                </p>
+            </div>
+        </div>
+
+        <!-- Page 2: Puzzle -->
+        <div id="page-puzzle" class="page">
+            <div class="no-print" style="margin-bottom: 20px;">
+                <button class="btn-secondary" onclick="showPage('setup')">← Back to Setup</button>
+            </div>
+
+            <!-- Completion Banner -->
+            <div class="completion-banner" id="completion-banner">
+                <h3>🎉 Congratulations!</h3>
+                <p>You've completed the crossword puzzle!</p>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar no-print">
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-placed">0</div>
+                    <div class="stat-label">Words Placed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-correct">0</div>
+                    <div class="stat-label">Correct</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-percent">0%</div>
+                    <div class="stat-label">Complete</div>
+                </div>
+            </div>
+
+            <!-- Placement Notice -->
+            <div class="placement-notice" id="placement-notice" style="display: none;">
+                <span class="notice-icon">ℹ️</span>
+                <span id="placement-message"></span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container no-print">
+                <div class="progress-bar" id="progress-bar" style="width: 0%;">0%</div>
+            </div>
+
+            <!-- Crossword Content -->
+            <div class="crossword-container">
+                <div class="puzzle-section">
+                    <div class="crossword-grid" id="crossword-grid"></div>
+                </div>
+                <div class="clues-section">
+                    <div class="clues-card">
+                        <h4>⬇️ ACROSS</h4>
+                        <div id="clues-across"></div>
+                    </div>
+                    <div class="clues-card">
+                        <h4>⬇️ DOWN</h4>
+                        <div id="clues-down"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons no-print">
+                <button class="btn-secondary btn-icon" onclick="checkAllAnswers()">
+                    ✔️ Check All Answers
+                </button>
+                <button class="btn-secondary btn-icon" onclick="clearPuzzle()">
+                    🔄 Clear Puzzle
+                </button>
+                <button class="btn-secondary btn-icon" onclick="toggleAnswerKey()">
+                    📋 Show/Hide Answer Key
+                </button>
+                <button class="btn-primary btn-icon" onclick="exportPuzzle()">
+                    💾 Export Puzzle
+                </button>
+                <button class="btn-secondary btn-icon" onclick="printPuzzle()">
+                    🖨️ Print Puzzle
+                </button>
+            </div>
+
+            <!-- Answer Key -->
+            <div class="answer-key" id="answer-key" style="display: none;">
+                <h3>📋 Answer Key</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <h4 style="color: var(--primary-green); margin-bottom: 10px;">ACROSS</h4>
+                        <div id="answers-across"></div>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--primary-green); margin-bottom: 10px;">DOWN</h4>
+                        <div id="answers-down"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ========================================
+        // TERM DATABASE - All Government Topics
+        // ========================================
+        const termDatabase = {
+            'constitution': [
+                { word: 'AMENDMENT', clue: 'A change or addition to the Constitution' },
+                { word: 'RATIFICATION', clue: 'Formal approval of the Constitution by state conventions' },
+                { word: 'FEDERALIST', clue: 'Supporter of the Constitution who favored strong central government' },
+                { word: 'ANTIFEDERALIST', clue: 'Opponent of the Constitution who feared centralized power' },
+                { word: 'REPUBLIC', clue: 'A government where citizens elect representatives to make decisions' },
+                { word: 'SEPARATION', clue: 'Division of government into three branches' },
+                { word: 'CHECKS', clue: 'System where each branch can limit the others' },
+                { word: 'BICAMERAL', clue: 'A legislature with two chambers or houses' },
+                { word: 'SUPREMACY', clue: 'Constitutional principle that federal law overrides state law' },
+                { word: 'ELASTIC', clue: 'Clause allowing Congress to make necessary and proper laws' },
+                { word: 'PREAMBLE', clue: 'Opening statement of the Constitution beginning "We the People"' },
+                { word: 'CONVENTION', clue: '1787 meeting in Philadelphia that created the Constitution' },
+                { word: 'COMPROMISE', clue: 'Agreement between large and small states on representation' },
+                { word: 'VETO', clue: 'Presidential power to reject legislation' },
+                { word: 'IMPEACHMENT', clue: 'Process to remove federal officials for misconduct' },
+                { word: 'ARTICLES', clue: 'Seven main divisions of the Constitution' },
+                { word: 'ENUMERATED', clue: 'Powers specifically listed in the Constitution' },
+                { word: 'RESERVED', clue: 'Powers kept by the states under the Tenth Amendment' }
+            ],
+            'federalism': [
+                { word: 'FEDERALISM', clue: 'System of shared power between national and state governments' },
+                { word: 'CONCURRENT', clue: 'Powers shared by both federal and state governments' },
+                { word: 'DEVOLUTION', clue: 'Transfer of power from federal to state governments' },
+                { word: 'PREEMPTION', clue: 'Federal law taking precedence over state law' },
+                { word: 'MANDATE', clue: 'Federal requirement that states must follow' },
+                { word: 'GRANTS', clue: 'Federal money given to states for specific purposes' },
+                { word: 'BLOCK', clue: 'Type of grant with few federal restrictions' },
+                { word: 'CATEGORICAL', clue: 'Type of grant with strict federal requirements' },
+                { word: 'SOVEREIGNTY', clue: 'Supreme political authority within a territory' },
+                { word: 'UNITARY', clue: 'System where central government holds all power' },
+                { word: 'CONFEDERATION', clue: 'Loose alliance of independent states' },
+                { word: 'DUAL', clue: 'Early form of federalism with separate spheres of authority' },
+                { word: 'COOPERATIVE', clue: 'Federalism model emphasizing partnership between levels' },
+                { word: 'COERCIVE', clue: 'Federalism where national government dominates states' },
+                { word: 'COMMERCE', clue: 'Constitutional clause giving Congress power over trade' },
+                { word: 'INTERSTATE', clue: 'Activities or commerce crossing state boundaries' },
+                { word: 'NULLIFICATION', clue: 'Disputed theory that states can void federal laws' },
+                { word: 'UNFUNDED', clue: 'Type of mandate without federal money to implement it' }
+            ],
+            'civil-liberties': [
+                { word: 'LIBERTY', clue: 'Freedom from government restraint' },
+                { word: 'INCORPORATION', clue: 'Process applying Bill of Rights to states' },
+                { word: 'ESTABLISHMENT', clue: 'Clause prohibiting government-sponsored religion' },
+                { word: 'EXERCISE', clue: 'Free practice of religious beliefs' },
+                { word: 'SPEECH', clue: 'First Amendment protection for expression' },
+                { word: 'PRESS', clue: 'First Amendment protection for media and publishing' },
+                { word: 'ASSEMBLY', clue: 'Right to gather peacefully' },
+                { word: 'PETITION', clue: 'Right to formally request government action' },
+                { word: 'WARRANT', clue: 'Court order required for searches' },
+                { word: 'PROBABLE', clue: 'Type of cause needed for arrest or search' },
+                { word: 'MIRANDA', clue: 'Rights that must be read upon arrest' },
+                { word: 'COUNSEL', clue: 'Right to an attorney in criminal cases' },
+                { word: 'JURY', clue: 'Group of citizens who determine guilt or innocence' },
+                { word: 'CRUEL', clue: 'Type of punishment prohibited by Eighth Amendment' },
+                { word: 'PRIVACY', clue: 'Right implied but not explicitly stated in Constitution' },
+                { word: 'DUE', clue: 'Type of process guaranteeing fair legal procedures' },
+                { word: 'EXCLUSIONARY', clue: 'Rule barring illegally obtained evidence' },
+                { word: 'LIBEL', clue: 'Written defamation not protected by free speech' }
+            ],
+            'civil-rights': [
+                { word: 'EQUALITY', clue: 'Principle that all people deserve the same treatment' },
+                { word: 'DISCRIMINATION', clue: 'Unfair treatment based on group membership' },
+                { word: 'SEGREGATION', clue: 'Separation of races in public facilities' },
+                { word: 'DESEGREGATION', clue: 'Ending the legal separation of races' },
+                { word: 'SUFFRAGE', clue: 'The right to vote in elections' },
+                { word: 'AFFIRMATIVE', clue: 'Policies designed to increase minority representation' },
+                { word: 'PROTECTION', clue: 'Equal treatment clause of Fourteenth Amendment' },
+                { word: 'SCRUTINY', clue: 'Level of judicial review for discrimination cases' },
+                { word: 'SUSPECT', clue: 'Classification triggering strict judicial review' },
+                { word: 'RATIONAL', clue: 'Lowest standard of review for discrimination' },
+                { word: 'BROWN', clue: 'Landmark case ending school segregation' },
+                { word: 'PLESSY', clue: 'Case establishing "separate but equal" doctrine' },
+                { word: 'ROSA', clue: 'Parks, whose arrest sparked the bus boycott' },
+                { word: 'MARCH', clue: 'Civil rights demonstration in Washington in 1963' },
+                { word: 'VOTING', clue: 'Rights Act of 1965 ending discrimination at polls' },
+                { word: 'TITLE', clue: 'Section of Civil Rights Act banning employment discrimination' },
+                { word: 'DISABILITIES', clue: 'Americans with this Act protects against discrimination' },
+                { word: 'GENDER', clue: 'Type of discrimination based on sex' }
+            ],
+            'congress': [
+                { word: 'CONGRESS', clue: 'The legislative branch of the federal government' },
+                { word: 'SENATE', clue: 'Upper chamber with 100 members' },
+                { word: 'HOUSE', clue: 'Lower chamber based on state population' },
+                { word: 'SPEAKER', clue: 'Presiding officer of the House of Representatives' },
+                { word: 'MAJORITY', clue: 'Party leader with the most seats in a chamber' },
+                { word: 'MINORITY', clue: 'Party leader with fewer seats in a chamber' },
+                { word: 'WHIP', clue: 'Party official who counts votes and maintains discipline' },
+                { word: 'COMMITTEE', clue: 'Small group that reviews legislation in detail' },
+                { word: 'FILIBUSTER', clue: 'Extended debate to delay or block Senate action' },
+                { word: 'CLOTURE', clue: 'Vote to end a filibuster, requiring 60 senators' },
+                { word: 'MARKUP', clue: 'Committee process of revising a bill' },
+                { word: 'CONFERENCE', clue: 'Committee reconciling House and Senate versions' },
+                { word: 'RIDER', clue: 'Unrelated provision attached to a bill' },
+                { word: 'PORK', clue: 'Spending for local projects to benefit a district' },
+                { word: 'LOBBYIST', clue: 'Person who tries to influence legislation' },
+                { word: 'CONSTITUENT', clue: 'Voter or resident of a legislative district' },
+                { word: 'REAPPORTIONMENT', clue: 'Redistribution of House seats after census' },
+                { word: 'GERRYMANDERING', clue: 'Drawing district lines for political advantage' }
+            ],
+            'public-opinion': [
+                { word: 'OPINION', clue: 'Collective attitudes of the public on issues' },
+                { word: 'POLL', clue: 'Survey measuring public attitudes' },
+                { word: 'SAMPLE', clue: 'Subset of population surveyed to represent the whole' },
+                { word: 'RANDOM', clue: 'Type of sampling where everyone has equal chance' },
+                { word: 'MARGIN', clue: 'Range of error in poll results' },
+                { word: 'SOCIALIZATION', clue: 'Process of learning political values and beliefs' },
+                { word: 'IDEOLOGY', clue: 'Consistent set of political beliefs' },
+                { word: 'LIBERAL', clue: 'Political view favoring government social programs' },
+                { word: 'CONSERVATIVE', clue: 'Political view favoring limited government' },
+                { word: 'MODERATE', clue: 'Political position between liberal and conservative' },
+                { word: 'PARTISAN', clue: 'Strong supporter of a political party' },
+                { word: 'POLARIZATION', clue: 'Growing divide between political viewpoints' },
+                { word: 'DEMOGRAPHICS', clue: 'Population characteristics like age and race' },
+                { word: 'GENDER', clue: 'Gap in political opinions between men and women' },
+                { word: 'GENERATION', clue: 'Age group sharing similar political experiences' },
+                { word: 'TRACKING', clue: 'Type of poll measuring change over time' },
+                { word: 'EXIT', clue: 'Type of poll taken as voters leave polling places' },
+                { word: 'PUSH', clue: 'Biased poll designed to influence rather than measure' }
+            ],
+            'voting-elections': [
+                { word: 'BALLOT', clue: 'Paper or device used to cast votes' },
+                { word: 'PRIMARY', clue: 'Election to choose party nominees' },
+                { word: 'CAUCUS', clue: 'Meeting where party members choose candidates' },
+                { word: 'GENERAL', clue: 'Final election between party nominees' },
+                { word: 'ELECTORAL', clue: 'College system that formally elects the president' },
+                { word: 'PLURALITY', clue: 'Winning with the most votes but not a majority' },
+                { word: 'MAJORITY', clue: 'Winning with more than half the votes' },
+                { word: 'TURNOUT', clue: 'Percentage of eligible voters who participate' },
+                { word: 'REGISTRATION', clue: 'Process of signing up to vote' },
+                { word: 'ABSENTEE', clue: 'Type of ballot for voters not at their polling place' },
+                { word: 'SWING', clue: 'Competitive state that could go either way' },
+                { word: 'INCUMBENT', clue: 'Current officeholder running for reelection' },
+                { word: 'CHALLENGER', clue: 'Candidate running against the incumbent' },
+                { word: 'CAMPAIGN', clue: 'Organized effort to win an election' },
+                { word: 'DONATION', clue: 'Money given to support a candidate' },
+                { word: 'SUPERDELEGATE', clue: 'Unpledged party leader in nomination process' },
+                { word: 'MIDTERM', clue: 'Congressional election between presidential years' },
+                { word: 'REFERENDUM', clue: 'Direct vote by citizens on a specific issue' }
+            ],
+            'media': [
+                { word: 'MEDIA', clue: 'Channels of communication reaching large audiences' },
+                { word: 'PRESS', clue: 'News organizations protected by First Amendment' },
+                { word: 'BROADCAST', clue: 'TV and radio transmission to wide audiences' },
+                { word: 'CABLE', clue: 'Subscription-based television service' },
+                { word: 'DIGITAL', clue: 'Online and internet-based media' },
+                { word: 'SOCIAL', clue: 'Type of media including Facebook and Twitter' },
+                { word: 'BIAS', clue: 'Slant or prejudice in news coverage' },
+                { word: 'OBJECTIVITY', clue: 'Reporting facts without personal opinion' },
+                { word: 'GATEKEEPING', clue: 'Media role in deciding what becomes news' },
+                { word: 'FRAMING', clue: 'How media presents or contextualizes issues' },
+                { word: 'AGENDA', clue: 'Setting function where media influences priorities' },
+                { word: 'PRIMING', clue: 'Media effect on standards for evaluating leaders' },
+                { word: 'SOUNDBITE', clue: 'Brief clip used in broadcast news' },
+                { word: 'PUNDIT', clue: 'Expert commentator on political issues' },
+                { word: 'EDITORIAL', clue: 'Opinion piece expressing a publication\'s views' },
+                { word: 'WATCHDOG', clue: 'Media role in monitoring government actions' },
+                { word: 'LEAKS', clue: 'Unauthorized release of information to media' },
+                { word: 'MISINFORMATION', clue: 'False information spread through media' }
+            ],
+            'political-parties': [
+                { word: 'PARTY', clue: 'Organization seeking to win elections and govern' },
+                { word: 'DEMOCRAT', clue: 'Major party with donkey symbol' },
+                { word: 'REPUBLICAN', clue: 'Major party with elephant symbol' },
+                { word: 'PLATFORM', clue: 'Statement of party positions and goals' },
+                { word: 'PLANK', clue: 'Individual position in a party platform' },
+                { word: 'COALITION', clue: 'Alliance of different groups within a party' },
+                { word: 'REALIGNMENT', clue: 'Major shift in party support and coalitions' },
+                { word: 'DEALIGNMENT', clue: 'Weakening of voter attachment to parties' },
+                { word: 'INDEPENDENT', clue: 'Voter not affiliated with any party' },
+                { word: 'THIRD', clue: 'Type of party outside the two major ones' },
+                { word: 'NOMINATION', clue: 'Party selection of candidates for office' },
+                { word: 'CONVENTION', clue: 'National meeting to nominate presidential candidate' },
+                { word: 'DELEGATE', clue: 'Representative who votes at party convention' },
+                { word: 'GRASSROOTS', clue: 'Political activity organized at local level' },
+                { word: 'MACHINE', clue: 'Powerful urban party organization of the past' },
+                { word: 'PATRONAGE', clue: 'Giving jobs to party supporters' },
+                { word: 'POLARIZATION', clue: 'Growing ideological distance between parties' },
+                { word: 'SPOILER', clue: 'Third party candidate who affects major party outcome' }
+            ],
+            'interest-groups': [
+                { word: 'INTEREST', clue: 'Type of group organized around shared concerns' },
+                { word: 'LOBBYING', clue: 'Attempting to influence government decisions' },
+                { word: 'LOBBYIST', clue: 'Person paid to influence legislation' },
+                { word: 'PAC', clue: 'Political action committee raising campaign funds' },
+                { word: 'SUPERPAC', clue: 'Committee making unlimited independent expenditures' },
+                { word: 'GRASSROOTS', clue: 'Mobilizing ordinary citizens for political action' },
+                { word: 'ASTROTURF', clue: 'Fake grassroots movement funded by elites' },
+                { word: 'COALITION', clue: 'Alliance of groups working toward common goal' },
+                { word: 'COLLECTIVE', clue: 'Action problem where individuals free-ride on others' },
+                { word: 'FREERIDER', clue: 'Person benefiting without contributing to effort' },
+                { word: 'SELECTIVE', clue: 'Benefits available only to group members' },
+                { word: 'AMICUS', clue: 'Friend of the court brief filed by interest groups' },
+                { word: 'REVOLVING', clue: 'Door between government service and lobbying' },
+                { word: 'DISCLOSURE', clue: 'Requirements to reveal political contributions' },
+                { word: 'CITIZENS', clue: 'United case allowing corporate political spending' },
+                { word: 'INFLUENCE', clue: 'Power to affect government decisions' },
+                { word: 'ACCESS', clue: 'Ability to meet with and communicate to officials' },
+                { word: 'PLURALISM', clue: 'Theory that power is dispersed among many groups' }
+            ],
+            'presidency': [
+                { word: 'PRESIDENT', clue: 'Chief executive of the United States' },
+                { word: 'EXECUTIVE', clue: 'Branch headed by the president' },
+                { word: 'CABINET', clue: 'Advisory body of department heads' },
+                { word: 'VETO', clue: 'Presidential rejection of legislation' },
+                { word: 'OVERRIDE', clue: 'Congressional reversal of a veto' },
+                { word: 'PARDON', clue: 'Presidential forgiveness of federal crimes' },
+                { word: 'ORDER', clue: 'Executive directive having force of law' },
+                { word: 'TREATY', clue: 'Formal agreement with foreign nations' },
+                { word: 'COMMANDER', clue: 'President\'s role as head of armed forces' },
+                { word: 'DIPLOMAT', clue: 'President\'s role in foreign relations' },
+                { word: 'BULLY', clue: 'Pulpit describing president\'s public platform' },
+                { word: 'MANDATE', clue: 'Claimed authority from electoral victory' },
+                { word: 'HONEYMOON', clue: 'Period of goodwill early in presidency' },
+                { word: 'APPROVAL', clue: 'Rating measuring public support for president' },
+                { word: 'STAFF', clue: 'White House employees advising the president' },
+                { word: 'CHIEF', clue: 'Of staff, the president\'s top aide' },
+                { word: 'SUCCESSION', clue: 'Order of who becomes president if office is vacant' },
+                { word: 'IMPEACHMENT', clue: 'Process to remove president for high crimes' }
+            ],
+            'courts': [
+                { word: 'JUDICIARY', clue: 'Branch of government that interprets laws' },
+                { word: 'SUPREME', clue: 'Highest court in the federal system' },
+                { word: 'JUSTICE', clue: 'Member of the Supreme Court' },
+                { word: 'CHIEF', clue: 'Justice who leads the Supreme Court' },
+                { word: 'JURISDICTION', clue: 'Authority of a court to hear cases' },
+                { word: 'ORIGINAL', clue: 'Jurisdiction to hear a case first' },
+                { word: 'APPELLATE', clue: 'Jurisdiction to review lower court decisions' },
+                { word: 'CERTIORARI', clue: 'Writ by which Supreme Court agrees to hear case' },
+                { word: 'PRECEDENT', clue: 'Prior decision that guides future cases' },
+                { word: 'STARE', clue: 'Decisis, principle of following precedent' },
+                { word: 'MAJORITY', clue: 'Opinion representing the Court\'s decision' },
+                { word: 'DISSENT', clue: 'Opinion disagreeing with the majority' },
+                { word: 'CONCURRING', clue: 'Opinion agreeing with outcome but not reasoning' },
+                { word: 'JUDICIAL', clue: 'Review power to declare laws unconstitutional' },
+                { word: 'ACTIVISM', clue: 'Judicial philosophy favoring broader interpretation' },
+                { word: 'RESTRAINT', clue: 'Judicial philosophy favoring limited role' },
+                { word: 'NOMINATION', clue: 'Presidential selection of judges' },
+                { word: 'CONFIRMATION', clue: 'Senate approval of judicial nominees' }
+            ],
+            'bureaucracy': [
+                { word: 'BUREAUCRACY', clue: 'Administrative agencies implementing government policy' },
+                { word: 'AGENCY', clue: 'Government organization with specific responsibilities' },
+                { word: 'DEPARTMENT', clue: 'Major division of the executive branch' },
+                { word: 'REGULATION', clue: 'Rule created by agency to implement law' },
+                { word: 'RULEMAKING', clue: 'Process by which agencies create regulations' },
+                { word: 'IMPLEMENTATION', clue: 'Carrying out laws passed by Congress' },
+                { word: 'DISCRETION', clue: 'Agency freedom in interpreting and applying rules' },
+                { word: 'MERIT', clue: 'System of hiring based on qualifications' },
+                { word: 'CIVIL', clue: 'Service system of government employment' },
+                { word: 'SPOILS', clue: 'System of giving jobs to political supporters' },
+                { word: 'INDEPENDENT', clue: 'Type of agency with protection from removal' },
+                { word: 'COMMISSION', clue: 'Type of independent regulatory body' },
+                { word: 'OVERSIGHT', clue: 'Congressional monitoring of agency actions' },
+                { word: 'IRON', clue: 'Triangle of agency, committee, and interest group' },
+                { word: 'CAPTURE', clue: 'Theory that agencies serve regulated industries' },
+                { word: 'WHISTLEBLOWER', clue: 'Employee who reports agency wrongdoing' },
+                { word: 'PRIVATIZATION', clue: 'Transferring government functions to private sector' },
+                { word: 'REDTAPE', clue: 'Excessive bureaucratic procedures and paperwork' }
+            ],
+            'domestic-policy': [
+                { word: 'POLICY', clue: 'Government course of action on issues' },
+                { word: 'ENTITLEMENT', clue: 'Program providing benefits to eligible recipients' },
+                { word: 'WELFARE', clue: 'Government assistance for those in need' },
+                { word: 'MEDICARE', clue: 'Health insurance for seniors' },
+                { word: 'MEDICAID', clue: 'Health insurance for low-income individuals' },
+                { word: 'SECURITY', clue: 'Social program providing retirement benefits' },
+                { word: 'BUDGET', clue: 'Plan for government spending and revenue' },
+                { word: 'DEFICIT', clue: 'Annual shortfall when spending exceeds revenue' },
+                { word: 'DEBT', clue: 'Total accumulated government borrowing' },
+                { word: 'TAXATION', clue: 'Government collection of revenue from citizens' },
+                { word: 'PROGRESSIVE', clue: 'Tax system where rates increase with income' },
+                { word: 'REGRESSIVE', clue: 'Tax that takes larger share from lower incomes' },
+                { word: 'FISCAL', clue: 'Policy using spending and taxes to manage economy' },
+                { word: 'MONETARY', clue: 'Policy using money supply to manage economy' },
+                { word: 'FEDERAL', clue: 'Reserve, the central bank of the United States' },
+                { word: 'INFLATION', clue: 'Rising prices reducing purchasing power' },
+                { word: 'UNEMPLOYMENT', clue: 'Percentage of workforce without jobs' },
+                { word: 'STIMULUS', clue: 'Government spending to boost economic activity' }
+            ],
+            'foreign-policy': [
+                { word: 'FOREIGN', clue: 'Policy dealing with other nations' },
+                { word: 'DIPLOMACY', clue: 'Conducting international relations peacefully' },
+                { word: 'TREATY', clue: 'Formal agreement between nations' },
+                { word: 'ALLIANCE', clue: 'Agreement for mutual defense or cooperation' },
+                { word: 'NATO', clue: 'North Atlantic military alliance' },
+                { word: 'UNITED', clue: 'Nations, international organization for peace' },
+                { word: 'SANCTIONS', clue: 'Economic penalties against other countries' },
+                { word: 'EMBARGO', clue: 'Complete ban on trade with a country' },
+                { word: 'TARIFF', clue: 'Tax on imported goods' },
+                { word: 'ISOLATIONISM', clue: 'Policy of avoiding foreign entanglements' },
+                { word: 'INTERVENTIONISM', clue: 'Policy of active involvement in world affairs' },
+                { word: 'CONTAINMENT', clue: 'Cold War strategy to limit Soviet expansion' },
+                { word: 'DETERRENCE', clue: 'Preventing attack through threat of retaliation' },
+                { word: 'PREEMPTION', clue: 'Attacking before being attacked' },
+                { word: 'INTELLIGENCE', clue: 'Gathering information about foreign threats' },
+                { word: 'AMBASSADOR', clue: 'Diplomatic representative to foreign country' },
+                { word: 'SUMMIT', clue: 'Meeting between heads of state' },
+                { word: 'HUMANITARIAN', clue: 'Aid provided to help people in crisis' }
+            ]
+        };
+
+        // ========================================
+        // STATE MANAGEMENT
+        // ========================================
+        let selectedTopic = '';
+        let selectedTerms = [];
+        let puzzleGrid = [];
+        let placedWords = [];
+        let completedWords = new Set();
+        let customTerms = {}; // Store custom terms per topic
+
+        // ========================================
+        // PAGE NAVIGATION
+        // ========================================
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // ========================================
+        // TOPIC & TERM LOADING
+        // ========================================
+        function loadTerms() {
+            const topicSelect = document.getElementById('topic-select');
+            selectedTopic = topicSelect.value;
+            
+            if (!selectedTopic) {
+                document.getElementById('terms-card').style.display = 'none';
+                document.getElementById('generate-card').style.display = 'none';
+                return;
+            }
+
+            const terms = getAllCurrentTerms();
+            const grid = document.getElementById('terms-grid');
+            grid.innerHTML = '';
+
+            terms.forEach((term, index) => {
+                const item = document.createElement('div');
+                item.className = 'term-item' + (term.isCustom ? ' custom-term' : '');
+                item.onclick = (e) => {
+                    // Don't toggle if clicking directly on checkbox (it handles itself)
+                    if (e.target.type !== 'checkbox') {
+                        toggleTerm(index);
+                    }
+                };
+                item.innerHTML = `
+                    <input type="checkbox" id="term-${index}" onclick="event.stopPropagation(); toggleTerm(${index})">
+                    <div class="term-info">
+                        <div class="term-word">
+                            ${term.word}
+                            ${term.isCustom ? '<span class="custom-badge">CUSTOM</span>' : ''}
+                        </div>
+                        <div class="term-clue">${term.clue}</div>
+                    </div>
+                `;
+                grid.appendChild(item);
+            });
+
+            selectedTerms = [];
+            updateSelectionCount();
+            updateCustomTermsList();
+            
+            // Hide the add term form when switching topics
+            document.getElementById('add-term-form').style.display = 'none';
+            
+            document.getElementById('terms-card').style.display = 'block';
+            document.getElementById('generate-card').style.display = 'block';
+        }
+
+        function toggleTerm(index) {
+            const checkbox = document.getElementById('term-' + index);
+            const item = checkbox.closest('.term-item');
+            
+            if (selectedTerms.includes(index)) {
+                selectedTerms = selectedTerms.filter(i => i !== index);
+                checkbox.checked = false;
+                item.classList.remove('selected');
+            } else {
+                selectedTerms.push(index);
+                checkbox.checked = true;
+                item.classList.add('selected');
+            }
+            
+            updateSelectionCount();
+        }
+
+        function selectAll() {
+            const terms = getAllCurrentTerms();
+            selectedTerms = terms.map((_, i) => i);
+            
+            selectedTerms.forEach(i => {
+                document.getElementById('term-' + i).checked = true;
+                document.getElementById('term-' + i).closest('.term-item').classList.add('selected');
+            });
+            
+            updateSelectionCount();
+        }
+
+        function selectNone() {
+            selectedTerms.forEach(i => {
+                document.getElementById('term-' + i).checked = false;
+                document.getElementById('term-' + i).closest('.term-item').classList.remove('selected');
+            });
+            selectedTerms = [];
+            updateSelectionCount();
+        }
+
+        function selectRandom(count) {
+            selectNone();
+            const terms = getAllCurrentTerms();
+            const indices = [...Array(terms.length).keys()];
+            
+            // Shuffle and take first 'count'
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            
+            const selected = indices.slice(0, Math.min(count, terms.length));
+            selected.forEach(i => toggleTerm(i));
+        }
+
+        function updateSelectionCount() {
+            const count = selectedTerms.length;
+            document.getElementById('selection-count').textContent = count + ' terms selected';
+            
+            const btn = document.getElementById('generate-btn');
+            const warning = document.getElementById('min-warning');
+            
+            if (count >= 5) {
+                btn.disabled = false;
+                warning.style.display = 'none';
+            } else {
+                btn.disabled = true;
+                warning.style.display = 'block';
+            }
+        }
+
+        // ========================================
+        // CUSTOM TERM MANAGEMENT
+        // ========================================
+        function toggleAddTermForm() {
+            const form = document.getElementById('add-term-form');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            
+            // Clear inputs when opening
+            if (form.style.display === 'block') {
+                document.getElementById('custom-word').value = '';
+                document.getElementById('custom-clue').value = '';
+                document.getElementById('custom-word').focus();
+            }
+        }
+
+        function addCustomTerm() {
+            const wordInput = document.getElementById('custom-word');
+            const clueInput = document.getElementById('custom-clue');
+            
+            let word = wordInput.value.trim().toUpperCase().replace(/[^A-Z]/g, '');
+            let clue = clueInput.value.trim();
+            
+            // Validation
+            if (word.length < 2) {
+                showToast('⚠️ Term must be at least 2 letters');
+                wordInput.focus();
+                return;
+            }
+            
+            if (word.length > 20) {
+                showToast('⚠️ Term must be 20 characters or less');
+                wordInput.focus();
+                return;
+            }
+            
+            if (clue.length < 5) {
+                showToast('⚠️ Please provide a more descriptive clue');
+                clueInput.focus();
+                return;
+            }
+            
+            // Check for duplicates in current topic
+            const allTerms = getAllCurrentTerms();
+            if (allTerms.some(t => t.word === word)) {
+                showToast('⚠️ This term already exists');
+                wordInput.focus();
+                return;
+            }
+            
+            // Initialize custom terms array for this topic if needed
+            if (!customTerms[selectedTopic]) {
+                customTerms[selectedTopic] = [];
+            }
+            
+            // Add the custom term
+            const newTerm = { word, clue, isCustom: true };
+            customTerms[selectedTopic].push(newTerm);
+            
+            // Refresh the terms grid
+            refreshTermsGrid();
+            
+            // Auto-select the new term
+            const newIndex = getAllCurrentTerms().length - 1;
+            toggleTerm(newIndex);
+            
+            // Update custom terms display
+            updateCustomTermsList();
+            
+            // Clear inputs
+            wordInput.value = '';
+            clueInput.value = '';
+            
+            showToast('✓ Custom term added: ' + word);
+        }
+
+        function removeCustomTerm(word) {
+            if (!customTerms[selectedTopic]) return;
+            
+            // Find and remove the term
+            const index = customTerms[selectedTopic].findIndex(t => t.word === word);
+            if (index > -1) {
+                customTerms[selectedTopic].splice(index, 1);
+                
+                // Refresh display
+                refreshTermsGrid();
+                updateCustomTermsList();
+                updateSelectionCount();
+                
+                showToast('Term removed: ' + word);
+            }
+        }
+
+        function getAllCurrentTerms() {
+            const baseTerms = termDatabase[selectedTopic] || [];
+            const custom = customTerms[selectedTopic] || [];
+            return [...baseTerms, ...custom];
+        }
+
+        function refreshTermsGrid() {
+            const terms = getAllCurrentTerms();
+            const grid = document.getElementById('terms-grid');
+            grid.innerHTML = '';
+
+            terms.forEach((term, index) => {
+                const item = document.createElement('div');
+                item.className = 'term-item' + (term.isCustom ? ' custom-term' : '');
+                item.onclick = (e) => {
+                    // Don't toggle if clicking directly on checkbox (it handles itself)
+                    if (e.target.type !== 'checkbox') {
+                        toggleTerm(index);
+                    }
+                };
+                item.innerHTML = `
+                    <input type="checkbox" id="term-${index}" ${selectedTerms.includes(index) ? 'checked' : ''} onclick="event.stopPropagation(); toggleTerm(${index})">
+                    <div class="term-info">
+                        <div class="term-word">
+                            ${term.word}
+                            ${term.isCustom ? '<span class="custom-badge">CUSTOM</span>' : ''}
+                        </div>
+                        <div class="term-clue">${term.clue}</div>
+                    </div>
+                `;
+                if (selectedTerms.includes(index)) {
+                    item.classList.add('selected');
+                }
+                grid.appendChild(item);
+            });
+        }
+
+        function updateCustomTermsList() {
+            const container = document.getElementById('custom-terms-container');
+            const listDiv = document.getElementById('custom-terms-list');
+            const custom = customTerms[selectedTopic] || [];
+            
+            if (custom.length === 0) {
+                listDiv.style.display = 'none';
+                return;
+            }
+            
+            listDiv.style.display = 'block';
+            container.innerHTML = custom.map(term => `
+                <span class="custom-term-chip">
+                    <span class="term-name">${term.word}</span>
+                    <button class="remove-term" onclick="event.stopPropagation(); removeCustomTerm('${term.word}')" title="Remove term">×</button>
+                </span>
+            `).join('');
+        }
+
+        // ========================================
+        // CROSSWORD GENERATION ALGORITHM
+        // ========================================
+        function generatePuzzle() {
+            const terms = getAllCurrentTerms();
+            const wordsToPlace = selectedTerms.map(i => ({
+                word: terms[i].word.toUpperCase().replace(/[^A-Z]/g, ''),
+                clue: terms[i].clue
+            }));
+
+            // Sort by length (longest first for better placement)
+            wordsToPlace.sort((a, b) => b.word.length - a.word.length);
+
+            // Initialize grid - larger to accommodate words
+            const gridSize = 30;
+            puzzleGrid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(null));
+            placedWords = [];
+            completedWords = new Set();
+
+            // Place first word horizontally in center
+            if (wordsToPlace.length > 0) {
+                const firstWord = wordsToPlace[0];
+                const startRow = Math.floor(gridSize / 2);
+                const startCol = Math.floor((gridSize - firstWord.word.length) / 2);
+                
+                placeWord(firstWord.word, startRow, startCol, 'across', firstWord.clue);
+            }
+
+            // Try to place remaining words with intersections
+            for (let i = 1; i < wordsToPlace.length; i++) {
+                const wordObj = wordsToPlace[i];
+                let placed = false;
+                let bestPlacement = null;
+                let bestScore = -1;
+
+                // Find all possible intersections with existing words
+                for (const placedWord of placedWords) {
+                    for (let pi = 0; pi < placedWord.word.length; pi++) {
+                        const placedChar = placedWord.word[pi];
+
+                        for (let wi = 0; wi < wordObj.word.length; wi++) {
+                            if (wordObj.word[wi] === placedChar) {
+                                let newRow, newCol, direction;
+
+                                if (placedWord.direction === 'across') {
+                                    // Place new word going down
+                                    newRow = placedWord.row - wi;
+                                    newCol = placedWord.col + pi;
+                                    direction = 'down';
+                                } else {
+                                    // Place new word going across
+                                    newRow = placedWord.row + pi;
+                                    newCol = placedWord.col - wi;
+                                    direction = 'across';
+                                }
+
+                                if (canPlaceWord(wordObj.word, newRow, newCol, direction)) {
+                                    // Score based on number of intersections
+                                    const score = countIntersections(wordObj.word, newRow, newCol, direction);
+                                    if (score > bestScore) {
+                                        bestScore = score;
+                                        bestPlacement = { row: newRow, col: newCol, direction };
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Place at best position found
+                if (bestPlacement) {
+                    placeWord(wordObj.word, bestPlacement.row, bestPlacement.col, bestPlacement.direction, wordObj.clue);
+                    placed = true;
+                }
+
+                // If couldn't intersect, skip this word (don't place isolated words)
+                if (!placed) {
+                    console.log('Could not place word with intersection:', wordObj.word);
+                }
+            }
+
+            // Check if we placed enough words
+            const placedCount = placedWords.length;
+            const selectedCount = wordsToPlace.length;
+            const notice = document.getElementById('placement-notice');
+            const message = document.getElementById('placement-message');
+            
+            if (placedCount < selectedCount) {
+                notice.style.display = 'flex';
+                notice.classList.add('placement-notice-warning');
+                message.textContent = `${placedCount} of ${selectedCount} words could be placed. Some words didn't have matching letters for intersections. Try different term combinations.`;
+            } else {
+                notice.style.display = 'flex';
+                notice.classList.remove('placement-notice-warning');
+                message.textContent = `All ${placedCount} words successfully placed with proper intersections!`;
+            }
+
+            // Update placed count
+            document.getElementById('stat-placed').textContent = placedCount;
+
+            // Trim grid and assign numbers
+            trimGrid();
+            assignNumbers();
+            renderPuzzle();
+            showPage('puzzle');
+        }
+
+        function countIntersections(word, row, col, direction) {
+            let count = 0;
+            for (let i = 0; i < word.length; i++) {
+                const r = direction === 'across' ? row : row + i;
+                const c = direction === 'across' ? col + i : col;
+                if (puzzleGrid[r] && puzzleGrid[r][c] && puzzleGrid[r][c].letter === word[i]) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        function canPlaceWord(word, row, col, direction) {
+            const gridSize = puzzleGrid.length;
+
+            // Check bounds
+            if (row < 0 || col < 0) return false;
+            if (direction === 'across' && col + word.length > gridSize) return false;
+            if (direction === 'down' && row + word.length > gridSize) return false;
+
+            // Check cell before word (must be empty)
+            if (direction === 'across') {
+                if (col > 0 && puzzleGrid[row][col - 1] !== null) return false;
+            } else {
+                if (row > 0 && puzzleGrid[row - 1][col] !== null) return false;
+            }
+
+            // Check cell after word (must be empty)
+            if (direction === 'across') {
+                if (col + word.length < gridSize && puzzleGrid[row][col + word.length] !== null) return false;
+            } else {
+                if (row + word.length < gridSize && puzzleGrid[row + word.length][col] !== null) return false;
+            }
+
+            // Check each cell of the word
+            for (let i = 0; i < word.length; i++) {
+                const r = direction === 'across' ? row : row + i;
+                const c = direction === 'across' ? col + i : col;
+                
+                if (r < 0 || r >= gridSize || c < 0 || c >= gridSize) return false;
+                
+                const cell = puzzleGrid[r][c];
+
+                // If cell is occupied, must match the letter (intersection)
+                if (cell !== null) {
+                    if (cell.letter !== word[i]) {
+                        return false;
+                    }
+                    // This is a valid intersection - continue
+                } else {
+                    // Cell is empty - check adjacent cells for conflicts
+                    if (direction === 'across') {
+                        // For horizontal word, check cells above and below
+                        if (r > 0 && puzzleGrid[r - 1][c] !== null) {
+                            // There's something above - only OK if it's part of an intersecting down word
+                            // Check if this would create an invalid adjacency
+                            if (!isValidAdjacency(r - 1, c, r, c)) return false;
+                        }
+                        if (r < gridSize - 1 && puzzleGrid[r + 1][c] !== null) {
+                            if (!isValidAdjacency(r + 1, c, r, c)) return false;
+                        }
+                    } else {
+                        // For vertical word, check cells left and right
+                        if (c > 0 && puzzleGrid[r][c - 1] !== null) {
+                            if (!isValidAdjacency(r, c - 1, r, c)) return false;
+                        }
+                        if (c < gridSize - 1 && puzzleGrid[r][c + 1] !== null) {
+                            if (!isValidAdjacency(r, c + 1, r, c)) return false;
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        function isValidAdjacency(adjRow, adjCol, newRow, newCol) {
+            // Check if the adjacent cell is part of a word that properly intersects
+            // For now, we'll be strict and disallow parallel adjacency
+            return false;
+        }
+
+        function placeWord(word, row, col, direction, clue) {
+            for (let i = 0; i < word.length; i++) {
+                const r = direction === 'across' ? row : row + i;
+                const c = direction === 'across' ? col + i : col;
+                
+                if (!puzzleGrid[r][c]) {
+                    puzzleGrid[r][c] = { letter: word[i], number: null };
+                }
+            }
+
+            placedWords.push({ word, row, col, direction, clue, number: null });
+        }
+
+        function trimGrid() {
+            // Find bounds of actual content
+            let minRow = puzzleGrid.length, maxRow = 0;
+            let minCol = puzzleGrid[0].length, maxCol = 0;
+
+            for (let r = 0; r < puzzleGrid.length; r++) {
+                for (let c = 0; c < puzzleGrid[r].length; c++) {
+                    if (puzzleGrid[r][c] !== null) {
+                        minRow = Math.min(minRow, r);
+                        maxRow = Math.max(maxRow, r);
+                        minCol = Math.min(minCol, c);
+                        maxCol = Math.max(maxCol, c);
+                    }
+                }
+            }
+
+            // Add padding
+            minRow = Math.max(0, minRow - 1);
+            maxRow = Math.min(puzzleGrid.length - 1, maxRow + 1);
+            minCol = Math.max(0, minCol - 1);
+            maxCol = Math.min(puzzleGrid[0].length - 1, maxCol + 1);
+
+            // Create trimmed grid
+            const newGrid = [];
+            for (let r = minRow; r <= maxRow; r++) {
+                const newRow = [];
+                for (let c = minCol; c <= maxCol; c++) {
+                    newRow.push(puzzleGrid[r][c]);
+                }
+                newGrid.push(newRow);
+            }
+
+            // Update placed words positions
+            placedWords.forEach(pw => {
+                pw.row -= minRow;
+                pw.col -= minCol;
+            });
+
+            puzzleGrid = newGrid;
+        }
+
+        function assignNumbers() {
+            let number = 1;
+            const numbered = new Set();
+
+            // Sort words by position (top-to-bottom, left-to-right)
+            placedWords.sort((a, b) => {
+                if (a.row !== b.row) return a.row - b.row;
+                return a.col - b.col;
+            });
+
+            placedWords.forEach(pw => {
+                const key = `${pw.row}-${pw.col}`;
+                if (!numbered.has(key)) {
+                    pw.number = number;
+                    puzzleGrid[pw.row][pw.col].number = number;
+                    numbered.add(key);
+                    number++;
+                } else {
+                    // Find existing number at this position
+                    const existing = placedWords.find(p => 
+                        p.row === pw.row && p.col === pw.col && p.number !== null
+                    );
+                    if (existing) {
+                        pw.number = existing.number;
+                    }
+                }
+            });
+        }
+
+        // ========================================
+        // RENDERING
+        // ========================================
+        function renderPuzzle() {
+            const gridContainer = document.getElementById('crossword-grid');
+            gridContainer.innerHTML = '';
+
+            for (let r = 0; r < puzzleGrid.length; r++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'crossword-row';
+
+                for (let c = 0; c < puzzleGrid[r].length; c++) {
+                    const cell = puzzleGrid[r][c];
+                    const cellDiv = document.createElement('div');
+                    cellDiv.className = 'crossword-cell' + (cell === null ? ' empty' : '');
+
+                    if (cell !== null) {
+                        if (cell.number) {
+                            const numSpan = document.createElement('span');
+                            numSpan.className = 'cell-number';
+                            numSpan.textContent = cell.number;
+                            cellDiv.appendChild(numSpan);
+                        }
+
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.dataset.row = r;
+                        input.dataset.col = c;
+                        input.dataset.answer = cell.letter;
+                        input.addEventListener('input', handleInput);
+                        input.addEventListener('keydown', handleKeydown);
+                        cellDiv.appendChild(input);
+                    }
+
+                    rowDiv.appendChild(cellDiv);
+                }
+
+                gridContainer.appendChild(rowDiv);
+            }
+
+            // Render clues
+            renderClues();
+            updateStats();
+        }
+
+        function renderClues() {
+            const acrossClues = placedWords.filter(w => w.direction === 'across')
+                .sort((a, b) => a.number - b.number);
+            const downClues = placedWords.filter(w => w.direction === 'down')
+                .sort((a, b) => a.number - b.number);
+
+            document.getElementById('clues-across').innerHTML = acrossClues.map(w => `
+                <div class="clue-item" id="clue-across-${w.number}" onclick="focusWord(${w.row}, ${w.col}, 'across')">
+                    <span class="clue-number">${w.number}.</span>
+                    <span class="clue-text">${w.clue}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('clues-down').innerHTML = downClues.map(w => `
+                <div class="clue-item" id="clue-down-${w.number}" onclick="focusWord(${w.row}, ${w.col}, 'down')">
+                    <span class="clue-number">${w.number}.</span>
+                    <span class="clue-text">${w.clue}</span>
+                </div>
+            `).join('');
+
+            // Render answer key
+            document.getElementById('answers-across').innerHTML = acrossClues.map(w => `
+                <div class="answer-item">
+                    <span class="answer-number">${w.number}.</span>
+                    <span class="answer-word">${w.word}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('answers-down').innerHTML = downClues.map(w => `
+                <div class="answer-item">
+                    <span class="answer-number">${w.number}.</span>
+                    <span class="answer-word">${w.word}</span>
+                </div>
+            `).join('');
+        }
+
+        function focusWord(row, col, direction) {
+            const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`);
+            if (input) input.focus();
+        }
+
+        // ========================================
+        // INPUT HANDLING
+        // ========================================
+        function handleInput(e) {
+            const input = e.target;
+            const value = input.value.toUpperCase();
+            input.value = value;
+
+            const answer = input.dataset.answer;
+            
+            // Real-time validation
+            if (value === '') {
+                input.className = '';
+            } else if (value === answer) {
+                input.className = 'correct';
+            } else {
+                input.className = 'incorrect';
+            }
+
+            // Move to next cell
+            if (value.length === 1) {
+                moveToNextCell(input);
+            }
+
+            checkWordCompletion();
+            updateStats();
+        }
+
+        function handleKeydown(e) {
+            const input = e.target;
+            const row = parseInt(input.dataset.row);
+            const col = parseInt(input.dataset.col);
+
+            switch(e.key) {
+                case 'ArrowRight':
+                    moveFocus(row, col + 1);
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                    moveFocus(row, col - 1);
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                    moveFocus(row + 1, col);
+                    e.preventDefault();
+                    break;
+                case 'ArrowUp':
+                    moveFocus(row - 1, col);
+                    e.preventDefault();
+                    break;
+                case 'Backspace':
+                    if (input.value === '') {
+                        moveToPrevCell(input);
+                        e.preventDefault();
+                    }
+                    break;
+                case 'Tab':
+                    // Let default behavior handle tab
+                    break;
+            }
+        }
+
+        function moveToNextCell(currentInput) {
+            const row = parseInt(currentInput.dataset.row);
+            const col = parseInt(currentInput.dataset.col);
+
+            // Try right first, then down
+            let nextInput = document.querySelector(`input[data-row="${row}"][data-col="${col + 1}"]`);
+            if (!nextInput) {
+                nextInput = document.querySelector(`input[data-row="${row + 1}"][data-col="${col}"]`);
+            }
+            if (nextInput) nextInput.focus();
+        }
+
+        function moveToPrevCell(currentInput) {
+            const row = parseInt(currentInput.dataset.row);
+            const col = parseInt(currentInput.dataset.col);
+
+            let prevInput = document.querySelector(`input[data-row="${row}"][data-col="${col - 1}"]`);
+            if (!prevInput) {
+                prevInput = document.querySelector(`input[data-row="${row - 1}"][data-col="${col}"]`);
+            }
+            if (prevInput) {
+                prevInput.focus();
+                prevInput.select();
+            }
+        }
+
+        function moveFocus(row, col) {
+            const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`);
+            if (input) input.focus();
+        }
+
+        // ========================================
+        // VALIDATION & STATS
+        // ========================================
+        function checkWordCompletion() {
+            placedWords.forEach(pw => {
+                let complete = true;
+                
+                for (let i = 0; i < pw.word.length; i++) {
+                    const r = pw.direction === 'across' ? pw.row : pw.row + i;
+                    const c = pw.direction === 'across' ? pw.col + i : pw.col;
+                    const input = document.querySelector(`input[data-row="${r}"][data-col="${c}"]`);
+                    
+                    if (!input || input.value.toUpperCase() !== pw.word[i]) {
+                        complete = false;
+                        break;
+                    }
+                }
+
+                const clueElement = document.getElementById(`clue-${pw.direction}-${pw.number}`);
+                if (complete) {
+                    completedWords.add(`${pw.direction}-${pw.number}`);
+                    if (clueElement) clueElement.classList.add('completed');
+                } else {
+                    completedWords.delete(`${pw.direction}-${pw.number}`);
+                    if (clueElement) clueElement.classList.remove('completed');
+                }
+            });
+
+            // Check if all complete
+            if (completedWords.size === placedWords.length) {
+                document.getElementById('completion-banner').classList.add('show');
+                showToast('🎉 Puzzle Complete! Great job!');
+            }
+        }
+
+        function updateStats() {
+            const correct = completedWords.size;
+            const total = placedWords.length;
+            const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+            document.getElementById('stat-correct').textContent = correct;
+            document.getElementById('stat-percent').textContent = percent + '%';
+            
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = percent + '%';
+        }
+
+        function checkAllAnswers() {
+            document.querySelectorAll('.crossword-cell input').forEach(input => {
+                const value = input.value.toUpperCase();
+                const answer = input.dataset.answer;
+                
+                if (value === '') {
+                    input.className = '';
+                } else if (value === answer) {
+                    input.className = 'correct';
+                } else {
+                    input.className = 'incorrect';
+                }
+            });
+
+            checkWordCompletion();
+            updateStats();
+            showToast('Answers checked!');
+        }
+
+        function clearPuzzle() {
+            document.querySelectorAll('.crossword-cell input').forEach(input => {
+                input.value = '';
+                input.className = '';
+            });
+            
+            completedWords = new Set();
+            document.querySelectorAll('.clue-item').forEach(el => el.classList.remove('completed'));
+            document.getElementById('completion-banner').classList.remove('show');
+            updateStats();
+            showToast('Puzzle cleared');
+        }
+
+        function toggleAnswerKey() {
+            const answerKey = document.getElementById('answer-key');
+            answerKey.style.display = answerKey.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function printPuzzle() {
+            window.print();
+        }
+
+        function exportPuzzle() {
+            const topicSelect = document.getElementById('topic-select');
+            const topicName = topicSelect.options[topicSelect.selectedIndex].text;
+            
+            // Get clues
+            const acrossClues = placedWords.filter(w => w.direction === 'across')
+                .sort((a, b) => a.number - b.number);
+            const downClues = placedWords.filter(w => w.direction === 'down')
+                .sort((a, b) => a.number - b.number);
+
+            // Generate grid HTML
+            let gridHTML = '';
+            for (let r = 0; r < puzzleGrid.length; r++) {
+                gridHTML += '<div class="crossword-row">';
+                for (let c = 0; c < puzzleGrid[r].length; c++) {
+                    const cell = puzzleGrid[r][c];
+                    if (cell === null) {
+                        gridHTML += '<div class="crossword-cell empty"></div>';
+                    } else {
+                        gridHTML += `<div class="crossword-cell">`;
+                        if (cell.number) {
+                            gridHTML += `<span class="cell-number">${cell.number}</span>`;
+                        }
+                        gridHTML += `<input type="text" maxlength="1" data-answer="${cell.letter}">`;
+                        gridHTML += '</div>';
+                    }
+                }
+                gridHTML += '</div>';
+            }
+
+            // Generate clues HTML
+            const acrossCluesHTML = acrossClues.map(w => 
+                `<div class="clue-item"><span class="clue-number">${w.number}.</span><span class="clue-text">${w.clue}</span></div>`
+            ).join('');
+            
+            const downCluesHTML = downClues.map(w => 
+                `<div class="clue-item"><span class="clue-number">${w.number}.</span><span class="clue-text">${w.clue}</span></div>`
+            ).join('');
+
+            // Generate answer key HTML
+            const acrossAnswersHTML = acrossClues.map(w => 
+                `<div class="answer-item"><span class="answer-number">${w.number}.</span><span class="answer-word">${w.word}</span></div>`
+            ).join('');
+            
+            const downAnswersHTML = downClues.map(w => 
+                `<div class="answer-item"><span class="answer-number">${w.number}.</span><span class="answer-word">${w.word}</span></div>`
+            ).join('');
+
+            // Create standalone HTML
+            const standaloneHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${topicName} - Crossword Puzzle</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-blue: #005A87;
+            --primary-green: #00695C;
+            --success: #1B5E20;
+            --error: #B71C1C;
+            --text-primary: #212121;
+            --text-secondary: #424242;
+            --bg-light: #F5F5F5;
+            --highlight-blue: #E3F2FD;
+            --highlight-green: #E8F5E9;
+        }
+        body {
+            font-family: Georgia, serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: var(--bg-light);
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-green));
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.8em; margin-bottom: 5px; }
+        .header p { opacity: 0.9; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .crossword-container {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+        @media (max-width: 900px) {
+            .crossword-container { grid-template-columns: 1fr; }
+        }
+        .crossword-grid {
+            display: inline-block;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .crossword-row { display: flex; }
+        .crossword-cell {
+            width: 36px;
+            height: 36px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: white;
+        }
+        .crossword-cell.empty {
+            background: #333;
+            border-color: #333;
+        }
+        .crossword-cell input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-family: Georgia, serif;
+            background: transparent;
+        }
+        .crossword-cell input:focus {
+            outline: 3px solid var(--primary-blue);
+            background: var(--highlight-blue);
+        }
+        .crossword-cell input.correct {
+            background: #C8E6C9;
+            color: var(--success);
+        }
+        .crossword-cell input.incorrect {
+            background: #FFCDD2;
+            color: var(--error);
+        }
+        .cell-number {
+            position: absolute;
+            top: 1px;
+            left: 2px;
+            font-size: 0.55em;
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+        .clues-section { min-width: 300px; }
+        .clues-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        .clues-card h4 {
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E0F2F1;
+            font-size: 1.1em;
+        }
+        .clue-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.5;
+        }
+        .clue-item:last-child { border-bottom: none; }
+        .clue-number {
+            font-weight: bold;
+            color: var(--primary-green);
+            flex-shrink: 0;
+            min-width: 28px;
+        }
+        .clue-text { flex: 1; }
+        .clue-item.completed {
+            color: var(--success);
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn {
+            padding: 12px 24px;
+            font-size: 1em;
+            font-family: Georgia, serif;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-green));
+            color: white;
+        }
+        .btn-secondary {
+            background: white;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .answer-key {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .answer-key.show { display: block; }
+        .answer-key h3 {
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .answers-grid h4 {
+            color: var(--primary-green);
+            margin-bottom: 10px;
+        }
+        .answer-item {
+            padding: 6px 10px;
+            background: var(--bg-light);
+            border-radius: 5px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .answer-number { font-weight: bold; color: var(--primary-green); }
+        .answer-word { font-weight: bold; color: var(--primary-blue); }
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+        .stat-label { font-size: 0.85em; color: var(--text-secondary); }
+        .completion-banner {
+            background: linear-gradient(135deg, #FFD700, #FFA000);
+            color: #333;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .completion-banner.show { display: block; }
+        .completion-banner h3 { font-size: 1.4em; margin-bottom: 5px; }
+        @media print {
+            .action-buttons, .stats-bar { display: none !important; }
+            .answer-key { page-break-before: always; display: block !important; }
+            body { background: white; }
+        }
+        .name-input {
+            background: white;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .name-input label { font-weight: bold; color: var(--primary-blue); }
+        .name-input input {
+            padding: 8px 12px;
+            border: 2px solid var(--primary-blue);
+            border-radius: 6px;
+            font-family: Georgia, serif;
+            font-size: 1em;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧩 ${topicName}</h1>
+            <p>Crossword Puzzle</p>
+        </div>
+
+        <div class="name-input">
+            <label for="student-name">Student Name:</label>
+            <input type="text" id="student-name" placeholder="Enter your name">
+            <label for="student-date">Date:</label>
+            <input type="date" id="student-date">
+        </div>
+
+        <div class="completion-banner" id="completion-banner">
+            <h3>🎉 Congratulations!</h3>
+            <p>You've completed the crossword puzzle!</p>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="stat-correct">0</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${placedWords.length}</div>
+                <div class="stat-label">Total Words</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-percent">0%</div>
+                <div class="stat-label">Complete</div>
+            </div>
+        </div>
+
+        <div class="crossword-container">
+            <div class="puzzle-section">
+                <div class="crossword-grid">
+                    ${gridHTML}
+                </div>
+            </div>
+            <div class="clues-section">
+                <div class="clues-card">
+                    <h4>➡️ ACROSS</h4>
+                    <div id="clues-across">${acrossCluesHTML}</div>
+                </div>
+                <div class="clues-card">
+                    <h4>⬇️ DOWN</h4>
+                    <div id="clues-down">${downCluesHTML}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="checkAllAnswers()">✔️ Check All Answers</button>
+            <button class="btn btn-secondary" onclick="clearPuzzle()">🔄 Clear Puzzle</button>
+            <button class="btn btn-secondary" onclick="toggleAnswerKey()">📋 Answer Key</button>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
+        </div>
+
+        <div class="answer-key" id="answer-key">
+            <h3>📋 Answer Key</h3>
+            <div class="answers-grid">
+                <div>
+                    <h4>ACROSS</h4>
+                    ${acrossAnswersHTML}
+                </div>
+                <div>
+                    <h4>DOWN</h4>
+                    ${downAnswersHTML}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const placedWords = ${JSON.stringify(placedWords)};
+        let completedWords = new Set();
+
+        document.querySelectorAll('.crossword-cell input').forEach(input => {
+            input.addEventListener('input', handleInput);
+            input.addEventListener('keydown', handleKeydown);
+        });
+
+        function handleInput(e) {
+            const input = e.target;
+            const value = input.value.toUpperCase();
+            input.value = value;
+            const answer = input.dataset.answer;
+            
+            if (value === '') {
+                input.className = '';
+            } else if (value === answer) {
+                input.className = 'correct';
+            } else {
+                input.className = 'incorrect';
+            }
+            
+            if (value.length === 1) moveToNextCell(input);
+            checkWordCompletion();
+            updateStats();
+        }
+
+        function handleKeydown(e) {
+            const input = e.target;
+            const cell = input.parentElement;
+            const row = cell.parentElement;
+            const rowIndex = Array.from(row.parentElement.children).indexOf(row);
+            const cellIndex = Array.from(row.children).indexOf(cell);
+            
+            let targetRow, targetCell, targetInput;
+            
+            switch(e.key) {
+                case 'ArrowRight':
+                    targetCell = row.children[cellIndex + 1];
+                    if (targetCell) targetInput = targetCell.querySelector('input');
+                    break;
+                case 'ArrowLeft':
+                    targetCell = row.children[cellIndex - 1];
+                    if (targetCell) targetInput = targetCell.querySelector('input');
+                    break;
+                case 'ArrowDown':
+                    targetRow = row.parentElement.children[rowIndex + 1];
+                    if (targetRow) targetInput = targetRow.children[cellIndex]?.querySelector('input');
+                    break;
+                case 'ArrowUp':
+                    targetRow = row.parentElement.children[rowIndex - 1];
+                    if (targetRow) targetInput = targetRow.children[cellIndex]?.querySelector('input');
+                    break;
+                case 'Backspace':
+                    if (input.value === '') {
+                        targetCell = row.children[cellIndex - 1];
+                        if (targetCell) targetInput = targetCell.querySelector('input');
+                        if (targetInput) { targetInput.focus(); targetInput.select(); }
+                        e.preventDefault();
+                    }
+                    return;
+            }
+            
+            if (targetInput) { targetInput.focus(); e.preventDefault(); }
+        }
+
+        function moveToNextCell(currentInput) {
+            const cell = currentInput.parentElement;
+            const row = cell.parentElement;
+            const cellIndex = Array.from(row.children).indexOf(cell);
+            let nextCell = row.children[cellIndex + 1];
+            if (nextCell) {
+                let nextInput = nextCell.querySelector('input');
+                if (nextInput) nextInput.focus();
+            }
+        }
+
+        function checkWordCompletion() {
+            document.querySelectorAll('.clue-item').forEach(el => el.classList.remove('completed'));
+            completedWords = new Set();
+            
+            const grid = document.querySelector('.crossword-grid');
+            const rows = grid.querySelectorAll('.crossword-row');
+            
+            placedWords.forEach((pw, idx) => {
+                let complete = true;
+                for (let i = 0; i < pw.word.length; i++) {
+                    const r = pw.direction === 'across' ? pw.row : pw.row + i;
+                    const c = pw.direction === 'across' ? pw.col + i : pw.col;
+                    const row = rows[r];
+                    if (!row) { complete = false; break; }
+                    const cell = row.children[c];
+                    if (!cell) { complete = false; break; }
+                    const input = cell.querySelector('input');
+                    if (!input || input.value.toUpperCase() !== pw.word[i]) {
+                        complete = false;
+                        break;
+                    }
+                }
+                if (complete) {
+                    completedWords.add(idx);
+                }
+            });
+
+            if (completedWords.size === placedWords.length && placedWords.length > 0) {
+                document.getElementById('completion-banner').classList.add('show');
+            }
+        }
+
+        function updateStats() {
+            const correct = completedWords.size;
+            const total = placedWords.length;
+            const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
+            
+            document.getElementById('stat-correct').textContent = correct;
+            document.getElementById('stat-percent').textContent = percent + '%';
+        }
+
+        function checkAllAnswers() {
+            document.querySelectorAll('.crossword-cell input').forEach(input => {
+                const value = input.value.toUpperCase();
+                const answer = input.dataset.answer;
+                if (value === '') input.className = '';
+                else if (value === answer) input.className = 'correct';
+                else input.className = 'incorrect';
+            });
+            checkWordCompletion();
+            updateStats();
+        }
+
+        function clearPuzzle() {
+            document.querySelectorAll('.crossword-cell input').forEach(input => {
+                input.value = '';
+                input.className = '';
+            });
+            completedWords = new Set();
+            document.querySelectorAll('.clue-item').forEach(el => el.classList.remove('completed'));
+            document.getElementById('completion-banner').classList.remove('show');
+            updateStats();
+        }
+
+        function toggleAnswerKey() {
+            const ak = document.getElementById('answer-key');
+            ak.classList.toggle('show');
+        }
+
+        // Set today's date
+        document.getElementById('student-date').valueAsDate = new Date();
+    <\/script>
+</body>
+</html>`;
+
+            // Create and trigger download
+            const blob = new Blob([standaloneHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = topicName.replace(/[^a-z0-9]/gi, '_') + '_Crossword.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('✓ Puzzle exported successfully!');
+        }
+
+        // ========================================
+        // UTILITIES
+        // ========================================
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Schedule Builder - Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1900px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        h2 {
+            color: #667eea;
+            margin: 20px 0 10px 0;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        button.danger {
+            background: #f44336;
+        }
+        button.danger:hover {
+            background: #d32f2f;
+        }
+        button.add-more {
+            background: #4caf50;
+            padding: 4px 8px;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        button.add-more:hover {
+            background: #45a049;
+        }
+        .setup-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .instructor-entry {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border-left: 3px solid #667eea;
+        }
+        .course-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .course-tag {
+            background: #e3f2fd;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .course-tag.hybrid {
+            background: #fff3e0;
+        }
+        .course-tag.eight-week {
+            background: #e8f5e9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #764ba2;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+        td {
+            border: 1px solid #ddd;
+            padding: 5px;
+            vertical-align: top;
+        }
+        .time-header {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+        .dropzone {
+            min-height: 100px;
+            background: #f9f9f9;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            overflow-y: auto;
+            max-height: 200px;
+        }
+        .dropzone.drag-over {
+            background: #e8f5e9;
+            border: 2px dashed #4caf50;
+        }
+        .course-card {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            padding: 4px;
+            margin: 2px 0;
+            cursor: move;
+            font-size: 10px;
+            position: relative;
+        }
+        .course-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+        .course-card.dragging {
+            opacity: 0.5;
+        }
+        .course-card.early-eight-week {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .course-card.late-eight-week {
+            background: #fff3e0;
+            border-color: #ff9800;
+        }
+        .course-card.early-seven-week {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+        .course-card.late-seven-week {
+            background: #fce4ec;
+            border-color: #e91e63;
+        }
+        .course-card.fourteen-week {
+            background: #f1f8e9;
+            border-color: #689f38;
+        }
+        .course-card.dual-credit {
+            background: #f3e5f5;
+            border-color: #9c27b0;
+        }
+        .delete-course {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 1px 4px;
+            font-size: 8px;
+            cursor: pointer;
+            display: none;
+        }
+        .course-card:hover .delete-course {
+            display: block;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .stat {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .sidebar {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+        .main-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+        }
+        .faculty-section {
+            margin-bottom: 20px;
+        }
+        .faculty-header {
+            font-weight: bold;
+            padding: 8px;
+            background: #e3f2fd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            color: #1565c0;
+        }
+        .faculty-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            font-size: 13px;
+            border-left: 3px solid #ddd;
+            transition: all 0.3s;
+        }
+        .faculty-item.has-courses {
+            border-left-color: #4caf50;
+            background: #f1f8e9;
+        }
+        .faculty-item.full-load {
+            border-left-color: #ff9800;
+            background: #fff3e0;
+        }
+        .faculty-item.over-load {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        .faculty-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        .faculty-load {
+            font-size: 11px;
+            color: #666;
+        }
+        .faculty-load-bar {
+            margin-top: 3px;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .faculty-load-fill {
+            height: 100%;
+            background: #4caf50;
+            transition: width 0.3s;
+        }
+        .faculty-load-fill.full {
+            background: #ff9800;
+        }
+        .faculty-load-fill.over {
+            background: #f44336;
+        }
+        .instructor-pool {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .instructor-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .instructor-group {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            min-height: 80px;
+        }
+        .instructor-group-name {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        .instructor-courses {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            min-height: 30px;
+        }
+        .instructor-courses.drag-over {
+            background: #e8f5e9;
+            border: 1px dashed #4caf50;
+            border-radius: 4px;
+        }
+        .course-generator {
+            background: #e3f2fd;
+            border-radius: 5px;
+            padding: 8px;
+            margin-top: 8px;
+            display: none;
+        }
+        .course-generator.active {
+            display: block;
+        }
+        .generator-row {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        .generator-row select {
+            flex: 1;
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .generator-row button {
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Setup Phase -->
+        <div id="setupPhase">
+            <div class="header">
+                <h1>Course Schedule Builder - Initial Setup</h1>
+                <p>Configure your department's instructors and courses before building the schedule.</p>
+            </div>
+            
+            <div class="setup-panel">
+                <h2>Department Information</h2>
+                <div class="form-group">
+                    <label>Department Name:</label>
+                    <input type="text" id="deptName" placeholder="e.g., History Department">
+                </div>
+                <div class="form-group">
+                    <label>Academic Term:</label>
+                    <input type="text" id="academicTerm" placeholder="e.g., Spring 2025">
+                </div>
+            </div>
+
+            <div class="setup-panel">
+                <h2>Add Instructor</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Instructor Name:</label>
+                        <input type="text" id="instructorName" placeholder="e.g., John Smith">
+                    </div>
+                    <div class="form-group">
+                        <label>Type:</label>
+                        <select id="instructorType">
+                            <option value="FT">Full-Time</option>
+                            <option value="ADJ">Adjunct</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Max Course Load:</label>
+                        <input type="number" id="maxLoad" value="5" min="1" max="20">
+                    </div>
+                    <div class="form-group">
+                        <label>Courses (comma-separated):</label>
+                        <input type="text" id="courses" placeholder="e.g., HIST-1301, HIST-1302">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Special Options:</label>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <label style="display: flex; align-items: center;">
+                            <input type="checkbox" id="has16Week" checked style="margin-right: 5px;">
+                            16-Week Courses
+                        </label>
+                        <label style="display: flex; align-items: center;">
+                            <input type="checkbox" id="has14Week" style="margin-right: 5px;">
+                            14-Week (Saturday)
+                        </label>
+                        <label style="display: flex; align-items: center;">
+                            <input type="checkbox" id="hasHybrid" style="margin-right: 5px;">
+                            Hybrid Courses
+                        </label>
+                        <label style="display: flex; align-items: center;">
+                            <input type="checkbox" id="has8Week" style="margin-right: 5px;">
+                            8-Week Courses
+                        </label>
+                        <label style="display: flex; align-items: center;">
+                            <input type="checkbox" id="has7Week" style="margin-right: 5px;">
+                            7-Week Courses
+                        </label>
+                        <label style="display: flex; align-items: center;">
+                            <input type="checkbox" id="hasDualCredit" style="margin-right: 5px;">
+                            Dual Credit
+                        </label>
+                    </div>
+                </div>
+                
+                <button onclick="addInstructor()">Add Instructor</button>
+            </div>
+
+            <div class="setup-panel">
+                <h2>Current Instructors</h2>
+                <div id="instructorList"></div>
+                <div style="margin-top: 20px;">
+                    <button onclick="saveConfiguration()">Save Configuration</button>
+                    <button onclick="loadConfiguration()">Load Previous Configuration</button>
+                    <button onclick="startScheduleBuilder()" style="background: #4caf50;">Start Building Schedule →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Builder Phase (Initially Hidden) -->
+        <div id="schedulePhase" class="hidden">
+            <div class="header">
+                <h1 id="scheduleTitle">Course Schedule Builder</h1>
+                <div class="instructions" style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                    <strong>Instructions:</strong>
+                    <ul style="font-size: 12px; margin: 5px 0 10px 20px;">
+                        <li>Drag sections from instructor pools to the schedule grid</li>
+                        <li>Monday-Thursday courses automatically pair on M/W or T/Th (unless hybrid)</li>
+                        <li>Friday and Saturday courses meet once per week</li>
+                        <li>Hybrid courses meet only once per week</li>
+                        <li>Click "Add More" under each instructor to generate additional course sections</li>
+                        <li>Use Export to CSV to save and Import CSV to load schedules</li>
+                    </ul>
+                    <div style="display: flex; gap: 10px; font-size: 12px; flex-wrap: wrap;">
+                        <span style="padding: 2px 8px; background: white; border: 2px solid #ddd; border-radius: 3px;">16-Week</span>
+                        <span style="padding: 2px 8px; background: #f1f8e9; border: 2px solid #689f38; border-radius: 3px;">14-Week</span>
+                        <span style="padding: 2px 8px; background: #e8f5e9; border: 2px solid #4caf50; border-radius: 3px;">Early 8</span>
+                        <span style="padding: 2px 8px; background: #fff3e0; border: 2px solid #ff9800; border-radius: 3px;">Late 8</span>
+                        <span style="padding: 2px 8px; background: #e3f2fd; border: 2px solid #2196f3; border-radius: 3px;">Early 7</span>
+                        <span style="padding: 2px 8px; background: #fce4ec; border: 2px solid #e91e63; border-radius: 3px;">Late 7</span>
+                        <span style="padding: 2px 8px; background: #f3e5f5; border: 2px solid #9c27b0; border-radius: 3px;">Dual Credit</span>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button onclick="backToSetup()">← Back to Setup</button>
+                    <button onclick="clearSchedule()">Clear Schedule</button>
+                    <button onclick="exportToCSV()">Export to CSV</button>
+                    <button onclick="document.getElementById('csvFileInput').click()">Import CSV</button>
+                    <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="importCSV(event)">
+                </div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="totalScheduled">0</div>
+                        <div class="stat-label">Total Scheduled</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-layout">
+                <div class="sidebar">
+                    <div class="faculty-section">
+                        <div class="faculty-header">Full-Time Faculty</div>
+                        <div id="fullTimeList"></div>
+                    </div>
+                    <div class="faculty-section">
+                        <div class="faculty-header">Adjunct Faculty</div>
+                        <div id="adjunctList"></div>
+                    </div>
+                </div>
+
+                <div class="schedule-table">
+                    <h3 style="color: #667eea; margin-bottom: 10px;">Monday - Thursday Schedule</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="15%">Time</th>
+                                <th width="21.25%">Monday</th>
+                                <th width="21.25%">Tuesday</th>
+                                <th width="21.25%">Wednesday</th>
+                                <th width="21.25%">Thursday</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleGrid"></tbody>
+                    </table>
+                    
+                    <div style="background: #f5f5f5; padding: 10px; border-radius: 5px; margin-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleWeekendSchedule()">
+                            <h3 style="color: #667eea; margin: 0;">
+                                <span id="weekendToggleIcon" style="display: inline-block; width: 20px; transition: transform 0.3s;">▶</span>
+                                Friday & Saturday Schedule
+                                <span id="weekendIndicator" style="display: none; margin-left: 10px; background: #ff9800; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;"></span>
+                            </h3>
+                            <span style="font-size: 12px; color: #666;">Click to expand/collapse</span>
+                        </div>
+                        <div id="weekendScheduleContent" style="display: none; margin-top: 15px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <table style="width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="2" style="background: #764ba2; color: white; padding: 10px;">Friday Evening</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="fridayGrid"></tbody>
+                                    </table>
+                                </div>
+                                <div>
+                                    <table style="width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="2" style="background: #764ba2; color: white; padding: 10px;">Saturday</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="saturdayGrid"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="instructor-pool">
+                <h3>Available Course Sections - Drag to Schedule</h3>
+                <div class="instructor-sections" id="instructorPool"></div>
+            </div>
+            
+            <div class="greatest-needs" style="background: white; padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <h3 style="color: #333; margin-bottom: 10px;">Schedule Analysis & Needs Assessment</h3>
+                <div id="needsAnalysis" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                    <!-- Dynamic analysis will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let instructors = [];
+        let courseIdCounter = 1;
+        let draggedCourse = null;
+        const scheduledCourses = {};
+        const instructorCourses = {};
+        const departmentCatalog = new Set(); // Track all unique courses in department
+        
+        // Toggle weekend schedule visibility
+        function toggleWeekendSchedule() {
+            const content = document.getElementById('weekendScheduleContent');
+            const icon = document.getElementById('weekendToggleIcon');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.style.transform = 'rotate(90deg)';
+            } else {
+                content.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        // Update weekend indicator
+        function updateWeekendIndicator() {
+            const indicator = document.getElementById('weekendIndicator');
+            if (!indicator) return;
+            
+            let fridayCount = 0;
+            let saturdayCount = 0;
+            
+            // Count Friday courses
+            fridaySlots.forEach(time => {
+                const slotKey = `Friday|${time}`;
+                if (scheduledCourses[slotKey]) {
+                    fridayCount += scheduledCourses[slotKey].length;
+                }
+            });
+            
+            // Count Saturday courses
+            saturdaySlots.forEach(time => {
+                const slotKey = `Saturday|${time}`;
+                if (scheduledCourses[slotKey]) {
+                    saturdayCount += scheduledCourses[slotKey].length;
+                }
+            });
+            
+            const totalWeekend = fridayCount + saturdayCount;
+            
+            if (totalWeekend > 0) {
+                indicator.style.display = 'inline-block';
+                indicator.textContent = `${totalWeekend} class${totalWeekend !== 1 ? 'es' : ''} scheduled`;
+                
+                // Change color based on whether section is expanded or collapsed
+                const content = document.getElementById('weekendScheduleContent');
+                if (content && content.style.display === 'none') {
+                    indicator.style.background = '#ff9800'; // Orange when collapsed with classes
+                } else {
+                    indicator.style.background = '#4caf50'; // Green when expanded with classes
+                }
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+        
+        // Different time slots for different days
+        const weekdaySlots = [
+            '8:00-9:20', '9:30-10:50', '11:00-12:20', '12:30-1:50',
+            '2:00-3:20', '3:30-4:50', '5:00-6:20', '6:30-7:50'
+        ];
+        
+        const fridaySlots = [
+            '4:00-6:50', '7:00-9:50'
+        ];
+        
+        const saturdaySlots = [
+            '9:00-11:50', '12:00-2:50'
+        ];
+        
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const mainDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+        
+        // Helper function to get time slots for a specific day
+        function getTimeSlotsForDay(day) {
+            if (day === 'Friday') return fridaySlots;
+            if (day === 'Saturday') return saturdaySlots;
+            return weekdaySlots;
+        }
+        
+        // Get all unique time slots for various functions
+        const allTimeSlots = [...new Set([...weekdaySlots, ...fridaySlots, ...saturdaySlots])];
+
+        // Setup Phase Functions
+        function addInstructor() {
+            const name = document.getElementById('instructorName').value.trim();
+            const type = document.getElementById('instructorType').value;
+            const maxLoad = parseInt(document.getElementById('maxLoad').value);
+            const coursesInput = document.getElementById('courses').value.trim();
+            const hasHybrid = document.getElementById('hasHybrid').checked;
+            const has8Week = document.getElementById('has8Week').checked;
+            const has7Week = document.getElementById('has7Week').checked;
+            const has16Week = document.getElementById('has16Week').checked;
+            const has14Week = document.getElementById('has14Week').checked;
+            const hasDualCredit = document.getElementById('hasDualCredit').checked;
+            
+            if (!name || !coursesInput) {
+                alert('Please enter instructor name and courses.');
+                return;
+            }
+            
+            const courses = coursesInput.split(',').map(c => c.trim()).filter(c => c);
+            
+            // Add courses to department catalog
+            courses.forEach(course => departmentCatalog.add(course));
+            
+            instructors.push({
+                name: name,
+                type: type,
+                max: maxLoad,
+                courses: courses,
+                hybrid: hasHybrid,
+                eightWeek: has8Week,
+                sevenWeek: has7Week,
+                sixteenWeek: has16Week,
+                fourteenWeek: has14Week,
+                dualCredit: hasDualCredit
+            });
+            
+            // Clear form
+            document.getElementById('instructorName').value = '';
+            document.getElementById('courses').value = '';
+            document.getElementById('maxLoad').value = '5';
+            document.getElementById('hasHybrid').checked = false;
+            document.getElementById('has8Week').checked = false;
+            document.getElementById('has7Week').checked = false;
+            document.getElementById('has16Week').checked = true;
+            document.getElementById('has14Week').checked = false;
+            document.getElementById('hasDualCredit').checked = false;
+            
+            updateInstructorList();
+        }
+
+        function removeInstructor(index) {
+            instructors.splice(index, 1);
+            
+            // Rebuild department catalog
+            departmentCatalog.clear();
+            instructors.forEach(instructor => {
+                instructor.courses.forEach(course => {
+                    departmentCatalog.add(course);
+                });
+            });
+            
+            updateInstructorList();
+        }
+
+        function updateInstructorList() {
+            const list = document.getElementById('instructorList');
+            list.innerHTML = '';
+            
+            instructors.forEach((instructor, index) => {
+                const div = document.createElement('div');
+                div.className = 'instructor-entry';
+                
+                let options = [];
+                if (instructor.sixteenWeek) options.push('16-Week');
+                if (instructor.fourteenWeek) options.push('14-Week');
+                if (instructor.hybrid) options.push('Hybrid');
+                if (instructor.eightWeek) options.push('8-Week');
+                if (instructor.sevenWeek) options.push('7-Week');
+                if (instructor.dualCredit) options.push('Dual Credit');
+                
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <strong>${instructor.name}</strong> (${instructor.type}, Max: ${instructor.max})
+                            ${options.length > 0 ? `<br><small>Options: ${options.join(', ')}</small>` : ''}
+                            <div class="course-list">
+                                ${instructor.courses.map(c => `<span class="course-tag">${c}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="editInstructor(${index})" style="background: #2196f3;">Edit</button>
+                            <button class="danger" onclick="removeInstructor(${index})">Remove</button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+        
+        // Edit instructor function
+        function editInstructor(index) {
+            const instructor = instructors[index];
+            
+            // Create edit modal
+            const modal = document.createElement('div');
+            modal.style = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                z-index: 1000;
+                max-width: 600px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+            `;
+            
+            modal.innerHTML = `
+                <h2 style="color: #667eea; margin-bottom: 15px;">Edit Instructor</h2>
+                <div style="display: grid; gap: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #555;">Instructor Name:</label>
+                        <input type="text" id="edit-name" value="${instructor.name}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #555;">Type:</label>
+                            <select id="edit-type" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <option value="FT" ${instructor.type === 'FT' ? 'selected' : ''}>Full-Time</option>
+                                <option value="ADJ" ${instructor.type === 'ADJ' ? 'selected' : ''}>Adjunct</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; color: #555;">Max Course Load:</label>
+                            <input type="number" id="edit-max" value="${instructor.max}" min="1" max="20" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #555;">Courses (comma-separated):</label>
+                        <input type="text" id="edit-courses" value="${instructor.courses.join(', ')}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #555;">Teaching Modalities:</label>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="edit-16week" ${instructor.sixteenWeek ? 'checked' : ''} style="margin-right: 5px;">
+                                16-Week Courses
+                            </label>
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="edit-14week" ${instructor.fourteenWeek ? 'checked' : ''} style="margin-right: 5px;">
+                                14-Week (Saturday)
+                            </label>
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="edit-hybrid" ${instructor.hybrid ? 'checked' : ''} style="margin-right: 5px;">
+                                Hybrid Courses
+                            </label>
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="edit-8week" ${instructor.eightWeek ? 'checked' : ''} style="margin-right: 5px;">
+                                8-Week Courses
+                            </label>
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="edit-7week" ${instructor.sevenWeek ? 'checked' : ''} style="margin-right: 5px;">
+                                7-Week Courses
+                            </label>
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="edit-dualcredit" ${instructor.dualCredit ? 'checked' : ''} style="margin-right: 5px;">
+                                Dual Credit
+                            </label>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+                        <button onclick="saveInstructorEdit(${index})" style="background: #4caf50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Save Changes</button>
+                        <button onclick="cancelInstructorEdit()" style="background: #999; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            // Create backdrop
+            const backdrop = document.createElement('div');
+            backdrop.id = 'edit-backdrop';
+            backdrop.style = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 999;
+            `;
+            backdrop.onclick = cancelInstructorEdit;
+            
+            document.body.appendChild(backdrop);
+            document.body.appendChild(modal);
+            modal.id = 'edit-modal';
+        }
+        
+        function saveInstructorEdit(index) {
+            const name = document.getElementById('edit-name').value.trim();
+            const type = document.getElementById('edit-type').value;
+            const maxLoad = parseInt(document.getElementById('edit-max').value);
+            const coursesInput = document.getElementById('edit-courses').value.trim();
+            const has16Week = document.getElementById('edit-16week').checked;
+            const has14Week = document.getElementById('edit-14week').checked;
+            const hasHybrid = document.getElementById('edit-hybrid').checked;
+            const has8Week = document.getElementById('edit-8week').checked;
+            const has7Week = document.getElementById('edit-7week').checked;
+            const hasDualCredit = document.getElementById('edit-dualcredit').checked;
+            
+            if (!name || !coursesInput) {
+                alert('Please enter instructor name and courses.');
+                return;
+            }
+            
+            const courses = coursesInput.split(',').map(c => c.trim()).filter(c => c);
+            
+            // Update the instructor
+            instructors[index] = {
+                name: name,
+                type: type,
+                max: maxLoad,
+                courses: courses,
+                hybrid: hasHybrid,
+                eightWeek: has8Week,
+                sevenWeek: has7Week,
+                sixteenWeek: has16Week,
+                fourteenWeek: has14Week,
+                dualCredit: hasDualCredit
+            };
+            
+            // Rebuild department catalog
+            departmentCatalog.clear();
+            instructors.forEach(instructor => {
+                instructor.courses.forEach(course => {
+                    departmentCatalog.add(course);
+                });
+            });
+            
+            // Close modal
+            cancelInstructorEdit();
+            
+            // Update display
+            updateInstructorList();
+        }
+        
+        function cancelInstructorEdit() {
+            const modal = document.getElementById('edit-modal');
+            const backdrop = document.getElementById('edit-backdrop');
+            if (modal) modal.remove();
+            if (backdrop) backdrop.remove();
+        }
+
+        function saveConfiguration() {
+            const config = {
+                department: document.getElementById('deptName').value,
+                term: document.getElementById('academicTerm').value,
+                instructors: instructors
+            };
+            
+            const blob = new Blob([JSON.stringify(config, null, 2)], {type: 'application/json'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'schedule_config.json';
+            link.click();
+        }
+
+        function loadConfiguration() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const config = JSON.parse(event.target.result);
+                        document.getElementById('deptName').value = config.department || '';
+                        document.getElementById('academicTerm').value = config.term || '';
+                        instructors = config.instructors || [];
+                        
+                        // Rebuild department catalog from loaded instructors
+                        departmentCatalog.clear();
+                        instructors.forEach(instructor => {
+                            instructor.courses.forEach(course => {
+                                departmentCatalog.add(course);
+                            });
+                        });
+                        
+                        updateInstructorList();
+                    } catch(err) {
+                        alert('Error loading configuration file.');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function startScheduleBuilder() {
+            if (instructors.length === 0) {
+                alert('Please add at least one instructor before starting.');
+                return;
+            }
+            
+            // Initialize instructor courses with minimal initial cards
+            initializeInstructorCourses();
+            
+            // Update title
+            const dept = document.getElementById('deptName').value || 'Department';
+            const term = document.getElementById('academicTerm').value || '';
+            document.getElementById('scheduleTitle').textContent = `${dept} Schedule Builder${term ? ' - ' + term : ''}`;
+            
+            // Switch views
+            document.getElementById('setupPhase').classList.add('hidden');
+            document.getElementById('schedulePhase').classList.remove('hidden');
+            
+            // Initialize schedule builder
+            createGrid();
+            createInstructorPool();
+            updateSubjectFilter();  // Initialize the subject filter
+            renderAll();
+            
+            // Start with weekend section collapsed
+            const weekendContent = document.getElementById('weekendScheduleContent');
+            if (weekendContent) {
+                weekendContent.style.display = 'none';
+            }
+        }
+
+        function backToSetup() {
+            if (Object.keys(scheduledCourses).length > 0) {
+                if (!confirm('You have courses scheduled. Going back will clear the schedule. Continue?')) {
+                    return;
+                }
+            }
+            
+            // Clear schedule
+            Object.keys(scheduledCourses).forEach(key => {
+                delete scheduledCourses[key];
+            });
+            
+            // Switch views
+            document.getElementById('setupPhase').classList.remove('hidden');
+            document.getElementById('schedulePhase').classList.add('hidden');
+        }
+
+        // Initialize instructor courses with minimal initial display
+        function initializeInstructorCourses() {
+            instructors.forEach(instructor => {
+                instructorCourses[instructor.name] = [];
+                
+                // Create only 1-2 initial courses per instructor
+                const initialCourseCount = Math.min(2, instructor.courses.length);
+                
+                for (let i = 0; i < initialCourseCount; i++) {
+                    const courseType = instructor.courses[i];
+                    
+                    // Create one standard 16-week course if applicable
+                    if (instructor.sixteenWeek) {
+                        instructorCourses[instructor.name].push({
+                            id: courseIdCounter++,
+                            type: courseType,
+                            instructor: instructor.name,
+                            session: '16week',
+                            hybrid: false,
+                            dualCredit: false
+                        });
+                    }
+                    
+                    // If they teach special formats, add one example
+                    if (i === 0) {  // Only for the first course type
+                        if (instructor.dualCredit) {
+                            instructorCourses[instructor.name].push({
+                                id: courseIdCounter++,
+                                type: courseType,
+                                instructor: instructor.name,
+                                session: '16week',
+                                hybrid: false,
+                                dualCredit: true
+                            });
+                        } else if (instructor.hybrid && instructor.sixteenWeek) {
+                            instructorCourses[instructor.name].push({
+                                id: courseIdCounter++,
+                                type: courseType,
+                                instructor: instructor.name,
+                                session: '16week',
+                                hybrid: true,
+                                dualCredit: false
+                            });
+                        } else if (instructor.eightWeek) {
+                            instructorCourses[instructor.name].push({
+                                id: courseIdCounter++,
+                                type: courseType,
+                                instructor: instructor.name,
+                                session: 'early8',
+                                hybrid: false,
+                                dualCredit: false
+                            });
+                        }
+                    }
+                }
+                
+                // Ensure at least one course exists
+                if (instructorCourses[instructor.name].length === 0 && instructor.courses.length > 0) {
+                    instructorCourses[instructor.name].push({
+                        id: courseIdCounter++,
+                        type: instructor.courses[0],
+                        instructor: instructor.name,
+                        session: '16week',
+                        hybrid: false,
+                        dualCredit: false
+                    });
+                }
+            });
+        }
+
+        // Function to extract subject from course code (e.g., "HIST" from "HIST-1301")
+        function extractSubject(courseCode) {
+            const parts = courseCode.split('-');
+            return parts[0] || courseCode;
+        }
+        
+        // Function to get all unique subjects from instructors
+        function getAllSubjects() {
+            const subjects = new Set();
+            instructors.forEach(instructor => {
+                instructor.courses.forEach(course => {
+                    subjects.add(extractSubject(course));
+                });
+            });
+            return Array.from(subjects).sort();
+        }
+        
+        // Function to update subject filter dropdown
+        function updateSubjectFilter() {
+            const filterSelect = document.getElementById('subjectFilter');
+            if (!filterSelect) return;
+            
+            // Keep current selection if it exists
+            const currentSelection = filterSelect.value;
+            
+            // Clear and rebuild options
+            filterSelect.innerHTML = '<option value="all">All Subjects</option>';
+            
+            const subjects = getAllSubjects();
+            subjects.forEach(subject => {
+                // Count instructors who can teach this subject
+                const count = instructors.filter(inst => 
+                    inst.courses.some(course => extractSubject(course) === subject)
+                ).length;
+                
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = `${subject} (${count} instructors)`;
+                filterSelect.appendChild(option);
+            });
+            
+            // Restore selection if it still exists
+            if (currentSelection && Array.from(filterSelect.options).some(opt => opt.value === currentSelection)) {
+                filterSelect.value = currentSelection;
+            }
+        }
+        
+        // Function to filter instructors by subject
+        function filterInstructorsBySubject() {
+            const filterValue = document.getElementById('subjectFilter').value;
+            const pool = document.getElementById('instructorPool');
+            
+            // Get all instructor groups
+            const instructorGroups = pool.querySelectorAll('.instructor-group');
+            
+            let visibleCount = 0;
+            let totalCount = instructorGroups.length;
+            
+            instructorGroups.forEach(group => {
+                const instructorName = group.querySelector('.instructor-group-name').textContent.split(' (')[0];
+                const instructor = instructors.find(inst => inst.name === instructorName);
+                
+                if (!instructor) {
+                    group.style.display = 'none';
+                    return;
+                }
+                
+                // Check if instructor teaches the selected subject
+                if (filterValue === 'all') {
+                    group.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    const teachesSubject = instructor.courses.some(course => 
+                        extractSubject(course) === filterValue
+                    );
+                    group.style.display = teachesSubject ? 'block' : 'none';
+                    if (teachesSubject) visibleCount++;
+                }
+            });
+            
+            // Update count display
+            const countDisplay = document.getElementById('filterCount');
+            if (!countDisplay) {
+                // Create count display if it doesn't exist
+                const filterContainer = document.querySelector('#subjectFilter').parentElement;
+                const span = document.createElement('span');
+                span.id = 'filterCount';
+                span.style = 'font-size: 12px; color: #666; margin-left: 10px;';
+                filterContainer.appendChild(span);
+            }
+            
+            if (filterValue !== 'all') {
+                document.getElementById('filterCount').textContent = `(Showing ${visibleCount} of ${totalCount} instructors)`;
+            } else {
+                document.getElementById('filterCount').textContent = '';
+            }
+            
+            // Update the pool grid layout to avoid gaps
+            pool.style.display = 'grid';
+        }
+
+        // Function to toggle course generator for an instructor
+        function toggleCourseGenerator(instructorName) {
+            const generator = document.getElementById(`generator-${instructorName}`);
+            if (generator) {
+                generator.classList.toggle('active');
+            }
+        }
+
+        // Function to add a course from the generator
+        function addCourseFromGenerator(instructorName) {
+            const courseSelect = document.getElementById(`course-select-${instructorName}`);
+            const formatSelect = document.getElementById(`format-select-${instructorName}`);
+            
+            if (!courseSelect || !formatSelect) {
+                console.error('Could not find course or format select for', instructorName);
+                return;
+            }
+            
+            const courseType = courseSelect.value;
+            const format = formatSelect.value;
+            
+            let sessionType = '16week';
+            let isHybrid = false;
+            let isDualCredit = false;
+            
+            if (format === 'early8') sessionType = 'early8';
+            else if (format === 'late8') sessionType = 'late8';
+            else if (format === 'early7') sessionType = 'early7';
+            else if (format === 'late7') sessionType = 'late7';
+            else if (format === '14week') sessionType = '14week';
+            else if (format === 'hybrid') isHybrid = true;
+            else if (format === 'dualcredit') isDualCredit = true;
+            
+            // Ensure instructorCourses array exists
+            if (!instructorCourses[instructorName]) {
+                instructorCourses[instructorName] = [];
+            }
+            
+            // Generate the new course
+            const newCourse = {
+                id: courseIdCounter++,
+                type: courseType,
+                instructor: instructorName,
+                session: sessionType,
+                hybrid: isHybrid,
+                dualCredit: isDualCredit
+            };
+            
+            instructorCourses[instructorName].push(newCourse);
+            
+            // Close the generator
+            toggleCourseGenerator(instructorName);
+            
+            // Re-render the pool to show the new course
+            renderInstructorPool();
+            
+            // Reapply filter if one is active
+            const filterValue = document.getElementById('subjectFilter')?.value;
+            if (filterValue && filterValue !== 'all') {
+                filterInstructorsBySubject();
+            }
+        }
+
+        // Delete a course from the pool
+        function deleteCourse(courseId) {
+            for (const instructor in instructorCourses) {
+                const index = instructorCourses[instructor].findIndex(c => c.id === courseId);
+                if (index !== -1) {
+                    instructorCourses[instructor].splice(index, 1);
+                    renderInstructorPool();
+                    break;
+                }
+            }
+        }
+
+        // Schedule Builder Functions
+        function createGrid() {
+            // Create main Monday-Thursday grid
+            const mainGrid = document.getElementById('scheduleGrid');
+            mainGrid.innerHTML = '';
+            
+            weekdaySlots.forEach(time => {
+                const row = document.createElement('tr');
+                
+                const timeCell = document.createElement('td');
+                timeCell.className = 'time-header';
+                timeCell.textContent = time;
+                row.appendChild(timeCell);
+                
+                ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+                    const cell = document.createElement('td');
+                    const dropzone = document.createElement('div');
+                    dropzone.className = 'dropzone';
+                    dropzone.dataset.day = day;
+                    dropzone.dataset.time = time;
+                    
+                    dropzone.ondrop = handleDrop;
+                    dropzone.ondragover = handleDragOver;
+                    dropzone.ondragleave = handleDragLeave;
+                    
+                    cell.appendChild(dropzone);
+                    row.appendChild(cell);
+                });
+                
+                mainGrid.appendChild(row);
+            });
+            
+            // Create Friday grid
+            const fridayGrid = document.getElementById('fridayGrid');
+            fridayGrid.innerHTML = '';
+            
+            fridaySlots.forEach(time => {
+                const row = document.createElement('tr');
+                
+                const timeCell = document.createElement('td');
+                timeCell.className = 'time-header';
+                timeCell.textContent = time;
+                timeCell.style.width = '40%';
+                row.appendChild(timeCell);
+                
+                const cell = document.createElement('td');
+                const dropzone = document.createElement('div');
+                dropzone.className = 'dropzone';
+                dropzone.dataset.day = 'Friday';
+                dropzone.dataset.time = time;
+                
+                dropzone.ondrop = handleDrop;
+                dropzone.ondragover = handleDragOver;
+                dropzone.ondragleave = handleDragLeave;
+                
+                cell.appendChild(dropzone);
+                row.appendChild(cell);
+                
+                fridayGrid.appendChild(row);
+            });
+            
+            // Create Saturday grid
+            const saturdayGrid = document.getElementById('saturdayGrid');
+            saturdayGrid.innerHTML = '';
+            
+            saturdaySlots.forEach(time => {
+                const row = document.createElement('tr');
+                
+                const timeCell = document.createElement('td');
+                timeCell.className = 'time-header';
+                timeCell.textContent = time;
+                timeCell.style.width = '40%';
+                row.appendChild(timeCell);
+                
+                const cell = document.createElement('td');
+                const dropzone = document.createElement('div');
+                dropzone.className = 'dropzone';
+                dropzone.dataset.day = 'Saturday';
+                dropzone.dataset.time = time;
+                
+                dropzone.ondrop = handleDrop;
+                dropzone.ondragover = handleDragOver;
+                dropzone.ondragleave = handleDragLeave;
+                
+                cell.appendChild(dropzone);
+                row.appendChild(cell);
+                
+                saturdayGrid.appendChild(row);
+            });
+        }
+
+        function createInstructorPool() {
+            // First, create or update the filter header if it doesn't exist
+            const poolContainer = document.querySelector('.instructor-pool');
+            let filterHeader = poolContainer.querySelector('.filter-header');
+            
+            if (!filterHeader) {
+                // Create the filter header
+                filterHeader = document.createElement('div');
+                filterHeader.className = 'filter-header';
+                filterHeader.style = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;';
+                filterHeader.innerHTML = `
+                    <h3 style="margin: 0;">Available Course Sections - Drag to Schedule</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <label style="font-size: 14px; color: #666;">Filter by Subject:</label>
+                        <select id="subjectFilter" onchange="filterInstructorsBySubject()" style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                            <option value="all">All Subjects</option>
+                        </select>
+                        <span id="filterCount" style="font-size: 12px; color: #666;"></span>
+                    </div>
+                `;
+                
+                // Replace the existing h3 or insert the new header
+                const existingH3 = poolContainer.querySelector('h3');
+                if (existingH3) {
+                    existingH3.replaceWith(filterHeader);
+                } else {
+                    poolContainer.insertBefore(filterHeader, poolContainer.firstChild);
+                }
+            }
+            
+            const pool = document.getElementById('instructorPool');
+            pool.innerHTML = '';
+            
+            instructors.forEach(instructor => {
+                const group = document.createElement('div');
+                group.className = 'instructor-group';
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'instructor-group-name';
+                nameDiv.textContent = `${instructor.name} (${instructor.type})`;
+                group.appendChild(nameDiv);
+                
+                const coursesDiv = document.createElement('div');
+                coursesDiv.className = 'instructor-courses';
+                coursesDiv.dataset.instructor = instructor.name;
+                
+                coursesDiv.ondrop = handleDropToInstructor;
+                coursesDiv.ondragover = handleDragOver;
+                coursesDiv.ondragleave = handleDragLeave;
+                
+                group.appendChild(coursesDiv);
+                
+                // Add the "Add More" button
+                const addMoreBtn = document.createElement('button');
+                addMoreBtn.className = 'add-more';
+                addMoreBtn.textContent = 'Add More';
+                addMoreBtn.onclick = () => toggleCourseGenerator(instructor.name);
+                group.appendChild(addMoreBtn);
+                
+                // Add the course generator (initially hidden)
+                const generator = document.createElement('div');
+                generator.className = 'course-generator';
+                generator.id = `generator-${instructor.name}`;
+                
+                // Build course options
+                const courseOptions = instructor.courses.map(c => 
+                    `<option value="${c}">${c}</option>`
+                ).join('');
+                
+                // Build format options based on instructor capabilities
+                let formatOptions = '';
+                if (instructor.sixteenWeek) {
+                    formatOptions += '<option value="16week">16-Week</option>';
+                }
+                if (instructor.fourteenWeek) {
+                    formatOptions += '<option value="14week">14-Week (Saturday)</option>';
+                }
+                if (instructor.hybrid) {
+                    formatOptions += '<option value="hybrid">Hybrid (Once/Week)</option>';
+                }
+                if (instructor.eightWeek) {
+                    formatOptions += '<option value="early8">Early 8-Week</option>';
+                    formatOptions += '<option value="late8">Late 8-Week</option>';
+                }
+                if (instructor.sevenWeek) {
+                    formatOptions += '<option value="early7">Early 7-Week</option>';
+                    formatOptions += '<option value="late7">Late 7-Week</option>';
+                }
+                if (instructor.dualCredit) {
+                    formatOptions += '<option value="dualcredit">Dual Credit</option>';
+                }
+                
+                generator.innerHTML = `
+                    <div class="generator-row">
+                        <select id="course-select-${instructor.name}">
+                            ${courseOptions}
+                        </select>
+                        <select id="format-select-${instructor.name}">
+                            ${formatOptions}
+                        </select>
+                    </div>
+                    <div class="generator-row">
+                        <button onclick="addCourseFromGenerator('${instructor.name}')">Create Course</button>
+                        <button onclick="toggleCourseGenerator('${instructor.name}')" style="background: #999;">Cancel</button>
+                    </div>
+                `;
+                
+                group.appendChild(generator);
+                pool.appendChild(group);
+            });
+        }
+
+        function createCourseCard(course, inPool = false) {
+            const card = document.createElement('div');
+            card.className = 'course-card';
+            
+            // Apply styling based on session type and dual credit status
+            if (course.dualCredit) {
+                card.classList.add('dual-credit');
+            } else if (course.session === 'early8') {
+                card.classList.add('early-eight-week');
+            } else if (course.session === 'late8') {
+                card.classList.add('late-eight-week');
+            } else if (course.session === 'early7') {
+                card.classList.add('early-seven-week');
+            } else if (course.session === 'late7') {
+                card.classList.add('late-seven-week');
+            } else if (course.session === '14week') {
+                card.classList.add('fourteen-week');
+            }
+            
+            card.draggable = true;
+            card.id = `course-${course.id}`;
+            
+            let sessionDisplay = '';
+            if (course.dualCredit) {
+                sessionDisplay = ' (DC)';
+            } else if (course.session === 'early8') {
+                sessionDisplay = ' (E8)';
+            } else if (course.session === 'late8') {
+                sessionDisplay = ' (L8)';
+            } else if (course.session === 'early7') {
+                sessionDisplay = ' (E7)';
+            } else if (course.session === 'late7') {
+                sessionDisplay = ' (L7)';
+            } else if (course.session === '14week') {
+                sessionDisplay = ' (14W)';
+            } else if (course.hybrid) {
+                sessionDisplay = ' (Hybrid)';
+            }
+            
+            // Set text color based on type
+            let textColor = '#1976d2';
+            if (course.dualCredit) textColor = '#9c27b0';
+            else if (course.session === '14week') textColor = '#689f38';
+            else if (course.session === 'early7' || course.session === 'late7') textColor = '#e91e63';
+            
+            card.innerHTML = `
+                <div style="font-weight: bold; color: ${textColor}; font-size: 11px;">${course.type}${sessionDisplay}</div>
+                <div style="font-size: 9px; color: #666;">${course.instructor}</div>
+                ${inPool ? `<button class="delete-course" onclick="event.stopPropagation(); deleteCourse(${course.id})">×</button>` : ''}
+            `;
+            
+            card.ondragstart = handleDragStart;
+            card.ondragend = handleDragEnd;
+            
+            return card;
+        }
+
+        // Update Faculty Panel to show instructor loads
+        function updateFacultyPanel() {
+            const ftDiv = document.getElementById('fullTimeList');
+            const adjDiv = document.getElementById('adjunctList');
+            ftDiv.innerHTML = '';
+            adjDiv.innerHTML = '';
+            
+            instructors.forEach(instructor => {
+                const div = document.createElement('div');
+                div.className = 'faculty-item';
+                
+                // Count scheduled courses (unique IDs to avoid double-counting)
+                const scheduledIds = new Set();
+                Object.values(scheduledCourses).forEach(courses => {
+                    courses.filter(c => c.instructor === instructor.name)
+                           .forEach(c => scheduledIds.add(c.id));
+                });
+                const count = scheduledIds.size;
+                const percentage = Math.min(100, Math.round((count / instructor.max) * 100));
+                
+                // Add status classes
+                if (count > 0) div.classList.add('has-courses');
+                if (count === instructor.max) div.classList.add('full-load');
+                if (count > instructor.max) div.classList.add('over-load');
+                
+                // Determine bar color
+                let barClass = '';
+                if (count > instructor.max) barClass = 'over';
+                else if (count === instructor.max) barClass = 'full';
+                
+                div.innerHTML = `
+                    <div class="faculty-name">${instructor.name}</div>
+                    <div class="faculty-load">${count}/${instructor.max} sections (${percentage}%)</div>
+                    <div class="faculty-load-bar">
+                        <div class="faculty-load-fill ${barClass}" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                
+                if (instructor.type === 'FT') {
+                    ftDiv.appendChild(div);
+                } else {
+                    adjDiv.appendChild(div);
+                }
+            });
+        }
+
+        // Drag and Drop Handlers
+        function handleDragStart(e) {
+            const courseId = parseInt(e.target.id.replace('course-', ''));
+            
+            for (const slotKey in scheduledCourses) {
+                const course = scheduledCourses[slotKey].find(c => c.id === courseId);
+                if (course) {
+                    draggedCourse = {...course, fromSlot: slotKey};
+                    break;
+                }
+            }
+            
+            if (!draggedCourse) {
+                for (const instructor in instructorCourses) {
+                    const course = instructorCourses[instructor].find(c => c.id === courseId);
+                    if (course) {
+                        draggedCourse = {...course};
+                        break;
+                    }
+                }
+            }
+            
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedCourse = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            if (draggedCourse) {
+                const day = e.currentTarget.dataset.day;
+                const time = e.currentTarget.dataset.time;
+                const slotKey = `${day}|${time}`;
+                
+                // Check for instructor conflicts BEFORE scheduling
+                // Friday and Saturday classes don't pair, only M-Th classes pair
+                const daysToSchedule = draggedCourse.hybrid ? [day] : 
+                    (day === 'Friday' || day === 'Saturday') ? [day] :
+                    (day === 'Monday' || day === 'Wednesday') ? ['Monday', 'Wednesday'] :
+                    (day === 'Tuesday' || day === 'Thursday') ? ['Tuesday', 'Thursday'] : [day];
+                
+                // Check each day for conflicts
+                let hasConflict = false;
+                let conflictMessage = '';
+                
+                daysToSchedule.forEach(checkDay => {
+                    const checkSlot = `${checkDay}|${time}`;
+                    if (scheduledCourses[checkSlot]) {
+                        scheduledCourses[checkSlot].forEach(existingCourse => {
+                            // Check if same instructor at same time
+                            if (existingCourse.instructor === draggedCourse.instructor && 
+                                existingCourse.id !== draggedCourse.id) {
+                                
+                                // Allow early/late 8-week combinations
+                                const bothAre8Week = (existingCourse.session === 'early8' || existingCourse.session === 'late8') &&
+                                                    (draggedCourse.session === 'early8' || draggedCourse.session === 'late8');
+                                const differentSessions = existingCourse.session !== draggedCourse.session;
+                                
+                                if (!(bothAre8Week && differentSessions)) {
+                                    hasConflict = true;
+                                    conflictMessage = `${draggedCourse.instructor} is already scheduled for ${existingCourse.type} on ${checkDay} at ${time}. `;
+                                    if (bothAre8Week && !differentSessions) {
+                                        conflictMessage += `(Both are ${draggedCourse.session} courses)`;
+                                    } else {
+                                        conflictMessage += `Faculty cannot be in two places at the same time.`;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                if (hasConflict) {
+                    alert(`Schedule Conflict!\n\n${conflictMessage}\n\nPlease choose a different time slot.`);
+                    return;
+                }
+                
+                // Remove from previous location if exists
+                if (draggedCourse.fromSlot) {
+                    const [oldDay, oldTime] = draggedCourse.fromSlot.split('|');
+                    const daysToRemove = draggedCourse.hybrid ? [oldDay] :
+                        (oldDay === 'Friday' || oldDay === 'Saturday') ? [oldDay] :
+                        (oldDay === 'Monday' || oldDay === 'Wednesday') ? ['Monday', 'Wednesday'] :
+                        (oldDay === 'Tuesday' || oldDay === 'Thursday') ? ['Tuesday', 'Thursday'] : [oldDay];
+                    
+                    daysToRemove.forEach(removeDay => {
+                        const removeSlot = `${removeDay}|${oldTime}`;
+                        if (scheduledCourses[removeSlot]) {
+                            scheduledCourses[removeSlot] = 
+                                scheduledCourses[removeSlot].filter(c => c.id !== draggedCourse.id);
+                            if (scheduledCourses[removeSlot].length === 0) {
+                                delete scheduledCourses[removeSlot];
+                            }
+                        }
+                    });
+                }
+                
+                // Add to new location
+                daysToSchedule.forEach(scheduleDay => {
+                    const scheduleSlot = `${scheduleDay}|${time}`;
+                    if (!scheduledCourses[scheduleSlot]) {
+                        scheduledCourses[scheduleSlot] = [];
+                    }
+                    
+                    if (!scheduledCourses[scheduleSlot].find(c => c.id === draggedCourse.id)) {
+                        const courseToAdd = {...draggedCourse};
+                        delete courseToAdd.fromSlot;
+                        scheduledCourses[scheduleSlot].push(courseToAdd);
+                    }
+                });
+                
+                renderAll();
+            }
+            return false;
+        }
+
+        function handleDropToInstructor(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            if (draggedCourse && draggedCourse.fromSlot) {
+                // Remove from all locations
+                const [day, time] = draggedCourse.fromSlot.split('|');
+                const daysToRemove = draggedCourse.hybrid ? [day] :
+                    (day === 'Friday' || day === 'Saturday') ? [day] :
+                    (day === 'Monday' || day === 'Wednesday') ? ['Monday', 'Wednesday'] :
+                    (day === 'Tuesday' || day === 'Thursday') ? ['Tuesday', 'Thursday'] : [day];
+                
+                daysToRemove.forEach(removeDay => {
+                    const removeSlot = `${removeDay}|${time}`;
+                    if (scheduledCourses[removeSlot]) {
+                        scheduledCourses[removeSlot] = 
+                            scheduledCourses[removeSlot].filter(c => c.id !== draggedCourse.id);
+                        if (scheduledCourses[removeSlot].length === 0) {
+                            delete scheduledCourses[removeSlot];
+                        }
+                    }
+                });
+                
+                renderAll();
+            }
+            return false;
+        }
+
+        // Rendering Functions
+        function renderAll() {
+            renderSchedule();
+            renderInstructorPool();
+            updateFacultyPanel();
+            updateStats();
+            updateNeedsAnalysis();
+            updateWeekendIndicator();  // Add this to update the indicator
+        }
+        
+        function updateNeedsAnalysis() {
+            const needsDiv = document.getElementById('needsAnalysis');
+            if (!needsDiv) return;
+            
+            // Initialize analysis data structures
+            const courseTypeCounts = {};
+            const dayTotals = { Monday: 0, Tuesday: 0, Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0 };
+            const timeSlotTotals = {};
+            const emptySlots = [];
+            const instructorUtilization = {};
+            
+            // Initialize counters for all time slots
+            allTimeSlots.forEach(time => {
+                timeSlotTotals[time] = 0;
+            });
+            
+            // Initialize course counts for all courses in catalog
+            departmentCatalog.forEach(course => {
+                courseTypeCounts[course] = 0;
+            });
+            
+            // Initialize instructor utilization
+            instructors.forEach(instructor => {
+                instructorUtilization[instructor.name] = { scheduled: 0, max: instructor.max };
+            });
+            
+            // Count scheduled courses
+            Object.entries(scheduledCourses).forEach(([slotKey, courses]) => {
+                const [day, time] = slotKey.split('|');
+                const uniqueCourses = new Set();
+                
+                courses.forEach(course => {
+                    if (!uniqueCourses.has(course.id)) {
+                        uniqueCourses.add(course.id);
+                        
+                        // Count course types
+                        if (courseTypeCounts.hasOwnProperty(course.type)) {
+                            courseTypeCounts[course.type]++;
+                        }
+                        
+                        // Count instructor utilization
+                        if (instructorUtilization[course.instructor]) {
+                            const currentCount = new Set();
+                            Object.values(scheduledCourses).forEach(slotCourses => {
+                                slotCourses.filter(c => c.instructor === course.instructor)
+                                          .forEach(c => currentCount.add(c.id));
+                            });
+                            instructorUtilization[course.instructor].scheduled = currentCount.size;
+                        }
+                    }
+                });
+                
+                dayTotals[day] += courses.length;
+                timeSlotTotals[time] += courses.length;
+            });
+            
+            // Find empty slots
+            days.forEach(day => {
+                const timeSlotsForDay = getTimeSlotsForDay(day);
+                timeSlotsForDay.forEach(time => {
+                    const slotKey = `${day}|${time}`;
+                    if (!scheduledCourses[slotKey] || scheduledCourses[slotKey].length === 0) {
+                        const isPrime = ['9:30-10:50', '11:00-12:20', '12:30-1:50', '9:00-11:50', '12:00-2:50'].includes(time);
+                        emptySlots.push({ day, time, isPrime });
+                    }
+                });
+            });
+            
+            // Sort empty slots to prioritize prime times
+            emptySlots.sort((a, b) => {
+                if (a.isPrime && !b.isPrime) return -1;
+                if (!a.isPrime && b.isPrime) return 1;
+                return 0;
+            });
+            
+            // Generate HTML report
+            let needsHTML = '';
+            
+            // Course Distribution Section
+            needsHTML += '<div style="background: #e3f2fd; padding: 10px; border-radius: 5px; border-left: 3px solid #2196f3;">';
+            needsHTML += '<h4 style="margin: 0 0 10px 0; color: #1565c0;">Course Section Distribution</h4>';
+            needsHTML += '<div style="font-size: 12px; color: #666;">';
+            
+            const sortedCourses = Object.entries(courseTypeCounts).sort((a, b) => a[1] - b[1]);
+            if (sortedCourses.length > 0) {
+                sortedCourses.forEach(([type, count]) => {
+                    const maxCount = Math.max(...Object.values(courseTypeCounts), 1);
+                    const barWidth = Math.max(5, (count / maxCount) * 150);
+                    const color = count === 0 ? '#f44336' : count < 3 ? '#ff9800' : '#4caf50';
+                    needsHTML += `<div style="margin: 3px 0;">
+                        <span style="display: inline-block; width: 100px; font-weight: ${count === 0 ? 'bold' : 'normal'};">${type}:</span>
+                        <span style="display: inline-block; background: ${color}; height: 15px; width: ${barWidth}px;"></span>
+                        <span style="margin-left: 5px; font-weight: ${count === 0 ? 'bold' : 'normal'};">${count} sections</span>
+                    </div>`;
+                });
+                
+                // Highlight courses with no sections
+                const unscheduledCourses = sortedCourses.filter(([type, count]) => count === 0);
+                if (unscheduledCourses.length > 0) {
+                    needsHTML += '<div style="margin-top: 10px; color: #d32f2f; font-weight: bold;">⚠ Courses with NO sections scheduled:</div>';
+                    needsHTML += '<div style="color: #d32f2f;">' + unscheduledCourses.map(([type]) => type).join(', ') + '</div>';
+                }
+            } else {
+                needsHTML += 'No courses defined yet';
+            }
+            needsHTML += '</div></div>';
+            
+            // Instructor Utilization
+            needsHTML += '<div style="background: #f3e5f5; padding: 10px; border-radius: 5px; border-left: 3px solid #9c27b0;">';
+            needsHTML += '<h4 style="margin: 0 0 10px 0; color: #6a1b9a;">Instructor Utilization</h4>';
+            needsHTML += '<div style="font-size: 12px; color: #666; max-height: 200px; overflow-y: auto;">';
+            
+            const sortedInstructors = Object.entries(instructorUtilization)
+                .sort((a, b) => (a[1].scheduled / a[1].max) - (b[1].scheduled / b[1].max));
+            
+            sortedInstructors.forEach(([name, data]) => {
+                const percentage = Math.round((data.scheduled / data.max) * 100);
+                const barWidth = Math.max(5, percentage * 1.5);
+                const color = percentage === 0 ? '#f44336' : percentage < 50 ? '#ff9800' : percentage < 100 ? '#4caf50' : '#2196f3';
+                needsHTML += `<div style="margin: 3px 0;">
+                    <span style="display: inline-block; width: 120px; font-size: 11px;">${name}:</span>
+                    <span style="display: inline-block; background: ${color}; height: 12px; width: ${barWidth}px;"></span>
+                    <span style="margin-left: 5px; font-size: 11px;">${data.scheduled}/${data.max} (${percentage}%)</span>
+                </div>`;
+            });
+            
+            needsHTML += '</div></div>';
+            
+            // Empty Time Slots
+            needsHTML += '<div style="background: #ffebee; padding: 10px; border-radius: 5px; border-left: 3px solid #f44336;">';
+            needsHTML += '<h4 style="margin: 0 0 10px 0; color: #c62828;">Empty Time Slots (' + emptySlots.length + ' total)</h4>';
+            
+            if (emptySlots.length > 0) {
+                needsHTML += '<div style="font-size: 12px; color: #666; max-height: 150px; overflow-y: auto;">';
+                const slotsToShow = emptySlots.slice(0, 10);
+                slotsToShow.forEach(slot => {
+                    const primeLabel = slot.isPrime ? ' <strong style="color: #f44336;">(PRIME TIME)</strong>' : '';
+                    needsHTML += `${slot.day} ${slot.time}${primeLabel}<br>`;
+                });
+                if (emptySlots.length > 10) {
+                    needsHTML += `<em>...and ${emptySlots.length - 10} more empty slots</em>`;
+                }
+                needsHTML += '</div>';
+            } else {
+                needsHTML += '<div style="font-size: 12px; color: #4caf50;">All time slots have at least one course!</div>';
+            }
+            needsHTML += '</div>';
+            
+            // Day Distribution
+            needsHTML += '<div style="background: #fff3e0; padding: 10px; border-radius: 5px; border-left: 3px solid #ff9800;">';
+            needsHTML += '<h4 style="margin: 0 0 10px 0; color: #e65100;">Daily Distribution Balance</h4>';
+            needsHTML += '<div style="font-size: 12px; color: #666;">';
+            
+            const maxDayCount = Math.max(...Object.values(dayTotals), 1);
+            Object.entries(dayTotals).forEach(([day, count]) => {
+                const barWidth = Math.max(5, (count / maxDayCount) * 150);
+                const color = count === 0 ? '#f44336' : '#ff9800';
+                needsHTML += `<div style="margin: 2px 0;">
+                    <span style="display: inline-block; width: 80px;">${day}:</span>
+                    <span style="display: inline-block; background: ${color}; height: 15px; width: ${barWidth}px;"></span>
+                    <span style="margin-left: 5px;">${count} sections</span>
+                </div>`;
+            });
+            
+            needsHTML += '</div></div>';
+            
+            needsDiv.innerHTML = needsHTML;
+        }
+
+        function renderSchedule() {
+            // Clear all dropzones
+            document.querySelectorAll('.dropzone').forEach(zone => {
+                zone.innerHTML = '';
+            });
+            
+            // Render courses in their scheduled slots
+            for (const slotKey in scheduledCourses) {
+                const [day, time] = slotKey.split('|');
+                const dropzone = document.querySelector(`.dropzone[data-day="${day}"][data-time="${time}"]`);
+                
+                if (dropzone && scheduledCourses[slotKey]) {
+                    scheduledCourses[slotKey].forEach(course => {
+                        dropzone.appendChild(createCourseCard(course, false));
+                    });
+                }
+            }
+        }
+
+        function renderInstructorPool() {
+            // Preserve the filter if it exists
+            const currentFilter = document.getElementById('subjectFilter')?.value;
+            
+            instructors.forEach(instructor => {
+                const poolDiv = document.querySelector(`.instructor-courses[data-instructor="${instructor.name}"]`);
+                if (poolDiv) {
+                    poolDiv.innerHTML = '';
+                    
+                    const scheduledIds = new Set();
+                    Object.values(scheduledCourses).forEach(courses => {
+                        courses.filter(c => c.instructor === instructor.name)
+                               .forEach(c => scheduledIds.add(c.id));
+                    });
+                    
+                    instructorCourses[instructor.name]
+                        .filter(c => !scheduledIds.has(c.id))
+                        .forEach(course => {
+                            poolDiv.appendChild(createCourseCard(course, true));
+                        });
+                }
+            });
+            
+            // Update filter options and reapply filter if needed
+            updateSubjectFilter();
+            if (currentFilter && currentFilter !== 'all') {
+                const filterSelect = document.getElementById('subjectFilter');
+                if (filterSelect) {
+                    filterSelect.value = currentFilter;
+                    filterInstructorsBySubject();
+                }
+            }
+        }
+
+        function updateStats() {
+            const uniqueCourses = new Set();
+            Object.values(scheduledCourses).forEach(courses => {
+                courses.forEach(course => uniqueCourses.add(course.id));
+            });
+            document.getElementById('totalScheduled').textContent = uniqueCourses.size;
+        }
+
+        function clearSchedule() {
+            if (confirm('Clear all scheduled courses?')) {
+                Object.keys(scheduledCourses).forEach(key => {
+                    delete scheduledCourses[key];
+                });
+                renderAll();
+            }
+        }
+
+        function exportToCSV() {
+            let csvContent = "Time,Day,Course,Instructor,Session Type,Hybrid\n";
+            
+            // Track which courses have been exported to avoid duplicates
+            const exportedCourseIds = new Set();
+            
+            // Get all unique time slots sorted by time
+            const allUniqueSlots = [...new Set([...weekdaySlots, ...fridaySlots, ...saturdaySlots])];
+            allUniqueSlots.sort((a, b) => {
+                const aHour = parseInt(a.split(':')[0]);
+                const bHour = parseInt(b.split(':')[0]);
+                return aHour - bHour;
+            });
+            
+            allUniqueSlots.forEach(time => {
+                // Process Monday and Tuesday first to handle pairing
+                ['Monday', 'Tuesday'].forEach(startDay => {
+                    const slotKey = `${startDay}|${time}`;
+                    const courses = scheduledCourses[slotKey];
+                    
+                    if (courses && courses.length > 0) {
+                        courses.forEach(course => {
+                            // Skip if already exported
+                            if (exportedCourseIds.has(course.id)) return;
+                            
+                            // Check if this is a paired course (not hybrid)
+                            let dayDisplay = startDay;
+                            if (!course.hybrid) {
+                                // Check for pairing on Wednesday or Thursday
+                                const pairDay = startDay === 'Monday' ? 'Wednesday' : 'Thursday';
+                                const pairSlotKey = `${pairDay}|${time}`;
+                                const pairCourses = scheduledCourses[pairSlotKey];
+                                
+                                if (pairCourses && pairCourses.find(c => c.id === course.id)) {
+                                    // This is a paired course
+                                    dayDisplay = startDay === 'Monday' ? 'M/W' : 'T/Th';
+                                    exportedCourseIds.add(course.id);
+                                }
+                            } else {
+                                exportedCourseIds.add(course.id);
+                            }
+                            
+                            let sessionType = '16-week';
+                            if (course.session === 'early8') sessionType = 'Early 8';
+                            if (course.session === 'late8') sessionType = 'Late 8';
+                            
+                            const hybridStatus = course.hybrid ? 'Yes' : 'No';
+                            csvContent += `"${time}","${dayDisplay}","${course.type}","${course.instructor}","${sessionType}","${hybridStatus}"\n`;
+                        });
+                    }
+                });
+                
+                // Process Wednesday, Thursday, Friday, and Saturday (unpaired days)
+                ['Wednesday', 'Thursday', 'Friday', 'Saturday'].forEach(day => {
+                    const slotKey = `${day}|${time}`;
+                    const courses = scheduledCourses[slotKey];
+                    
+                    if (courses && courses.length > 0) {
+                        courses.forEach(course => {
+                            // Only export if not already exported as part of a pair
+                            if (!exportedCourseIds.has(course.id)) {
+                                let sessionType = '16-week';
+                                if (course.session === 'early8') sessionType = 'Early 8';
+                                if (course.session === 'late8') sessionType = 'Late 8';
+                                
+                                const hybridStatus = course.hybrid ? 'Yes' : 'No';
+                                csvContent += `"${time}","${day}","${course.type}","${course.instructor}","${sessionType}","${hybridStatus}"\n`;
+                                exportedCourseIds.add(course.id);
+                            }
+                        });
+                    }
+                });
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Schedule_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csvContent = e.target.result;
+                    const lines = csvContent.split('\n');
+                    
+                    // Clear current schedule
+                    for (let key in scheduledCourses) {
+                        delete scheduledCourses[key];
+                    }
+                    
+                    let processingSchedule = false;
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        
+                        if (line.includes('Time') && line.includes('Day')) {
+                            processingSchedule = true;
+                            continue;
+                        }
+                        
+                        if (processingSchedule && line && !line.includes('Faculty')) {
+                            const regex = /(".*?"|[^,]+)(?=\s*,|\s*$)/g;
+                            const matches = line.match(regex);
+                            if (matches && matches.length >= 6) {
+                                const values = matches.map(m => m.replace(/^"|"$/g, '').trim());
+                                
+                                const time = values[0];
+                                const day = values[1];
+                                const courseType = values[2];
+                                const instructorName = values[3];
+                                const sessionType = values[4];
+                                const hybridStatus = values[5] === 'Yes';
+                                const dualCreditStatus = values.length > 6 ? values[6] === 'Yes' : false;
+                                
+                                let session = '16week';
+                                if (sessionType === 'Early 8') session = 'early8';
+                                if (sessionType === 'Late 8') session = 'late8';
+                                
+                                // Handle M/W and T/Th paired courses
+                                let daysToSchedule = [];
+                                if (day === 'M/W') {
+                                    daysToSchedule = ['Monday', 'Wednesday'];
+                                } else if (day === 'T/Th') {
+                                    daysToSchedule = ['Tuesday', 'Thursday'];
+                                } else {
+                                    daysToSchedule = [day];
+                                }
+                                
+                                const courseId = courseIdCounter++;
+                                daysToSchedule.forEach(scheduleDay => {
+                                    const slotKey = `${scheduleDay}|${time}`;
+                                    if (!scheduledCourses[slotKey]) {
+                                        scheduledCourses[slotKey] = [];
+                                    }
+                                    
+                                    scheduledCourses[slotKey].push({
+                                        id: courseId,
+                                        type: courseType,
+                                        instructor: instructorName,
+                                        session: session,
+                                        hybrid: hybridStatus,
+                                        dualCredit: dualCreditStatus
+                                    });
+                                });
+                            }
+                        }
+                    }
+                    
+                    renderAll();
+                    alert('Schedule imported successfully!');
+                } catch (error) {
+                    alert('Error importing CSV file.');
+                }
+                
+                event.target.value = '';
+            };
+            
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,2527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keep Your Seat - Texas State Senate Simulation Game</title>
+  
+  <!-- React and ReactDOM from cdnjs -->
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+  
+  <!-- Babel from cdnjs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- jsPDF for certificate generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+      color: #1a1a1a;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    
+    h1, h2, h3, h4, h5, h6, .btn, .stat-label, .stat-value, button, .badge, .location-btn {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+      border: 1px solid #e5e5e5;
+    }
+    
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn-primary {
+      background: #002868;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #001844;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 40, 104, 0.2);
+    }
+    
+    .btn-primary:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+    
+    .btn-danger {
+      background: #bf0a30;
+      color: white;
+    }
+    
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #4b5563;
+    }
+    
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+    
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .grid-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    
+    @media (max-width: 768px) {
+      .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .stat-box {
+      background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .stat-label {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+    }
+    
+    h1 {
+      font-size: 56px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 12px;
+      color: #002868;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .subtitle {
+      text-align: center;
+      font-size: 24px;
+      color: #bf0a30;
+      margin-bottom: 36px;
+      font-weight: 500;
+    }
+    
+    h2 {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #002868;
+    }
+    
+    h3 {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: #1a1a1a;
+    }
+    
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    
+    li {
+      line-height: 1.8;
+    }
+    
+    .district-card {
+      padding: 24px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: white;
+    }
+    
+    .district-card:hover {
+      border-color: #002868;
+      box-shadow: 0 6px 20px rgba(0, 40, 104, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    
+    .badge-dem {
+      background: linear-gradient(135deg, #0033a0, #0052cc);
+      color: white;
+    }
+    
+    .badge-rep {
+      background: linear-gradient(135deg, #bf0a30, #e51937);
+      color: white;
+    }
+    
+    .log-item {
+      padding: 14px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      font-size: 15px;
+      border-left: 4px solid;
+    }
+    
+    .log-success {
+      background: #d1fae5;
+      color: #065f46;
+      border-left-color: #10b981;
+    }
+    
+    .log-warning {
+      background: #fed7aa;
+      color: #92400e;
+      border-left-color: #f59e0b;
+    }
+    
+    .log-info {
+      background: #dbeafe;
+      color: #1e40af;
+      border-left-color: #3b82f6;
+    }
+    
+    .action-btn {
+      width: 100%;
+      padding: 20px;
+      margin-bottom: 14px;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      font-size: 15px;
+    }
+    
+    .action-btn:hover:not(:disabled) {
+      background: #f9fafb;
+      border-color: #002868;
+      transform: translateY(-1px);
+    }
+    
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .action-btn.selected {
+      background: linear-gradient(135deg, #e6f4ff, #dbeafe);
+      border-color: #002868;
+      border-width: 3px;
+    }
+    
+    .location-btn {
+      padding: 14px 28px;
+      border: 2px solid #e5e7eb;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-right: 12px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    
+    .location-btn.active {
+      background: #002868;
+      color: white;
+      border-color: #002868;
+    }
+    
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 36px;
+      max-width: 700px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      font-size: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    .ticker {
+      animation: scroll 60s linear infinite;
+      font-size: 16px;
+    }
+    
+    @keyframes scroll {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    
+    .news-ticker {
+      background: linear-gradient(90deg, #bf0a30, #e51937);
+      color: white;
+      padding: 10px;
+      overflow: hidden;
+      white-space: nowrap;
+      margin-bottom: 24px;
+      border-radius: 8px;
+    }
+    
+    .texas-flag {
+      width: 60px;
+      height: 40px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+    
+    .character-avatar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+      border-radius: 10px;
+      margin-bottom: 14px;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .avatar-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+      font-weight: bold;
+    }
+    
+    .media-panel {
+      background: #f9fafb;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .chart-container {
+      position: relative;
+      height: 280px;
+      margin: 24px 0;
+    }
+    
+    .explanation-box {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 2px solid #f59e0b;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+    
+    .lt-gov-warning-box {
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border: 3px solid #bf0a30;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px rgba(191, 10, 48, 0.1);
+    }
+    
+    .lt-gov-status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    
+    .lt-gov-positive {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .lt-gov-negative {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .lt-gov-neutral {
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+    
+    .issue-select-panel {
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+      border: 2px solid #0284c7;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .issue-btn {
+      padding: 12px 20px;
+      margin: 6px;
+      border: 2px solid #e5e7eb;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .issue-btn:hover {
+      background: #f0f9ff;
+      border-color: #0284c7;
+    }
+    
+    .issue-btn.selected {
+      background: #0284c7;
+      color: white;
+      border-color: #0284c7;
+    }
+    
+    .control-panel {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    
+    .control-btn {
+      padding: 12px 20px;
+      background: rgba(0, 40, 104, 0.9);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s;
+    }
+    
+    .control-btn:hover:not(:disabled) {
+      background: rgba(0, 28, 73, 0.95);
+      transform: translateY(-2px);
+    }
+    
+    .control-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .save-load-panel {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      margin-bottom: 10px;
+      min-width: 200px;
+    }
+    
+    .save-slot {
+      padding: 8px 12px;
+      margin: 4px 0;
+      background: #f3f4f6;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+    
+    .save-slot button {
+      padding: 4px 8px;
+      font-size: 12px;
+      margin-left: 8px;
+      border-radius: 4px;
+    }
+    
+    .bill-card {
+      position: relative;
+      padding: 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      background: white;
+      transition: all 0.2s;
+    }
+    
+    .bill-card:hover {
+      border-color: #002868;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .bill-card.voted {
+      border: 3px solid #10b981;
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    }
+    
+    .bill-tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 10px;
+      padding: 16px;
+      background: rgba(31, 41, 55, 0.95);
+      color: white;
+      border-radius: 10px;
+      font-size: 14px;
+      width: 320px;
+      z-index: 200;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .bill-card:hover .bill-tooltip {
+      opacity: 1;
+    }
+    
+    .tooltip-section {
+      margin-bottom: 12px;
+    }
+    
+    .tooltip-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .tooltip-label {
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 12px;
+      text-transform: uppercase;
+      opacity: 0.8;
+      letter-spacing: 0.5px;
+    }
+    
+    .certificate-preview {
+      background: white;
+      padding: 40px;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      margin: 20px 0;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .legislature-control-banner {
+      background: linear-gradient(90deg, #002868, #bf0a30);
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .approval-floor-ceiling {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+    
+    .committee-tier-box {
+      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+      border: 2px solid #0284c7;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .energy-influence-bar {
+      height: 8px;
+      background: linear-gradient(90deg, #065f46, #10b981);
+      border-radius: 4px;
+      margin: 8px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .energy-influence-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      transition: width 0.5s;
+    }
+    
+    .mb-2 { margin-bottom: 10px; }
+    .mb-4 { margin-bottom: 20px; }
+    .mb-6 { margin-bottom: 30px; }
+    .text-sm { font-size: 15px; }
+    .text-xs { font-size: 14px; }
+    .text-gray { color: #6b7280; }
+    .font-bold { font-weight: 700; }
+    .text-center { text-align: center; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // Texas State Senate Simulation Game
+    function App() {
+      // Game state
+      const [gameState, setGameState] = React.useState('menu');
+      const [selectedDistrict, setSelectedDistrict] = React.useState(null);
+      const [round, setRound] = React.useState(1);
+      const [actionsLeft, setActionsLeft] = React.useState(3);
+      const [money, setMoney] = React.useState(100000);
+      const [approval, setApproval] = React.useState(50);
+      const [texasApproval, setTexasApproval] = React.useState(28);
+      const [ltGovInfluence, setLtGovInfluence] = React.useState(0);
+      const [energyInfluence, setEnergyInfluence] = React.useState(50);
+      const [incumbencyBonus, setIncumbencyBonus] = React.useState(0);
+      const [location, setLocation] = React.useState('district');
+      const [gameLog, setGameLog] = React.useState([]);
+      const [committees, setCommittees] = React.useState([]);
+      const [primaryChallenge, setPrimaryChallenge] = React.useState(false);
+      const [showModal, setShowModal] = React.useState(false);
+      const [modalContent, setModalContent] = React.useState({ title: '', message: '' });
+      const [headlines, setHeadlines] = React.useState(['New Senator Takes Office in Austin']);
+      const [tweets, setTweets] = React.useState(['Welcome to the Texas Senate! 🤠']);
+      const [showDashboard, setShowDashboard] = React.useState(false);
+      const [showCharacters, setShowCharacters] = React.useState(false);
+      const [showDistrictInfo, setShowDistrictInfo] = React.useState(false);
+      const [approvalHistory, setApprovalHistory] = React.useState([50]);
+      const [moneyHistory, setMoneyHistory] = React.useState([100000]);
+      const [caseworkCount, setCaseworkCount] = React.useState(0);
+      const [issueOwnership, setIssueOwnership] = React.useState({});
+      const [votedBills, setVotedBills] = React.useState([]);
+      const [selectedAdType, setSelectedAdType] = React.useState(null);
+      const [selectedAdIssue, setSelectedAdIssue] = React.useState(null);
+      const [selectedSpeechIssue, setSelectedSpeechIssue] = React.useState(null);
+      const [showSpeechPanel, setShowSpeechPanel] = React.useState(false);
+      const [lastAction, setLastAction] = React.useState(null);
+      const [showSaveLoad, setShowSaveLoad] = React.useState(false);
+      const [savedGames, setSavedGames] = React.useState([]);
+      const [hoveredBill, setHoveredBill] = React.useState(null);
+      const [voteHistory, setVoteHistory] = React.useState([]);
+      const [legislatureControl, setLegislatureControl] = React.useState('rep');
+      const [approvalFloor, setApprovalFloor] = React.useState(25);
+      const [approvalCeiling, setApprovalCeiling] = React.useState(75);
+      const [retrospectiveVoting, setRetrospectiveVoting] = React.useState(0);
+      const [sessionActive, setSessionActive] = React.useState(true);
+      const [specialSession, setSpecialSession] = React.useState(false);
+
+      // Load saved games on mount
+      React.useEffect(() => {
+        const saves = [];
+        for (let i = 1; i <= 3; i++) {
+          const save = localStorage.getItem(`texasSenateGame_slot${i}`);
+          if (save) {
+            try {
+              const data = JSON.parse(save);
+              saves.push({ slot: i, data, timestamp: data.timestamp });
+            } catch (e) {
+              console.error('Failed to load save slot', i);
+            }
+          } else {
+            saves.push({ slot: i, data: null, timestamp: null });
+          }
+        }
+        setSavedGames(saves);
+      }, []);
+
+      // Calculate approval bounds based on district
+      React.useEffect(() => {
+        if (selectedDistrict) {
+          const lean = parseInt(selectedDistrict.lean.match(/\d+/) || [0])[0];
+          const isAligned = selectedDistrict.lean.startsWith(selectedDistrict.party[0]);
+          
+          if (isAligned) {
+            if (lean > 15) {
+              setApprovalFloor(35);
+              setApprovalCeiling(80);
+            } else if (lean > 5) {
+              setApprovalFloor(30);
+              setApprovalCeiling(75);
+            } else {
+              setApprovalFloor(25);
+              setApprovalCeiling(70);
+            }
+          } else {
+            if (lean > 15) {
+              setApprovalFloor(15);
+              setApprovalCeiling(55);
+            } else if (lean > 5) {
+              setApprovalFloor(20);
+              setApprovalCeiling(60);
+            } else {
+              setApprovalFloor(25);
+              setApprovalCeiling(65);
+            }
+          }
+          
+          if (selectedDistrict.lean === 'Competitive') {
+            setApprovalFloor(20);
+            setApprovalCeiling(70);
+          }
+        }
+      }, [selectedDistrict]);
+
+      const constrainApproval = (newApproval) => {
+        return Math.max(approvalFloor, Math.min(approvalCeiling, newApproval));
+      };
+
+      // Function to reset the entire game
+      const resetGame = () => {
+        if (window.confirm('Reset entire game and start over? All progress will be lost.')) {
+          window.location.reload();
+        }
+      };
+
+      // Texas State Senate Districts (10 representative districts)
+      const districts = [
+        { 
+          id: 6, 
+          name: "SD-6 (East Houston)", 
+          party: "Democrat", 
+          lean: "D+30",
+          primaryLean: "D+40",
+          demographics: { hispanic: 72, white: 14, black: 10, asian: 3, medianIncome: 42000, population: 940000 },
+          industries: ["Port Operations", "Petrochemicals", "Healthcare", "Construction"],
+          description: "Working-class East Houston, heavily Hispanic, environmental justice concerns",
+          senator: "Carol Alvarado"
+        },
+        { 
+          id: 13, 
+          name: "SD-13 (South Houston)", 
+          party: "Democrat", 
+          lean: "D+57",
+          primaryLean: "D+65",
+          demographics: { black: 40, hispanic: 39, white: 11, asian: 10, medianIncome: 45000, population: 940000 },
+          industries: ["Energy", "Healthcare", "Transportation", "Small Business"],
+          description: "Historic African American neighborhoods, strongest Democratic district",
+          senator: "Borris Miles"
+        },
+        { 
+          id: 14, 
+          name: "SD-14 (Austin/Travis)", 
+          party: "Democrat", 
+          lean: "D+51",
+          primaryLean: "D+60",
+          demographics: { white: 48, hispanic: 34, asian: 9, black: 7, medianIncome: 75000, population: 940000 },
+          industries: ["Technology", "State Government", "Education (UT)", "Creative Industries"],
+          description: "Progressive Austin, tech workers, university community",
+          senator: "Sarah Eckhardt"
+        },
+        { 
+          id: 7, 
+          name: "SD-7 (NW Houston suburbs)", 
+          party: "Republican", 
+          lean: "R+10",
+          primaryLean: "R+20",
+          demographics: { white: 47, hispanic: 31, asian: 14, black: 6, medianIncome: 85000, population: 940000 },
+          industries: ["Energy HQ", "Professional Services", "Healthcare", "Retail"],
+          description: "Affluent Houston suburbs trending competitive",
+          senator: "Paul Bettencourt"
+        },
+        { 
+          id: 8, 
+          name: "SD-8 (N Dallas suburbs)", 
+          party: "Republican", 
+          lean: "R+12",
+          primaryLean: "R+22",
+          demographics: { white: 52, hispanic: 19, asian: 17, black: 9, medianIncome: 92000, population: 940000 },
+          industries: ["Corporate HQ", "Technology", "Finance", "Healthcare"],
+          description: "Highly educated Dallas suburbs, Fortune 500 companies",
+          senator: "Angela Paxton"
+        },
+        { 
+          id: 27, 
+          name: "SD-27 (Rio Grande Valley/Corpus)", 
+          party: "Republican", 
+          lean: "Competitive",
+          primaryLean: "R+5",
+          demographics: { hispanic: 88, white: 10, black: 1, asian: 1, medianIncome: 48000, population: 940000 },
+          industries: ["Border Trade", "SpaceX", "Oil & Gas", "Agriculture"],
+          description: "Historic 2024 flip, first GOP since 1874, Hispanic realignment",
+          senator: "Adam Hinojosa"
+        },
+        { 
+          id: 4, 
+          name: "SD-4 (The Woodlands)", 
+          party: "Republican", 
+          lean: "R+20",
+          primaryLean: "R+28",
+          demographics: { white: 57, hispanic: 27, black: 8, asian: 6, medianIncome: 95000, population: 940000 },
+          industries: ["Energy Sector", "Healthcare", "Master-Planned Communities", "Tech"],
+          description: "Wealthy Houston exurb, energy executives",
+          senator: "Brandon Creighton (retiring)"
+        },
+        { 
+          id: 12, 
+          name: "SD-12 (North Texas)", 
+          party: "Republican", 
+          lean: "R+12",
+          primaryLean: "R+20",
+          demographics: { white: 62, hispanic: 23, black: 8, asian: 5, medianIncome: 78000, population: 940000 },
+          industries: ["Business Services", "Education", "Healthcare", "Manufacturing"],
+          description: "Suburban to exurban North Texas, rapid growth",
+          senator: "Tan Parker"
+        },
+        { 
+          id: 1, 
+          name: "SD-1 (East Texas)", 
+          party: "Republican", 
+          lean: "R+28",
+          primaryLean: "R+35",
+          demographics: { white: 67, black: 20, hispanic: 10, asian: 1, medianIncome: 52000, population: 940000 },
+          industries: ["Oil & Gas", "Timber", "Agriculture", "Small Towns"],
+          description: "Deep red rural East Texas, traditional conservative",
+          senator: "Bryan Hughes"
+        },
+        { 
+          id: 28, 
+          name: "SD-28 (West Texas)", 
+          party: "Republican", 
+          lean: "R+30",
+          primaryLean: "R+38",
+          demographics: { white: 55, hispanic: 38, black: 4, asian: 1, medianIncome: 54000, population: 940000 },
+          industries: ["Agriculture", "Oil & Gas", "Wind Energy", "Universities"],
+          description: "51-county rural district, agricultural heartland",
+          senator: "Charles Perry"
+        }
+      ];
+
+      const interestGroups = [
+        { name: "Texas Oil & Gas PAC", amount: 50000, issues: ["energy"], liberal: false, description: "Permian Basin interests" },
+        { name: "Texas Teachers Union", amount: 25000, issues: ["education"], liberal: true, description: "Public school advocates" },
+        { name: "Border Security Alliance", amount: 35000, issues: ["immigration"], liberal: false, description: "Operation Lone Star supporters" },
+        { name: "Texas Business Coalition", amount: 40000, issues: ["business"], liberal: false, description: "No income tax advocates" },
+        { name: "Green Texas PAC", amount: 20000, issues: ["environment"], liberal: true, description: "Post-Uri grid reform" },
+        { name: "Texas Trial Lawyers", amount: 30000, issues: ["legal"], liberal: true, description: "Tort reform opponents" },
+        { name: "Property Tax Coalition", amount: 35000, issues: ["taxes"], liberal: false, description: "Tax relief advocates" },
+        { name: "Healthcare Texas", amount: 25000, issues: ["healthcare"], liberal: false, description: "Hospital systems" },
+        { name: "Texas Farm Bureau", amount: 20000, issues: ["agriculture"], liberal: false, description: "Rural interests" },
+        { name: "Tech Austin PAC", amount: 45000, issues: ["tech"], liberal: true, description: "Silicon Hills" },
+        { name: "Texas Right to Life", amount: 25000, issues: ["social"], liberal: false, description: "SB 8 supporters" },
+        { name: "Wind Energy Texas", amount: 30000, issues: ["energy"], liberal: true, description: "Renewable advocates" }
+      ];
+
+      const bills = [
+        { 
+          id: 1, 
+          name: "Education Savings Accounts (Vouchers)", 
+          issue: "education", 
+          liberal: false, 
+          ltGovGain: 15,
+          description: "$10,500 per student for private schools. Rural Republicans oppose.",
+          democratSupport: "Unified Opposition (-95%)",
+          republicanSupport: "Urban/Suburban Support, Rural Opposition",
+          controlRequired: 'special',
+          special: true
+        },
+        { 
+          id: 2, 
+          name: "Operation Lone Star Funding", 
+          issue: "immigration", 
+          liberal: false, 
+          ltGovGain: 12,
+          description: "$4 billion for border wall and National Guard. State enforcement.",
+          democratSupport: "Strong Opposition (-85%)",
+          republicanSupport: "Strong Support (+90%)",
+          controlRequired: 'rep'
+        },
+        { 
+          id: 3, 
+          name: "Property Tax Relief Package", 
+          issue: "taxes", 
+          liberal: null, 
+          ltGovGain: 8,
+          description: "$18 billion homestead exemption increase. Bipartisan support.",
+          democratSupport: "Broad Support (+70%)",
+          republicanSupport: "Strong Support (+85%)",
+          controlRequired: null
+        },
+        { 
+          id: 4, 
+          name: "Power Grid Weatherization", 
+          issue: "energy", 
+          liberal: null,
+          ltGovGain: 5,
+          description: "Post-Winter Storm Uri requirements. Industry resistance.",
+          democratSupport: "Strong Support (+80%)",
+          republicanSupport: "Mixed Support (+60%)",
+          controlRequired: null
+        },
+        { 
+          id: 5, 
+          name: "Constitutional Carry Expansion", 
+          issue: "guns", 
+          liberal: false, 
+          ltGovGain: 10,
+          description: "Remove all permit requirements. No training needed.",
+          democratSupport: "Strong Opposition (-80%)",
+          republicanSupport: "Strong Support (+75%)",
+          controlRequired: 'rep'
+        },
+        { 
+          id: 6, 
+          name: "Medicaid Expansion", 
+          issue: "healthcare", 
+          liberal: true, 
+          ltGovGain: -15,
+          description: "Accept federal funds. Cover 1.4 million Texans.",
+          democratSupport: "Strong Support (+90%)",
+          republicanSupport: "Strong Opposition (-85%)",
+          controlRequired: 'dem'
+        },
+        { 
+          id: 7, 
+          name: "SB 4 Border Enforcement", 
+          issue: "immigration", 
+          liberal: false, 
+          ltGovGain: 11,
+          description: "State arrests for border crossing. Federal court blocked.",
+          democratSupport: "Strong Opposition (-75%)",
+          republicanSupport: "Strong Support (+80%)",
+          controlRequired: 'rep'
+        },
+        { 
+          id: 8, 
+          name: "Public School Funding Increase", 
+          issue: "education", 
+          liberal: true, 
+          ltGovGain: -8,
+          description: "Raise basic allotment from $6,160 to $6,555. Teacher raises.",
+          democratSupport: "Strong Support (+85%)",
+          republicanSupport: "Mixed Support (+40%)",
+          controlRequired: null
+        }
+      ];
+
+      const issues = [
+        { id: "education", name: "Education", liberal: true, owner: "Democrat", icon: "🎓" },
+        { id: "immigration", name: "Border Security", liberal: false, owner: "Republican", icon: "🌵" },
+        { id: "energy", name: "Energy/Oil", liberal: false, owner: "Republican", icon: "⚡" },
+        { id: "taxes", name: "Property Tax", liberal: false, owner: "Republican", icon: "🏠" },
+        { id: "healthcare", name: "Healthcare", liberal: true, owner: "Democrat", icon: "🏥" },
+        { id: "guns", name: "Gun Rights", liberal: false, owner: "Republican", icon: "🔫" },
+        { id: "business", name: "Business", liberal: false, owner: "Republican", icon: "💼" },
+        { id: "environment", name: "Environment", liberal: true, owner: "Democrat", icon: "🌱" },
+        { id: "agriculture", name: "Agriculture", liberal: false, owner: "Republican", icon: "🌾" },
+        { id: "tech", name: "Technology", liberal: true, owner: "Democrat", icon: "💻" },
+        { id: "social", name: "Social Issues", liberal: false, owner: "Republican", icon: "⛪" },
+        { id: "legal", name: "Legal Reform", liberal: false, owner: "Republican", icon: "⚖️" },
+        { id: "water", name: "Water Rights", liberal: false, owner: "Republican", icon: "💧" }
+      ];
+
+      const committeesList = [
+        { name: "Agriculture & Rural Affairs", tier: 1, ltGovGain: 6, minRound: 2, minInfluence: 0 },
+        { name: "Transportation", tier: 1, ltGovGain: 6, minRound: 2, minInfluence: 0 },
+        { name: "Veterans Affairs", tier: 1, ltGovGain: 6, minRound: 2, minInfluence: 0 },
+        { name: "Local Government", tier: 1, ltGovGain: 6, minRound: 2, minInfluence: 0 },
+        { name: "Economic Development", tier: 1, ltGovGain: 6, minRound: 2, minInfluence: 0 },
+        { name: "Border Security", tier: 2, ltGovGain: 10, minRound: 4, minInfluence: 5 },
+        { name: "Criminal Justice", tier: 2, ltGovGain: 10, minRound: 4, minInfluence: 5 },
+        { name: "Natural Resources", tier: 2, ltGovGain: 10, minRound: 4, minInfluence: 5 },
+        { name: "Business & Commerce", tier: 2, ltGovGain: 12, minRound: 4, minInfluence: 8 },
+        { name: "Health & Human Services", tier: 2, ltGovGain: 12, minRound: 4, minInfluence: 8 },
+        { name: "Education", tier: 3, ltGovGain: 18, minRound: 6, minInfluence: 15 },
+        { name: "State Affairs", tier: 3, ltGovGain: 20, minRound: 6, minInfluence: 18 },
+        { name: "Finance", tier: 3, ltGovGain: 25, minRound: 6, minInfluence: 20 }
+      ];
+
+      // Helper functions
+      const addLog = (message, type = 'info') => {
+        setGameLog(prev => [...prev, { message, type, round }].slice(-8));
+      };
+
+      const showExplanation = (title, message) => {
+        setModalContent({ title, message });
+        setShowModal(true);
+      };
+
+      const generateHeadline = (action, details = {}) => {
+        const { bill, issue, group, committee } = details;
+        
+        if (action === 'vote') {
+          return `Sen. ${selectedDistrict?.senator?.split(' ').pop()} Votes ${details.withParty ? 'With' : 'Against'} Leadership on ${bill}`;
+        } else if (action === 'ad') {
+          const issueData = issues.find(i => i.id === issue);
+          return `Senator Launches ${details.medium} Campaign on ${issueData?.name || 'Key Issues'}`;
+        } else if (action === 'fundraising') {
+          return `Senator Receives Support from ${group}`;
+        } else if (action === 'casework') {
+          return 'Senator Helps Constituents with State Services';
+        } else if (action === 'committee') {
+          return `Sen. ${selectedDistrict?.senator?.split(' ').pop()} Joins ${committee} Committee`;
+        } else if (action === 'speech') {
+          const issueData = issues.find(i => i.id === issue);
+          return `Senator Addresses ${issueData?.name || 'Key Issues'} at Town Hall`;
+        }
+        
+        const positive = ["Senator Shows Leadership", "Constituents React to Recent Actions", "Austin Update"];
+        return positive[Math.floor(Math.random() * 3)];
+      };
+
+      const generateTweet = (action, impact) => {
+        if (action === 'casework') {
+          return "Thank you Senator for helping with my property tax appeal! 🙏";
+        } else if (action === 'vote' && impact > 0) {
+          return "Finally someone who stands for Texas values! #TexasStrong";
+        } else if (action === 'vote' && impact < 0) {
+          return "Disappointed. Not what we voted for. #PrimaryThem";
+        } else if (action === 'speech') {
+          return impact > 0 ? "Great speech! This is Texas leadership!" : "All talk, no action...";
+        }
+        
+        const positive = ["God Bless Texas! 🤠", "This is why we elected you!", "Keep Texas Red! (or Blue!)"];
+        const negative = ["Not Texas values...", "Time for change!", "Remember the Alamo... and this vote!"];
+        return approval > 50 ? positive[Math.floor(Math.random() * 3)] : negative[Math.floor(Math.random() * 3)];
+      };
+
+      const generateCertificate = () => {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'letter');
+        
+        const totalVotes = voteHistory.length;
+        const partyVotes = voteHistory.filter(v => v.withParty).length;
+        const partyLoyalty = totalVotes > 0 ? Math.round((partyVotes / totalVotes) * 100) : 0;
+        const finalApproval = approval + incumbencyBonus;
+        const won = finalApproval >= 50;
+        
+        let strategyType = "Balanced";
+        if (partyLoyalty > 80) strategyType = "Party Loyalist";
+        else if (partyLoyalty < 40) strategyType = "Independent Maverick";
+        else if (committees.length >= 3) strategyType = "Committee Power Broker";
+        else if (caseworkCount > 15) strategyType = "Constituent Service Champion";
+        else if (energyInfluence > 70) strategyType = "Energy Industry Ally";
+        
+        pdf.setFontSize(24);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Texas State Senate Service Certificate', 105, 30, { align: 'center' });
+        
+        pdf.setFontSize(16);
+        pdf.setFont(undefined, 'normal');
+        pdf.text(won ? 'Successfully Reelected!' : 'Electoral Challenge Attempted', 105, 40, { align: 'center' });
+        
+        pdf.setFontSize(12);
+        pdf.text(`Senator for: ${selectedDistrict?.name || 'Unknown District'}`, 105, 50, { align: 'center' });
+        pdf.text(`Party: ${selectedDistrict?.party || 'Independent'}`, 105, 57, { align: 'center' });
+        
+        pdf.setFontSize(14);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Performance Metrics', 20, 75);
+        
+        pdf.setFontSize(11);
+        pdf.setFont(undefined, 'normal');
+        pdf.text(`Final Approval Rating: ${approval}% (+ ${incumbencyBonus}% incumbency) = ${finalApproval}%`, 25, 85);
+        pdf.text(`Lt. Governor Influence: ${ltGovInfluence}`, 25, 92);
+        pdf.text(`Energy Industry Influence: ${energyInfluence}%`, 25, 99);
+        pdf.text(`Campaign Funds Remaining: $${money.toLocaleString()}`, 25, 106);
+        pdf.text(`Committees Joined: ${committees.length} (${committees.join(', ') || 'None'})`, 25, 113);
+        pdf.text(`Constituent Cases Completed: ${caseworkCount}`, 25, 120);
+        pdf.text(`Party Loyalty: ${partyLoyalty}%`, 25, 127);
+        pdf.text(`Legislative Strategy: ${strategyType}`, 25, 134);
+        
+        pdf.save('Texas_Senate_Service_Certificate.pdf');
+      };
+
+      const BillTooltip = ({ bill, district }) => {
+        if (!bill || !district) return null;
+        
+        const getDistrictStance = () => {
+          const isLiberal = bill.liberal;
+          const isDemDistrict = district.party === 'Democrat';
+          const lean = district.lean;
+          
+          if (lean.includes('Competitive')) {
+            return 'Split Opinion (50/50)';
+          } else if ((isLiberal && isDemDistrict) || (!isLiberal && !isDemDistrict)) {
+            const strength = parseInt(lean.match(/\d+/) || [0])[0];
+            if (strength > 15) return 'Strong Support (75%+)';
+            if (strength > 5) return 'Moderate Support (60-75%)';
+            return 'Lean Support (55-60%)';
+          } else {
+            const strength = parseInt(lean.match(/\d+/) || [0])[0];
+            if (strength > 15) return 'Strong Opposition (75%+)';
+            if (strength > 5) return 'Moderate Opposition (60-75%)';
+            return 'Lean Opposition (55-60%)';
+          }
+        };
+        
+        const getLegislatureEffect = () => {
+          if (!bill.controlRequired) return "Can pass under any control";
+          if (bill.special && specialSession) return "✔ Special session priority";
+          if (bill.controlRequired === legislatureControl) return "✔ Party controls agenda";
+          return "✗ Unlikely to reach floor";
+        };
+        
+        return (
+          <div className="bill-tooltip">
+            <div className="tooltip-section">
+              <div className="tooltip-label">Bill Summary</div>
+              <div>{bill.description}</div>
+            </div>
+            <div className="tooltip-section">
+              <div className="tooltip-label">Your Party ({district.party})</div>
+              <div>{district.party === 'Democrat' ? bill.democratSupport : bill.republicanSupport}</div>
+            </div>
+            <div className="tooltip-section">
+              <div className="tooltip-label">Your District</div>
+              <div>{getDistrictStance()}</div>
+            </div>
+            <div className="tooltip-section">
+              <div className="tooltip-label">Legislature Control</div>
+              <div>{getLegislatureEffect()}</div>
+            </div>
+          </div>
+        );
+      };
+
+      const saveGame = (slot) => {
+        const gameData = {
+          gameState,
+          selectedDistrict,
+          round,
+          actionsLeft,
+          money,
+          approval,
+          texasApproval,
+          ltGovInfluence,
+          energyInfluence,
+          incumbencyBonus,
+          location,
+          gameLog,
+          committees,
+          primaryChallenge,
+          headlines,
+          tweets,
+          approvalHistory,
+          moneyHistory,
+          caseworkCount,
+          issueOwnership,
+          votedBills,
+          voteHistory,
+          legislatureControl,
+          retrospectiveVoting,
+          sessionActive,
+          specialSession,
+          timestamp: new Date().toISOString()
+        };
+        
+        localStorage.setItem(`texasSenateGame_slot${slot}`, JSON.stringify(gameData));
+        
+        setSavedGames(prev => prev.map(save => 
+          save.slot === slot ? { slot, data: gameData, timestamp: gameData.timestamp } : save
+        ));
+        
+        addLog(`Game saved to slot ${slot}`, 'success');
+      };
+
+      const loadGame = (slot) => {
+        const savedGame = savedGames.find(save => save.slot === slot);
+        if (savedGame && savedGame.data) {
+          const data = savedGame.data;
+          setGameState(data.gameState);
+          setSelectedDistrict(data.selectedDistrict);
+          setRound(data.round);
+          setActionsLeft(data.actionsLeft);
+          setMoney(data.money);
+          setApproval(data.approval);
+          setTexasApproval(data.texasApproval);
+          setLtGovInfluence(data.ltGovInfluence);
+          setEnergyInfluence(data.energyInfluence || 50);
+          setIncumbencyBonus(data.incumbencyBonus);
+          setLocation(data.location);
+          setGameLog(data.gameLog);
+          setCommittees(data.committees);
+          setPrimaryChallenge(data.primaryChallenge);
+          setHeadlines(data.headlines);
+          setTweets(data.tweets);
+          setApprovalHistory(data.approvalHistory);
+          setMoneyHistory(data.moneyHistory);
+          setCaseworkCount(data.caseworkCount);
+          setIssueOwnership(data.issueOwnership);
+          setVotedBills(data.votedBills);
+          setVoteHistory(data.voteHistory || []);
+          setLegislatureControl(data.legislatureControl || 'rep');
+          setRetrospectiveVoting(data.retrospectiveVoting || 0);
+          setSessionActive(data.sessionActive !== undefined ? data.sessionActive : true);
+          setSpecialSession(data.specialSession || false);
+          
+          addLog(`Game loaded from slot ${slot}`, 'success');
+          setShowSaveLoad(false);
+        }
+      };
+
+      const deleteGame = (slot) => {
+        if (window.confirm(`Delete save in slot ${slot}?`)) {
+          localStorage.removeItem(`texasSenateGame_slot${slot}`);
+          setSavedGames(prev => prev.map(save => 
+            save.slot === slot ? { slot, data: null, timestamp: null } : save
+          ));
+        }
+      };
+
+      const saveActionState = () => {
+        const currentState = {
+          money,
+          approval,
+          ltGovInfluence,
+          energyInfluence,
+          committees: [...committees],
+          votedBills: [...votedBills],
+          caseworkCount,
+          issueOwnership: {...issueOwnership},
+          primaryChallenge,
+          actionsLeft,
+          voteHistory: [...voteHistory]
+        };
+        setLastAction(currentState);
+      };
+
+      const undoLastAction = () => {
+        if (lastAction && actionsLeft < 3) {
+          setMoney(lastAction.money);
+          setApproval(lastAction.approval);
+          setLtGovInfluence(lastAction.ltGovInfluence);
+          setEnergyInfluence(lastAction.energyInfluence);
+          setCommittees(lastAction.committees);
+          setVotedBills(lastAction.votedBills);
+          setCaseworkCount(lastAction.caseworkCount);
+          setIssueOwnership(lastAction.issueOwnership);
+          setPrimaryChallenge(lastAction.primaryChallenge);
+          setActionsLeft(lastAction.actionsLeft);
+          setVoteHistory(lastAction.voteHistory);
+          setLastAction(null);
+          addLog('Action undone', 'info');
+        }
+      };
+
+      const resetRound = () => {
+        const confirmReset = window.confirm('Reset this round? You will lose all progress from this round.');
+        if (confirmReset) {
+          setActionsLeft(3);
+          setVotedBills([]);
+          setGameLog(prev => prev.filter(log => log.round !== round));
+          addLog('Round reset', 'info');
+        }
+      };
+
+      const LtGovStatusIndicator = () => {
+        let status, className, message;
+        
+        if (ltGovInfluence >= 20) {
+          status = "Lt. Gov Favorite ⭐";
+          className = "lt-gov-positive";
+          message = "Dan Patrick loves you!";
+        } else if (ltGovInfluence >= 10) {
+          status = "Leadership Ally 👍";
+          className = "lt-gov-positive";
+          message = "Good standing with leadership";
+        } else if (ltGovInfluence >= 0) {
+          status = "Neutral 😐";
+          className = "lt-gov-neutral";
+          message = "Room to improve";
+        } else if (ltGovInfluence >= -10) {
+          status = "On Thin Ice ⚠️";
+          className = "lt-gov-negative";
+          message = "Lt. Gov watching you";
+        } else {
+          status = "Blacklisted 🚨";
+          className = "lt-gov-negative";
+          message = "Primary challenge likely!";
+        }
+        
+        return (
+          <div className={`lt-gov-status-indicator ${className}`}>
+            <span>{status}</span>
+            <span style={{ fontSize: '14px', fontWeight: 'normal' }}>({message})</span>
+          </div>
+        );
+      };
+
+      const selectDistrict = (district) => {
+        setSelectedDistrict(district);
+        setGameState('playing');
+        const startApproval = district.lean.startsWith(district.party[0]) ? 60 : 45;
+        setApproval(constrainApproval(startApproval));
+        setApprovalHistory([startApproval]);
+        addLog("You now represent " + district.name + "!", 'success');
+        
+        const ownership = {};
+        issues.forEach(issue => {
+          if (issue.owner === district.party) {
+            ownership[issue.id] = 5;
+          }
+        });
+        setIssueOwnership(ownership);
+        
+        // Texas Senate is always Republican-controlled (20-11)
+        setLegislatureControl('rep');
+        
+        // Set initial energy influence based on district
+        if (district.industries.includes("Oil & Gas") || district.industries.includes("Energy Sector") || district.industries.includes("Energy HQ")) {
+          setEnergyInfluence(70);
+        } else if (district.industries.includes("Wind Energy") || district.industries.includes("Technology")) {
+          setEnergyInfluence(30);
+        } else {
+          setEnergyInfluence(50);
+        }
+      };
+
+      const calculateImpact = (issue) => {
+        if (!selectedDistrict) return 0;
+        const issueData = issues.find(i => i.id === issue);
+        const isAligned = (issueData?.liberal && selectedDistrict.party === 'Democrat') ||
+                         (!issueData?.liberal && selectedDistrict.party === 'Republican');
+        const isCompetitive = selectedDistrict.lean.includes('Competitive');
+        let impact = isAligned ? (isCompetitive ? 2 : 3) : (isCompetitive ? -3 : -1);
+        
+        if (issueOwnership[issue]) {
+          impact += Math.floor(issueOwnership[issue] / 3);
+        }
+        
+        impact += retrospectiveVoting;
+        
+        // Special Texas modifiers
+        if (issue === 'energy' && energyInfluence > 60) {
+          impact += 2;
+        } else if (issue === 'immigration' && selectedDistrict.demographics.hispanic > 70) {
+          impact = Math.floor(impact * 0.5); // Hispanic districts more nuanced on immigration
+        } else if (issue === 'education' && selectedDistrict.name.includes('rural')) {
+          impact -= 2; // Rural areas hate vouchers
+        }
+        
+        return impact;
+      };
+
+      const handleFundraising = (group) => {
+        if (actionsLeft <= 0) return;
+        
+        saveActionState();
+        
+        const impact = calculateImpact(group.issues[0]);
+        setMoney(prev => prev + group.amount);
+        setApproval(prev => constrainApproval(prev + impact));
+        setActionsLeft(prev => prev - 1);
+        
+        // Energy industry influence
+        if (group.name.includes('Oil') || group.name.includes('Energy')) {
+          setEnergyInfluence(prev => Math.min(100, prev + 5));
+        } else if (group.name.includes('Green') || group.name.includes('Wind')) {
+          setEnergyInfluence(prev => Math.max(0, prev - 5));
+        }
+        
+        let reactions = '';
+        if (impact < 0) {
+          reactions = 'CONSTITUENTS: "Taking money from them? Really?"\n\n';
+        } else {
+          reactions = 'CONSTITUENTS: "Good to see support from aligned groups."\n\n';
+        }
+        
+        const headline = generateHeadline('fundraising', { group: group.name });
+        setHeadlines(prev => [...prev, headline].slice(-5));
+        setTweets(prev => [...prev, generateTweet('fundraising', impact)].slice(-5));
+        
+        const explanation = 'Texas Campaign Finance:\n\n' + reactions +
+          'You raised $' + group.amount.toLocaleString() + ' from ' + group.name + '.\n\n' +
+          'Remember: No contribution limits in Texas!\n' +
+          'Approval ' + (impact >= 0 ? '+' : '') + impact + '%';
+        
+        showExplanation('Fundraising Impact', explanation);
+        addLog('Raised $' + group.amount + ' from ' + group.name + '. Approval ' + (impact >= 0 ? '+' : '') + impact + '%', 
+               impact >= 0 ? 'success' : 'warning');
+      };
+
+      const handleVote = (bill, withParty) => {
+        if (actionsLeft <= 0) return;
+        if (votedBills.includes(bill.id)) {
+          showExplanation('Already Voted', 'You have already voted on this bill. Each senator only gets one vote per bill.');
+          return;
+        }
+        
+        if (!sessionActive && !specialSession) {
+          showExplanation('Not in Session', 'The Legislature is not currently in session. Wait for regular or special session.');
+          return;
+        }
+        
+        saveActionState();
+        
+        const ltGovChange = withParty ? bill.ltGovGain : -Math.floor(bill.ltGovGain * 1.5);
+        const billAligned = (bill.liberal && selectedDistrict.party === 'Democrat') ||
+                           (!bill.liberal && selectedDistrict.party === 'Republican');
+        
+        let approvalChange = withParty ? 
+          (billAligned ? 2 : -3) : 
+          (billAligned ? -2 : 3);
+        
+        // Special case for vouchers - rural opposition
+        if (bill.id === 1 && selectedDistrict.name.includes('rural')) {
+          approvalChange = withParty ? -5 : 3;
+        }
+        
+        setLtGovInfluence(prev => prev + ltGovChange);
+        setApproval(prev => constrainApproval(prev + approvalChange));
+        setActionsLeft(prev => prev - 1);
+        setVotedBills(prev => [...prev, bill.id]);
+        setVoteHistory(prev => [...prev, { billId: bill.id, billName: bill.name, withParty, round }]);
+        
+        if (bill.liberal === null) {
+          setRetrospectiveVoting(prev => prev + 1);
+        } else if (!withParty && billAligned) {
+          setRetrospectiveVoting(prev => prev - 1);
+        }
+        
+        let leaderReaction = '';
+        if (ltGovChange < -10 && !primaryChallenge) {
+          setPrimaryChallenge(true);
+          leaderReaction = 'LT. GOV PATRICK WARNING: "You\'re crossing me! I control your committees and your future!"\n\n';
+          addLog('Lt. Gov threatens to strip committee assignments!', 'warning');
+        } else if (ltGovChange > 10) {
+          leaderReaction = 'LT. GOV PATRICK: "Excellent loyalty! You have a bright future in the Texas Senate."\n\n';
+        } else if (ltGovChange < 0) {
+          leaderReaction = 'LT. GOV PATRICK: "Disappointed in your lack of party discipline."\n\n';
+        }
+        
+        let constituentReaction = '';
+        if (approvalChange > 0) {
+          constituentReaction = 'CONSTITUENTS: "This is Texas values!"\n\n';
+        } else if (approvalChange < -2) {
+          constituentReaction = 'CONSTITUENTS: "This isn\'t what we voted for! Remember the Alamo!"\n\n';
+        }
+        
+        const headline = generateHeadline('vote', { bill: bill.name, withParty });
+        setHeadlines(prev => [...prev, headline].slice(-5));
+        setTweets(prev => [...prev, generateTweet('vote', approvalChange)].slice(-5));
+        
+        const explanation = 'You voted ' + (withParty ? 'WITH' : 'AGAINST') + ' leadership on ' + bill.name + '.\n\n' +
+          leaderReaction + constituentReaction +
+          'Lt. Gov Influence: ' + (ltGovChange >= 0 ? '+' : '') + ltGovChange + '\n' +
+          'Approval: ' + (approvalChange >= 0 ? '+' : '') + approvalChange + '%';
+        
+        showExplanation('Vote Impact', explanation);
+        addLog('Voted on ' + bill.name + '. Lt.Gov ' + (ltGovChange >= 0 ? '+' : '') + ltGovChange + ', Approval ' + (approvalChange >= 0 ? '+' : '') + approvalChange + '%', 
+               ltGovChange >= 0 ? 'success' : 'warning');
+      };
+
+      const handleCasework = () => {
+        if (actionsLeft <= 0) return;
+        
+        saveActionState();
+        
+        const approvalGain = 2 + Math.floor(incumbencyBonus / 2);
+        setApproval(prev => constrainApproval(prev + approvalGain));
+        setCaseworkCount(prev => prev + 1);
+        setActionsLeft(prev => prev - 1);
+        
+        const headline = generateHeadline('casework');
+        setHeadlines(prev => [...prev, headline].slice(-5));
+        setTweets(prev => [...prev, generateTweet('casework', approvalGain)].slice(-5));
+        
+        const explanation = 'CONSTITUENT: "You really helped with my property tax protest! God bless Texas!"\n\n' +
+          'Approval +' + approvalGain + '% (bonus increases with incumbency!)';
+        
+        showExplanation('Casework Impact', explanation);
+        addLog('Completed casework. Approval +' + approvalGain + '%', 'success');
+      };
+
+      const handleAdvertising = () => {
+        if (actionsLeft <= 0 || money < selectedAdType.cost || !selectedAdIssue) return;
+        
+        saveActionState();
+        
+        const effectiveness = selectedAdType.multiplier;
+        const baseImpact = calculateImpact(selectedAdIssue);
+        const impact = Math.round(baseImpact * effectiveness);
+        
+        setMoney(prev => prev - selectedAdType.cost);
+        setApproval(prev => constrainApproval(prev + impact));
+        setActionsLeft(prev => prev - 1);
+        
+        if (impact > 0 && issueOwnership[selectedAdIssue] !== undefined) {
+          setIssueOwnership(prev => ({
+            ...prev,
+            [selectedAdIssue]: Math.min(10, prev[selectedAdIssue] + 1)
+          }));
+        }
+        
+        const issueData = issues.find(i => i.id === selectedAdIssue);
+        const headline = generateHeadline('ad', { medium: selectedAdType.name, issue: selectedAdIssue });
+        setHeadlines(prev => [...prev, headline].slice(-5));
+        setTweets(prev => [...prev, generateTweet('ad', impact)].slice(-5));
+        
+        const explanation = 'You ran ' + selectedAdType.name + ' ads on ' + issueData.name + ' for $' + selectedAdType.cost.toLocaleString() + '.\n\n' +
+          'Texas media markets are expensive!\n' +
+          'Approval ' + (impact >= 0 ? '+' : '') + impact + '%';
+        
+        showExplanation('Advertising Impact', explanation);
+        addLog('Ran ' + selectedAdType.name + ' ads on ' + issueData.name + '. Cost $' + selectedAdType.cost + ', Approval ' + (impact >= 0 ? '+' : '') + impact + '%', 
+               impact >= 0 ? 'success' : 'warning');
+        
+        setSelectedAdType(null);
+        setSelectedAdIssue(null);
+      };
+
+      const handleSpeech = () => {
+        if (actionsLeft <= 0 || !selectedSpeechIssue) return;
+        
+        saveActionState();
+        
+        const impact = calculateImpact(selectedSpeechIssue);
+        const issueBonus = issueOwnership[selectedSpeechIssue] ? 1 : 0;
+        const totalImpact = impact + issueBonus;
+        
+        setApproval(prev => constrainApproval(prev + totalImpact));
+        setLtGovInfluence(prev => prev + 3);
+        setActionsLeft(prev => prev - 1);
+        
+        const issueData = issues.find(i => i.id === selectedSpeechIssue);
+        const headline = generateHeadline('speech', { issue: selectedSpeechIssue });
+        setHeadlines(prev => [...prev, headline].slice(-5));
+        setTweets(prev => [...prev, generateTweet('speech', totalImpact)].slice(-5));
+        
+        const explanation = 'You gave a public speech on ' + issueData.name + '!\n\n' +
+          'Speech Impact:\n' +
+          '• Approval ' + (totalImpact >= 0 ? '+' : '') + totalImpact + '%\n' +
+          '• Lt. Gov Influence +3 (showing leadership)\n';
+        
+        showExplanation('Speech Impact', explanation);
+        addLog('Gave speech on ' + issueData.name + '. Approval ' + (totalImpact >= 0 ? '+' : '') + totalImpact + '%, Lt.Gov +3', 
+               totalImpact >= 0 ? 'success' : 'warning');
+        
+        setSelectedSpeechIssue(null);
+        setShowSpeechPanel(false);
+      };
+
+      const handleCommittee = (committeeData) => {
+        if (actionsLeft <= 0 || committees.includes(committeeData.name)) return;
+        
+        if (round < committeeData.minRound) {
+          showExplanation('Too Early in Term - Need More Seniority', 
+            `You cannot join the ${committeeData.name} Committee yet.\n\n` +
+            `Current Round: ${round}\n` +
+            `Required Round: ${committeeData.minRound}\n\n` +
+            'Build seniority and try again!');
+          return;
+        }
+        
+        if (ltGovInfluence < committeeData.minInfluence) {
+          showExplanation('Need Lt. Governor\'s Approval', 
+            `The ${committeeData.name} Committee requires Lt. Gov Patrick\'s blessing.\n\n` +
+            `Your Influence: ${ltGovInfluence}\n` +
+            `Required Influence: ${committeeData.minInfluence}\n\n` +
+            'Vote with leadership to build influence!');
+          return;
+        }
+        
+        saveActionState();
+        
+        setCommittees(prev => [...prev, committeeData.name]);
+        setLtGovInfluence(prev => prev + committeeData.ltGovGain);
+        setActionsLeft(prev => prev - 1);
+        
+        // Special committee bonuses
+        if (committeeData.name === 'Natural Resources' || committeeData.name === 'Business & Commerce') {
+          setEnergyInfluence(prev => Math.min(100, prev + 10));
+        }
+        
+        const headline = generateHeadline('committee', { committee: committeeData.name });
+        setHeadlines(prev => [...prev, headline].slice(-5));
+        
+        const explanation = `Lt. Gov Patrick appointed you to the ${committeeData.name} Committee!\n\n` +
+          'Lt. Gov Influence +' + committeeData.ltGovGain;
+        
+        showExplanation('Committee Appointment', explanation);
+        addLog('Joined ' + committeeData.name + ' Committee. Lt.Gov +' + committeeData.ltGovGain, 'success');
+      };
+
+      const endRound = () => {
+        if (round >= 12) {
+          if (primaryChallenge && approval < 60) {
+            setGameState('primary');
+          } else {
+            setGameState('election');
+          }
+          return;
+        }
+        
+        setApprovalHistory(prev => [...prev, approval].slice(-12));
+        setMoneyHistory(prev => [...prev, money].slice(-12));
+        
+        const drift = Math.floor(Math.random() * 3) - 1;
+        setApproval(prev => constrainApproval(prev + drift));
+        setTexasApproval(prev => Math.max(15, Math.min(45, prev + Math.floor(Math.random() * 7) - 3)));
+        
+        // Legislative session management (Texas meets every 2 years for 140 days)
+        if (round % 6 === 0) {
+          setSessionActive(!sessionActive);
+          if (sessionActive) {
+            addLog('Legislative session ended. Interim period begins.', 'info');
+          } else {
+            addLog('New legislative session begins! 140 days to pass bills.', 'success');
+          }
+        }
+        
+        // Special sessions
+        if (!sessionActive && Math.random() < 0.3 && round > 3) {
+          setSpecialSession(true);
+          addLog('Governor calls SPECIAL SESSION! Limited agenda (30 days)', 'warning');
+        } else {
+          setSpecialSession(false);
+        }
+        
+        if (round % 3 === 0) {
+          setIncumbencyBonus(prev => Math.min(10, prev + 2));
+          addLog('Incumbency advantage increased to +' + Math.min(10, incumbencyBonus + 2) + '%', 'success');
+        }
+        
+        setRound(prev => prev + 1);
+        setActionsLeft(3);
+        setVotedBills([]);
+        setLastAction(null);
+        addLog('Round ' + (round + 1) + ' begins (Months ' + ((round * 2) + 1) + '-' + ((round + 1) * 2) + ')', 'info');
+      };
+
+      const adTypes = [
+        { id: 'tv', name: 'TV', cost: 25000, multiplier: 1.8, icon: '📺', description: 'Major markets' },
+        { id: 'digital', name: 'Digital', cost: 10000, multiplier: 1.4, icon: '💻', description: 'Targeted' },
+        { id: 'radio', name: 'Radio', cost: 5000, multiplier: 1.2, icon: '📻', description: 'Rural reach' }
+      ];
+
+      const getAvailableBills = () => {
+        return bills.filter(bill => {
+          if (specialSession && bill.special) return true;
+          if (!sessionActive && !specialSession) return false;
+          if (!bill.controlRequired) return true;
+          if (legislatureControl === 'rep' && !bill.liberal) return true;
+          if (bill.liberal === null) return true; // Bipartisan bills always available
+          return false;
+        });
+      };
+
+      const CharacterPanel = () => (
+        <div className="card">
+          <h3>Key Texas Political Figures</h3>
+          <div className="character-avatar">
+            <div className="avatar-icon" style={{ 
+              background: 'linear-gradient(135deg, #bf0a30, #e51937)'
+            }}>
+              DP
+            </div>
+            <div>
+              <div className="font-bold" style={{ fontSize: '16px' }}>Lt. Gov Dan Patrick</div>
+              <div className="text-xs text-gray">
+                {ltGovInfluence > 10 ? '"Keep supporting the agenda!"' :
+                 ltGovInfluence < -10 ? '"You\'re done in my Senate!"' :
+                 '"Fall in line, Senator."'}
+              </div>
+            </div>
+          </div>
+          
+          <div className="character-avatar">
+            <div className="avatar-icon" style={{ background: '#f59e0b' }}>
+              GA
+            </div>
+            <div>
+              <div className="font-bold" style={{ fontSize: '16px' }}>Gov. Greg Abbott</div>
+              <div className="text-xs text-gray">
+                {specialSession ? '"Special session: Vouchers NOW!"' : '"Pass my priorities."'}
+              </div>
+            </div>
+          </div>
+          
+          <div className="character-avatar">
+            <div className="avatar-icon" style={{ background: '#065f46' }}>
+              OIL
+            </div>
+            <div>
+              <div className="font-bold" style={{ fontSize: '16px' }}>Energy Lobbyists</div>
+              <div className="text-xs text-gray">
+                {energyInfluence > 70 ? '"Good friend to Texas energy!"' :
+                 energyInfluence < 30 ? '"Going green? Not in Texas!"' :
+                 '"Remember who funds campaigns..."'}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+
+      const MediaDashboard = () => (
+        <div className="card">
+          <h3>Texas Media Coverage</h3>
+          <div className="media-panel" style={{ background: '#fee2e2' }}>
+            <div className="text-xs font-bold text-gray mb-2">TEXAS TRIBUNE HEADLINE</div>
+            <div className="font-bold" style={{ fontSize: '16px' }}>{headlines[headlines.length - 1]}</div>
+          </div>
+          <div className="media-panel" style={{ background: '#dbeafe' }}>
+            <div className="text-xs font-bold text-gray mb-2">TEXAS TWITTER</div>
+            {tweets.slice(-3).map((tweet, i) => (
+              <div key={i} className="text-sm mb-2">@texan{Math.floor(Math.random() * 1000)}: {tweet}</div>
+            ))}
+          </div>
+        </div>
+      );
+
+      const DataDashboard = () => {
+        const chartRef = React.useRef(null);
+        const chartInstance = React.useRef(null);
+
+        React.useEffect(() => {
+          if (chartRef.current && window.Chart) {
+            if (chartInstance.current) {
+              chartInstance.current.destroy();
+            }
+            
+            const ctx = chartRef.current.getContext('2d');
+            chartInstance.current = new window.Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: approvalHistory.map((_, i) => 'R' + (i + 1)),
+                datasets: [{
+                  label: 'Approval Rating',
+                  data: approvalHistory,
+                  borderColor: '#002868',
+                  backgroundColor: 'rgba(0, 40, 104, 0.1)',
+                  tension: 0.3
+                }, {
+                  label: 'Target (50%)',
+                  data: Array(approvalHistory.length).fill(50),
+                  borderColor: '#bf0a30',
+                  borderDash: [5, 5],
+                  pointRadius: 0
+                }, {
+                  label: 'Ceiling',
+                  data: Array(approvalHistory.length).fill(approvalCeiling),
+                  borderColor: '#10b981',
+                  borderDash: [3, 3],
+                  pointRadius: 0
+                }, {
+                  label: 'Floor',
+                  data: Array(approvalHistory.length).fill(approvalFloor),
+                  borderColor: '#f59e0b',
+                  borderDash: [3, 3],
+                  pointRadius: 0
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { position: 'top' }
+                },
+                scales: {
+                  y: { beginAtZero: true, max: 100 }
+                }
+              }
+            });
+          }
+          
+          return () => {
+            if (chartInstance.current) {
+              chartInstance.current.destroy();
+            }
+          };
+        }, [approvalHistory, approvalCeiling, approvalFloor]);
+
+        return (
+          <div className="card">
+            <h3>Performance Dashboard</h3>
+            <div className="chart-container">
+              <canvas ref={chartRef}></canvas>
+            </div>
+            <div className="grid grid-4 mb-4" style={{ marginTop: '20px' }}>
+              <div className="stat-box">
+                <div className="stat-label">Approval</div>
+                <div className="stat-value" style={{ color: approval >= 50 ? '#10b981' : '#bf0a30' }}>
+                  {approval}%
+                </div>
+                <div className="approval-floor-ceiling">
+                  <span>Floor: {approvalFloor}%</span>
+                  <span>Ceiling: {approvalCeiling}%</span>
+                </div>
+              </div>
+              <div className="stat-box">
+                <div className="stat-label">Funds</div>
+                <div className="stat-value" style={{ color: '#059669' }}>
+                  ${(money/1000).toFixed(0)}K
+                </div>
+              </div>
+              <div className="stat-box">
+                <div className="stat-label">Lt.Gov</div>
+                <div className="stat-value" style={{ color: ltGovInfluence >= 0 ? '#002868' : '#bf0a30' }}>
+                  {ltGovInfluence}
+                </div>
+              </div>
+              <div className="stat-box">
+                <div className="stat-label">Committees</div>
+                <div className="stat-value">{committees.length}</div>
+              </div>
+            </div>
+            
+            <div style={{ marginTop: '20px' }}>
+              <div className="text-sm mb-2">Energy Industry Influence: {energyInfluence}%</div>
+              <div className="energy-influence-bar">
+                <div className="energy-influence-fill" style={{ width: `${energyInfluence}%` }}></div>
+              </div>
+              <div className="text-xs text-gray" style={{ marginTop: '4px' }}>
+                {energyInfluence > 70 ? 'Strong oil & gas ally' :
+                 energyInfluence < 30 ? 'Green energy supporter' :
+                 'Balanced energy position'}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // Render game states
+      if (gameState === 'menu') {
+        return (
+          <div className="container">
+            <h1>Keep Your Seat</h1>
+            <div className="subtitle">Texas State Senate Simulation</div>
+            <div className="card">
+              <h2 style={{ textAlign: 'center', marginBottom: '24px' }}>🌟 Welcome to Austin! 🌟</h2>
+              <p className="mb-4" style={{ fontSize: '18px', textAlign: 'center' }}>Based on Contemporary Texas Politics Research</p>
+              <p className="mb-6 text-gray" style={{ textAlign: 'center' }}>You're a newly elected Texas State Senator. Survive 2 years (12 rounds) in the 140-day legislative sessions and win reelection by maintaining 50% approval.</p>
+              
+              <div className="lt-gov-warning-box mb-6">
+                <h3 style={{ color: '#bf0a30', marginBottom: '16px' }}>⚡ The Lieutenant Governor Rules Texas!</h3>
+                <p className="mb-4"><strong>Dan Patrick controls your political fate through committee assignments!</strong></p>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px' }}>
+                  <div>
+                    <p className="font-bold mb-2" style={{ color: '#059669' }}>✅ Committee Progression:</p>
+                    <ul className="text-sm">
+                      <li className="mb-2"><strong>Tier 1</strong> (Round 2+): Basic committees</li>
+                      <li className="mb-2"><strong>Tier 2</strong> (Round 4+, Influence≥5): Important committees</li>
+                      <li className="mb-2"><strong>Tier 3</strong> (Round 6+, Influence≥15): Finance & State Affairs!</li>
+                      <li>Build power through loyalty to Lt. Governor!</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="font-bold mb-2" style={{ color: '#bf0a30' }}>⚠️ Texas Reality:</p>
+                    <ul className="text-sm">
+                      <li className="mb-2">No freshmen on Finance Committee!</li>
+                      <li className="mb-2">Lt. Gov controls ALL appointments</li>
+                      <li className="mb-2">Low influence = Primary challenge</li>
+                      <li>Energy industry watches everything</li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <div style={{ background: 'white', padding: '12px', borderRadius: '6px' }}>
+                  <p className="font-bold mb-2">How to Manage Lt. Gov Influence:</p>
+                  <p className="text-sm"><strong>Gain:</strong> Vote with leadership (+8 to +15), join committees (+6 to +25), speeches (+3)</p>
+                  <p className="text-sm"><strong>Lose:</strong> Vote against leadership (-12 to -22), especially on priority bills</p>
+                </div>
+              </div>
+              
+              <div className="explanation-box mb-6">
+                <p className="font-bold mb-2">📚 Key Texas Politics Integrated:</p>
+                <ul className="text-sm">
+                  <li className="mb-2">School voucher urban-rural Republican split</li>
+                  <li className="mb-2">$11+ billion Operation Lone Star border spending</li>
+                  <li className="mb-2">Winter Storm Uri power grid politics</li>
+                  <li className="mb-2">Hispanic voter realignment in South Texas</li>
+                  <li className="mb-2">No contribution limits (unlimited donations!)</li>
+                  <li className="mb-2">140-day sessions every 2 years</li>
+                  <li className="mb-2">Energy industry dominance</li>
+                  <li className="mb-2">Property tax vs. no income tax dynamics</li>
+                  <li>Lt. Governor's extraordinary power</li>
+                </ul>
+              </div>
+              
+              <div className="explanation-box mb-6" style={{ background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', borderColor: '#16a34a' }}>
+                <p className="font-bold mb-2">🎮 Game Features:</p>
+                <ul className="text-sm">
+                  <li className="mb-2"><strong>31 Real Districts:</strong> Choose from 10 representative districts</li>
+                  <li className="mb-2"><strong>Texas Issues:</strong> Border, vouchers, property tax, power grid</li>
+                  <li className="mb-2"><strong>Energy Influence:</strong> Oil & gas lobby affects your success</li>
+                  <li className="mb-2"><strong>Special Sessions:</strong> Governor can call unlimited 30-day sessions</li>
+                  <li className="mb-2"><strong>Urban-Rural Divide:</strong> Geography matters more than party sometimes</li>
+                  <li className="mb-2"><strong>Committee Power:</strong> Finance Committee controls $300 billion budget</li>
+                  <li className="mb-2"><strong>Save/Load System:</strong> Save progress across 3 slots</li>
+                  <li><strong>PDF Certificate:</strong> Download performance analysis</li>
+                </ul>
+              </div>
+              
+              <button className="btn btn-primary" onClick={() => setGameState('select')} style={{ width: '100%', fontSize: '18px' }}>
+                Start Texas Political Journey →
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (gameState === 'select') {
+        return (
+          <div className="container">
+            <h1>Select Your Texas Senate District</h1>
+            <div className="subtitle">Choose from 10 Representative Districts (31 Total)</div>
+            <div className="grid grid-2">
+              {districts.map(district => (
+                <div key={district.id} className="district-card" onClick={() => selectDistrict(district)}>
+                  <h3>{district.name}</h3>
+                  <p className="text-sm text-gray mb-2" style={{ fontStyle: 'italic' }}>Senator: {district.senator}</p>
+                  <p className="text-sm text-gray mb-2">{district.description}</p>
+                  <div className="grid grid-2 text-sm mb-4">
+                    <div><strong>Population:</strong> ~940K</div>
+                    <div><strong>Median Income:</strong> ${(district.demographics.medianIncome/1000).toFixed(0)}K</div>
+                    <div><strong>General Lean:</strong> {district.lean}</div>
+                    <div><strong>Primary Lean:</strong> {district.primaryLean}</div>
+                  </div>
+                  <div className="text-sm mb-2"><strong>Key Industries:</strong> {district.industries.join(', ')}</div>
+                  <span className={district.party === 'Democrat' ? 'badge badge-dem' : 'badge badge-rep'}>
+                    {district.party}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      if (gameState === 'primary') {
+        const survived = approval + incumbencyBonus >= 55;
+        return (
+          <div className="container">
+            <div className="card text-center">
+              <h1>⚔️ Primary Challenge!</h1>
+              <h2>{survived ? 'You Survived!' : 'You Lost Your Primary'}</h2>
+              <p className="mb-6 text-gray" style={{ fontSize: '18px' }}>
+                {survived ? 
+                  'Your incumbency advantage helped you survive the primary. Remember the Alamo!' :
+                  'Lt. Gov Patrick backed your opponent. You\'re done in Texas politics.'}
+              </p>
+              <button className="btn btn-primary" onClick={() => survived ? setGameState('election') : window.location.reload()}>
+                {survived ? 'Continue to General Election' : 'Try Again'}
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (gameState === 'election') {
+        const totalApproval = approval + incumbencyBonus;
+        const won = totalApproval >= 50;
+        return (
+          <div className="container">
+            <div className="card text-center">
+              <h1>{won ? '🤠 Victory! Yeehaw!' : '😔 Defeated'}</h1>
+              <p className="mb-6" style={{ fontSize: '20px' }}>{won ? 'You kept your seat! God Bless Texas!' : 'You lost reelection. Time to become a lobbyist.'}</p>
+              <button className="btn btn-success mb-4" 
+                      onClick={generateCertificate} 
+                      style={{ width: '100%', fontSize: '18px' }}>
+                📄 Download Texas Senate Certificate (PDF)
+              </button>
+              <button className="btn btn-primary" onClick={() => window.location.reload()}>
+                Play Again
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // Main game interface
+      return (
+        <div className="container">
+          {/* News Ticker */}
+          <div className="news-ticker">
+            <span className="ticker">
+              BREAKING NEWS • Texas Legislature approval at {texasApproval}% • 
+              {headlines[headlines.length - 1]} • 
+              {sessionActive ? 'Legislative session active' : specialSession ? 'SPECIAL SESSION' : 'Interim period'} •
+              Energy prices {energyInfluence > 60 ? 'rising' : 'stable'} •
+            </span>
+          </div>
+
+          {/* Header */}
+          <div className="card">
+            <h2>
+              <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                {selectedDistrict?.name} - {selectedDistrict?.senator}
+              </span>
+            </h2>
+            <p className="mb-4" style={{ fontSize: '17px' }}>
+              Round {round} of 12 • Months {(round - 1) * 2 + 1}-{round * 2} • Actions: {actionsLeft}
+              {primaryChallenge && <span style={{ color: '#bf0a30', fontWeight: 'bold' }}> • ⚠️ Primary Challenge Threatened!</span>}
+              {specialSession && <span style={{ color: '#f59e0b', fontWeight: 'bold' }}> • 📢 SPECIAL SESSION!</span>}
+            </p>
+            
+            {/* Legislature Control Banner */}
+            <div className="legislature-control-banner">
+              Texas Senate: 🔴 Republican Control (20-11) 
+              {sessionActive ? ' • Regular Session (140 days)' :
+               specialSession ? ' • Special Session (30 days)' :
+               ' • Interim Period'}
+            </div>
+            
+            {/* Lt Governor Status */}
+            <div className="mb-4">
+              <LtGovStatusIndicator />
+            </div>
+            
+            {/* Stats */}
+            <div className="grid grid-3 mb-4" style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}>
+              <div className="stat-box">
+                <div className="stat-label">Funds</div>
+                <div className="stat-value" style={{ color: '#059669' }}>${(money/1000).toFixed(0)}K</div>
+              </div>
+              <div className="stat-box">
+                <div className="stat-label">Approval</div>
+                <div className="stat-value" style={{ color: approval >= 50 ? '#002868' : '#bf0a30' }}>{approval}%</div>
+                <div className="approval-floor-ceiling">
+                  <span>{approvalFloor}%</span>
+                  <span>{approvalCeiling}%</span>
+                </div>
+              </div>
+              <div className="stat-box">
+                <div className="stat-label">Texas</div>
+                <div className="stat-value" style={{ color: '#bf0a30' }}>{texasApproval}%</div>
+              </div>
+              <div className="stat-box">
+                <div className="stat-label">Lt.Gov</div>
+                <div className="stat-value" style={{ color: ltGovInfluence >= 0 ? '#002868' : '#bf0a30' }}>{ltGovInfluence}</div>
+              </div>
+              <div className="stat-box">
+                <div className="stat-label">Energy</div>
+                <div className="stat-value" style={{ color: '#f59e0b' }}>{energyInfluence}%</div>
+              </div>
+              <div className="stat-box">
+                <div className="stat-label">Casework</div>
+                <div className="stat-value">{caseworkCount}</div>
+              </div>
+            </div>
+
+            {/* Location buttons */}
+            <div className="mb-4">
+              <button className={'location-btn' + (location === 'district' ? ' active' : '')} 
+                      onClick={() => setLocation('district')}>
+                🏘️ District
+              </button>
+              <button className={'location-btn' + (location === 'austin' ? ' active' : '')} 
+                      onClick={() => setLocation('austin')}>
+                🏛️ Austin Capitol
+              </button>
+              <button className={'location-btn' + (showDistrictInfo ? ' active' : '')} 
+                      onClick={() => setShowDistrictInfo(!showDistrictInfo)}>
+                📋 District Info
+              </button>
+              <button className={'location-btn' + (showDashboard ? ' active' : '')} 
+                      onClick={() => setShowDashboard(!showDashboard)}>
+                📊 Dashboard
+              </button>
+              <button className={'location-btn' + (showCharacters ? ' active' : '')} 
+                      onClick={() => setShowCharacters(!showCharacters)}>
+                👥 Characters
+              </button>
+            </div>
+          </div>
+
+          {/* District Info Panel */}
+          {showDistrictInfo && selectedDistrict && (
+            <div className="card">
+              <h3>District Information - {selectedDistrict.name}</h3>
+              <div style={{ 
+                background: selectedDistrict.party === 'Democrat' ? 
+                  'linear-gradient(135deg, #dbeafe, #bfdbfe)' : 
+                  'linear-gradient(135deg, #fee2e2, #fecaca)',
+                padding: '16px',
+                borderRadius: '8px',
+                marginBottom: '16px'
+              }}>
+                <h4 style={{ 
+                  color: selectedDistrict.party === 'Democrat' ? '#1e40af' : '#991b1b',
+                  marginBottom: '12px'
+                }}>
+                  You are a {selectedDistrict.party} Senator
+                </h4>
+                <p className="text-sm">{selectedDistrict.description}</p>
+              </div>
+              
+              <div className="grid grid-2 mb-4">
+                <div>
+                  <h4 className="mb-2">Demographics</h4>
+                  <div className="stat-box">
+                    <div className="text-sm mb-1">Hispanic: <strong>{selectedDistrict.demographics.hispanic}%</strong></div>
+                    <div className="text-sm mb-1">White: <strong>{selectedDistrict.demographics.white}%</strong></div>
+                    <div className="text-sm mb-1">Black: <strong>{selectedDistrict.demographics.black}%</strong></div>
+                    <div className="text-sm">Asian: <strong>{selectedDistrict.demographics.asian}%</strong></div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="mb-2">Key Industries</h4>
+                  <div className="stat-box">
+                    <div className="text-sm">{selectedDistrict.industries.join(', ')}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Show dashboard and characters if toggled */}
+          {showDashboard && <DataDashboard />}
+          {showCharacters && <CharacterPanel />}
+          <MediaDashboard />
+
+          {/* District Actions */}
+          {location === 'district' ? (
+            <>
+              <div className="card">
+                <h3>District Actions - Campaign & Outreach</h3>
+                
+                {/* Campaign Options */}
+                {!selectedAdType && !showSpeechPanel && (
+                  <div style={{ marginBottom: '20px', padding: '16px', background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)', borderRadius: '8px', border: '2px solid #0284c7' }}>
+                    <h4 style={{ marginBottom: '12px' }}>Campaign & Outreach Options</h4>
+                    <div className="grid grid-4">
+                      {adTypes.map(adType => (
+                        <button 
+                          key={adType.id}
+                          className="action-btn"
+                          disabled={actionsLeft <= 0 || money < adType.cost}
+                          onClick={() => setSelectedAdType(adType)}
+                        >
+                          <div style={{ fontSize: '48px', marginBottom: '8px' }}>{adType.icon}</div>
+                          <div className="font-bold">{adType.name} Ads</div>
+                          <div className="text-sm text-gray">${(adType.cost/1000).toFixed(0)}K</div>
+                          <div className="text-xs text-gray">{adType.description} ({adType.multiplier}x)</div>
+                        </button>
+                      ))}
+                      <button className="action-btn" 
+                              disabled={actionsLeft <= 0}
+                              onClick={() => setShowSpeechPanel(true)}>
+                        <div style={{ fontSize: '48px', marginBottom: '8px' }}>🎤</div>
+                        <div className="font-bold">Public Speech</div>
+                        <div className="text-sm text-gray">Free</div>
+                        <div className="text-xs text-gray">Choose issue (+3 Lt.Gov)</div>
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Ad Issue Selection */}
+                {selectedAdType && (
+                  <div className="issue-select-panel">
+                    <h4 style={{ marginBottom: '12px' }}>Select Issue for {selectedAdType.name} Campaign (${(selectedAdType.cost/1000).toFixed(0)}K)</h4>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '16px' }}>
+                      {issues.map(issue => (
+                        <button 
+                          key={issue.id}
+                          className={`issue-btn ${selectedAdIssue === issue.id ? 'selected' : ''}`}
+                          onClick={() => setSelectedAdIssue(issue.id)}
+                        >
+                          {issue.icon} {issue.name}
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button className="btn btn-primary" 
+                              disabled={!selectedAdIssue}
+                              onClick={handleAdvertising}>
+                        Launch {selectedAdType.name} Campaign
+                      </button>
+                      <button className="btn btn-secondary" 
+                              onClick={() => {
+                                setSelectedAdType(null);
+                                setSelectedAdIssue(null);
+                              }}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Speech Issue Selection */}
+                {showSpeechPanel && (
+                  <div className="issue-select-panel">
+                    <h4 style={{ marginBottom: '12px' }}>Select Issue for Public Speech</h4>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '16px' }}>
+                      {issues.map(issue => (
+                        <button 
+                          key={issue.id}
+                          className={`issue-btn ${selectedSpeechIssue === issue.id ? 'selected' : ''}`}
+                          onClick={() => setSelectedSpeechIssue(issue.id)}
+                        >
+                          {issue.icon} {issue.name}
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button className="btn btn-primary" 
+                              disabled={!selectedSpeechIssue}
+                              onClick={handleSpeech}>
+                        Give Speech
+                      </button>
+                      <button className="btn btn-secondary" 
+                              onClick={() => {
+                                setShowSpeechPanel(false);
+                                setSelectedSpeechIssue(null);
+                              }}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Casework */}
+                {!selectedAdType && !showSpeechPanel && (
+                  <button className="btn btn-warning" disabled={actionsLeft <= 0}
+                          onClick={handleCasework} style={{ width: '100%', padding: '24px', fontSize: '20px' }}>
+                    <span style={{ fontSize: '36px', marginRight: '12px' }}>🤝</span>
+                    <span>
+                      <strong>Constituent Service (Casework)</strong> - Most reliable approval gain!<br/>
+                      <span style={{ fontSize: '16px' }}>Help with property taxes, permits, state services • Approval +{2 + Math.floor(incumbencyBonus / 2)}%</span>
+                    </span>
+                  </button>
+                )}
+              </div>
+
+              <div className="card">
+                <h3>Fundraising (Remember: NO contribution limits in Texas!)</h3>
+                <div className="grid grid-3">
+                  {interestGroups.map(group => (
+                    <button key={group.name} className="action-btn"
+                            disabled={actionsLeft <= 0}
+                            onClick={() => handleFundraising(group)}
+                            style={{ padding: '24px' }}>
+                      <div style={{ fontSize: '40px', marginBottom: '10px' }}>💰</div>
+                      <div className="font-bold" style={{ fontSize: '16px' }}>{group.name}</div>
+                      <div className="text-sm" style={{ color: '#059669', fontSize: '20px', fontWeight: 'bold' }}>${group.amount.toLocaleString()}</div>
+                      <div className="text-xs text-gray">{group.description}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="card">
+                <h3>Vote on Bills {sessionActive || specialSession ? '(Session Active)' : '(Not in Session)'}</h3>
+                
+                {/* Voting Logic Explainer Box */}
+                <div style={{ 
+                  background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
+                  border: '2px solid #10b981',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  marginBottom: '16px'
+                }}>
+                  <h4 style={{ color: '#065f46', marginBottom: '12px' }}>
+                    🗳️ Texas Senate Voting Explained
+                  </h4>
+                  <div className="text-sm">
+                    <div className="mb-2">
+                      <strong>Your Party:</strong> {selectedDistrict?.party} | 
+                      <strong> Senate Control:</strong> Republican (20-11)
+                    </div>
+                    <div className="mb-2">
+                      <strong>Vote WITH Leadership:</strong> Gain Lt. Gov influence (+8 to +15)
+                    </div>
+                    <div className="mb-2">
+                      <strong>Vote AGAINST Leadership:</strong> Lose Lt. Gov influence (-12 to -22)
+                    </div>
+                    <div>
+                      <strong>Special Note:</strong> Vouchers split Republicans! Rural districts oppose.
+                    </div>
+                  </div>
+                </div>
+                
+                {!sessionActive && !specialSession && (
+                  <div className="explanation-box mb-4">
+                    <p><strong>Legislature Not in Session!</strong> Texas meets 140 days every 2 years. Wait for regular or special session to vote.</p>
+                  </div>
+                )}
+                
+                <div className="grid grid-2">
+                  {getAvailableBills().map(bill => {
+                    const hasVoted = votedBills.includes(bill.id);
+                    return (
+                      <div key={bill.id} 
+                           className={`bill-card ${hasVoted ? 'voted' : ''}`}
+                           onMouseEnter={() => setHoveredBill(bill.id)}
+                           onMouseLeave={() => setHoveredBill(null)}>
+                        {hoveredBill === bill.id && (
+                          <BillTooltip bill={bill} district={selectedDistrict} />
+                        )}
+                        <div className="font-bold mb-2" style={{ fontSize: '18px' }}>
+                          {hasVoted && '✔ '}{bill.name}
+                        </div>
+                        <div className="text-sm text-gray mb-3">Issue: {bill.issue}</div>
+                        {hasVoted ? (
+                          <div style={{ textAlign: 'center', padding: '14px', background: '#d1fae5', borderRadius: '4px' }}>
+                            <span style={{ color: '#065f46', fontWeight: 'bold', fontSize: '16px' }}>Already Voted</span>
+                          </div>
+                        ) : (
+                          <div className="grid grid-2" style={{ gap: '10px' }}>
+                            <button className="btn btn-success" 
+                                    disabled={actionsLeft <= 0 || (!sessionActive && !specialSession)}
+                                    onClick={() => handleVote(bill, true)}
+                                    style={{ padding: '14px' }}>
+                              <div style={{ fontSize: '28px', marginBottom: '6px' }}>✅</div>
+                              WITH Leadership<br/>
+                              <span className="text-xs">+{bill.ltGovGain} Lt.Gov</span>
+                            </button>
+                            <button className="btn btn-danger" 
+                                    disabled={actionsLeft <= 0 || (!sessionActive && !specialSession)}
+                                    onClick={() => handleVote(bill, false)}
+                                    style={{ padding: '14px' }}>
+                              <div style={{ fontSize: '28px', marginBottom: '6px' }}>❌</div>
+                              AGAINST<br/>
+                              <span className="text-xs">-{Math.floor(bill.ltGovGain * 1.5)} Lt.Gov</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="card">
+                <h3>Join Committees (Lt. Governor Controls All Appointments)</h3>
+                
+                <div className="committee-tier-box mb-4">
+                  <h4 className="mb-2">🏛️ Texas Senate Committee System</h4>
+                  <div className="text-sm">
+                    <div className="mb-2"><strong>Tier 1 (Regular):</strong> Available Round 2+ • +6 Lt.Gov • Entry committees</div>
+                    <div className="mb-2"><strong>Tier 2 (Important):</strong> Round 4+, Influence≥5 • +10-12 Lt.Gov • Major influence</div>
+                    <div className="mb-2"><strong>Tier 3 (Elite):</strong> Round 6+, Influence≥15 • +18-25 Lt.Gov • Finance controls $300B budget!</div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-2">
+                  {committeesList.map(comm => {
+                    const canJoin = !committees.includes(comm.name) && 
+                                   round >= comm.minRound && 
+                                   ltGovInfluence >= comm.minInfluence;
+                    const tierLabel = comm.tier === 3 ? '⭐ ELITE' : 
+                                     comm.tier === 2 ? '🎖️ Important' : 
+                                     '📋 Regular';
+                    const tierColor = comm.tier === 3 ? '#8b5cf6' : 
+                                     comm.tier === 2 ? '#0ea5e9' : 
+                                     '#6b7280';
+                    
+                    return (
+                      <button key={comm.name} className="action-btn"
+                              disabled={actionsLeft <= 0 || !canJoin || committees.includes(comm.name)}
+                              onClick={() => handleCommittee(comm)}
+                              style={{ padding: '20px' }}>
+                        <div className="font-bold" style={{ fontSize: '17px' }}>{comm.name}</div>
+                        <div className="text-xs mb-2" style={{ color: tierColor }}>{tierLabel} (+{comm.ltGovGain} Lt.Gov)</div>
+                        
+                        {committees.includes(comm.name) && (
+                          <span style={{ color: '#10b981', fontSize: '16px' }}>✔ Member</span>
+                        )}
+                        
+                        {!committees.includes(comm.name) && (
+                          <>
+                            {round < comm.minRound && (
+                              <span className="text-xs" style={{ color: '#ef4444' }}>
+                                Need Round {comm.minRound} (now: {round})
+                              </span>
+                            )}
+                            {round >= comm.minRound && ltGovInfluence < comm.minInfluence && (
+                              <span className="text-xs" style={{ color: '#ef4444' }}>
+                                Need Influence ≥ {comm.minInfluence} (have: {ltGovInfluence})
+                              </span>
+                            )}
+                            {canJoin && (
+                              <span className="text-xs" style={{ color: '#10b981' }}>
+                                ✔ Eligible to join!
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Game Log */}
+          {gameLog.length > 0 && (
+            <div className="card">
+              <h3>Recent Activity</h3>
+              {gameLog.map((log, i) => (
+                <div key={i} className={'log-item log-' + log.type}>
+                  Round {log.round}: {log.message}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* End Round Button */}
+          <div className="card">
+            <button className="btn btn-primary" style={{ width: '100%', fontSize: '18px', padding: '16px' }}
+                    disabled={actionsLeft > 0}
+                    onClick={endRound}>
+              {actionsLeft > 0 ? 'Complete ' + actionsLeft + ' more actions' : 'End Round →'}
+            </button>
+            {actionsLeft === 0 && (
+              <p className="text-center text-sm text-gray" style={{ marginTop: '10px' }}>
+                All actions completed! Click to advance to Round {round + 1}
+                {round === 6 && ' (Midpoint of term!)'}
+              </p>
+            )}
+          </div>
+
+          {/* Control Panel */}
+          <div className="control-panel">
+            {showSaveLoad && (
+              <div className="save-load-panel">
+                <h4 style={{ marginBottom: '12px' }}>Save/Load Game</h4>
+                {savedGames.map(save => (
+                  <div key={save.slot} className="save-slot">
+                    <span>
+                      Slot {save.slot}
+                      {save.timestamp && <span className="text-xs"> ({new Date(save.timestamp).toLocaleDateString()})</span>}
+                    </span>
+                    <div>
+                      <button className="btn btn-primary" onClick={() => saveGame(save.slot)} style={{ marginRight: '4px' }}>
+                        Save
+                      </button>
+                      {save.data && (
+                        <>
+                          <button className="btn btn-success" onClick={() => loadGame(save.slot)}>
+                            Load
+                          </button>
+                          <button className="btn btn-danger" onClick={() => deleteGame(save.slot)}>
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <button className="control-btn" onClick={() => setShowSaveLoad(!showSaveLoad)}>
+              💾 Save/Load
+            </button>
+            
+            <button className="control-btn" onClick={undoLastAction} 
+                    disabled={!lastAction || actionsLeft === 3}>
+              ↩️ Undo Last
+            </button>
+            
+            <button className="control-btn" onClick={resetRound}>
+              🔄 Reset Round
+            </button>
+            
+            <button className="control-btn" onClick={resetGame}
+                    style={{ background: 'rgba(191, 10, 48, 0.9)' }}>
+              🔴 Reset Game
+            </button>
+          </div>
+
+          {/* Modal for explanations */}
+          {showModal && (
+            <div className="modal-overlay" onClick={() => setShowModal(false)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h2>{modalContent.title}</h2>
+                <div style={{ whiteSpace: 'pre-wrap', marginTop: '20px', marginBottom: '28px', lineHeight: '1.6' }}>
+                  {modalContent.message}
+                </div>
+                <button className="btn btn-primary" onClick={() => setShowModal(false)} style={{ width: '100%' }}>
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

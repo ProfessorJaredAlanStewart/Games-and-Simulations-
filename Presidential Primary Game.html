@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race to the White House - Presidential Primary Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            color: #2c3e50;
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        h2 {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            color: #34495e;
+            margin-bottom: 15px;
+            font-size: 24px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        h3 {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .tagline {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 18px;
+            font-style: italic;
+        }
+        
+        .control-bar {
+            background: rgba(255,255,255,0.95);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .control-btn {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            padding: 8px 16px;
+            background: #7f8c8d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .control-btn:hover:not(:disabled) {
+            background: #5d6d7e;
+        }
+        
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            font-size: 12px;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .stat-value {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-description {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 5px;
+            line-height: 1.5;
+        }
+        
+        .progress-bar {
+            background: #ecf0f1;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        button {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+            font-weight: 600;
+        }
+        
+        button:hover:not(:disabled) {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        button small {
+            display: block;
+            font-size: 13px;
+            font-weight: normal;
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #c0392b;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #229954;
+        }
+        
+        .btn-warning {
+            background: #f39c12;
+        }
+        
+        .btn-warning:hover:not(:disabled) {
+            background: #d68910;
+        }
+        
+        .state-card {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .state-card strong {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            font-size: 16px;
+        }
+        
+        .state-card.active {
+            border-color: #3498db;
+            background: #e8f4f8;
+        }
+        
+        .state-card.won {
+            background: #d5f4e6;
+            border-color: #27ae60;
+        }
+        
+        .state-card.lost {
+            background: #fadbd8;
+            border-color: #e74c3c;
+        }
+        
+        .opponent-card {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            background: #fef5e7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 2px solid #f8c471;
+        }
+        
+        .opponent-card strong {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            font-size: 16px;
+        }
+        
+        .event-log {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            border-left: 4px solid #3498db;
+            line-height: 1.5;
+        }
+        
+        .event-log.success {
+            border-left-color: #27ae60;
+            background: #d5f4e6;
+        }
+        
+        .event-log.warning {
+            border-left-color: #f39c12;
+            background: #fef5e7;
+        }
+        
+        .event-log.danger {
+            border-left-color: #e74c3c;
+            background: #fadbd8;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+        
+        .modal-content h2 {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+        }
+        
+        .coalition-meter {
+            display: flex;
+            margin-bottom: 10px;
+            background: #ecf0f1;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .coalition-segment {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            padding: 8px;
+            font-size: 12px;
+            text-align: center;
+            color: white;
+            transition: flex 0.5s;
+            font-weight: 600;
+        }
+        
+        .endorsement-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .endorsement-badge {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            background: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .delegate-counter {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .delegate-counter h3 {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            font-size: 16px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+            letter-spacing: 1px;
+        }
+        
+        .delegate-counter .count {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 48px;
+            font-weight: bold;
+        }
+        
+        .delegate-counter .needed {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .action-counter {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            background: #e8f4f8;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 15px;
+            border: 2px solid #3498db;
+        }
+        
+        .action-counter strong {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            color: #2980b9;
+            font-size: 15px;
+        }
+        
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .topic-btn {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            padding: 10px;
+            font-size: 14px;
+            background: #ecf0f1;
+            color: #2c3e50;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        
+        .topic-btn:hover {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        
+        .topic-btn.selected {
+            background: #2980b9;
+            color: white;
+            border-color: #1f618d;
+        }
+        
+        p {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 1024px) {
+            .game-board {
+                grid-template-columns: 1fr;
+            }
+            .topic-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ Race to the White House 🇺🇸</h1>
+            <p class="tagline">From Congress to the Presidential Nomination</p>
+        </div>
+        
+        <!-- Control Bar -->
+        <div class="control-bar">
+            <button class="control-btn" id="undo-btn">↶ Undo</button>
+            <button class="control-btn" id="save-btn">💾 Save</button>
+            <button class="control-btn" id="load-btn">📂 Load</button>
+            <button class="control-btn" id="reset-btn">🔄 Reset</button>
+            <button class="control-btn" id="help-btn">❓ Help</button>
+        </div>
+        
+        <div class="game-board">
+            <!-- Left Panel - Campaign Status -->
+            <div class="panel">
+                <h2>Campaign Status</h2>
+                <div class="stat-box">
+                    <div class="stat-label">Phase</div>
+                    <div class="stat-value" id="phase">Setup</div>
+                    <div class="stat-description" id="phase-desc">Preparing to launch campaign</div>
+                </div>
+                <div class="action-counter" id="action-counter" style="display: none;">
+                    <strong>Actions This Month: <span id="actions-taken">0</span>/3</strong>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Campaign Funds</div>
+                    <div class="stat-value" id="money">$0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">National Polling</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="polling" style="width: 15%">15%</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Base Support</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="base-support" style="width: 25%; background: linear-gradient(90deg, #e74c3c, #c0392b);">25%</div>
+                    </div>
+                    <div class="stat-description">Your party's core voters who always vote in primaries</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Field Offices</div>
+                    <div class="stat-value" id="field-offices">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Small Donors</div>
+                    <div class="stat-value" id="donors">0</div>
+                </div>
+                
+                <div class="delegate-counter">
+                    <h3>Delegate Count</h3>
+                    <div class="count" id="delegate-count">0</div>
+                    <div class="needed" id="delegates-needed">Need 1,215 to Win</div>
+                </div>
+                
+                <h2 style="margin-top: 20px;">Endorsements</h2>
+                <div class="endorsement-list" id="endorsements">
+                    <span style="color: #95a5a6;">None yet</span>
+                </div>
+            </div>
+            
+            <!-- Center Panel - Main Game Area -->
+            <div class="panel">
+                <div id="game-area">
+                    <!-- Game content will be inserted here -->
+                </div>
+                
+                <h2 style="margin-top: 20px;">Campaign Log</h2>
+                <div id="event-log">
+                    <div class="event-log">Welcome to your presidential campaign!</div>
+                </div>
+            </div>
+            
+            <!-- Right Panel - Opponents & Coalitions -->
+            <div class="panel">
+                <h2>Your Coalition</h2>
+                <div class="coalition-meter" id="coalition">
+                    <div class="coalition-segment" style="background: #e74c3c; flex: 1;">Base 25%</div>
+                </div>
+                
+                <h2 style="margin-top: 20px;">Opponents</h2>
+                <div id="opponents">
+                    <!-- Opponents will be added here -->
+                </div>
+                
+                <h2 style="margin-top: 20px;">Upcoming States</h2>
+                <div id="upcoming-states">
+                    <!-- States will be listed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for events -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Event</h2>
+            <p id="modal-text"></p>
+            <button id="modal-close">Continue</button>
+        </div>
+    </div>
+    
+    <script>
+        'use strict';
+        
+        // Game Manager - Optimized with full functionality
+        const Game = {
+            // Game state
+            state: {
+                phase: 'setup',
+                turn: 0,
+                monthsUntilPrimary: 12,
+                actionsThisMonth: 0,
+                money: 1000000,
+                polling: 15,
+                baseSupport: 25,
+                fieldOffices: {},
+                donors: 5000,
+                endorsements: [],
+                delegateCount: 0,
+                delegatesNeeded: 1215,
+                momentum: 0,
+                mediaAttention: 5,
+                coalitions: {
+                    base: 25,
+                    moderate: 0,
+                    progressive: 0,
+                    establishment: 0,
+                    evangelical: 0,
+                    populist: 0
+                },
+                party: null,
+                candidateType: null,
+                opponents: [],
+                statesWon: [],
+                statesLost: [],
+                currentState: null,
+                selectedMediaTopic: null,
+                superTuesdayAllocations: {},
+                eventLog: [],
+                lastState: null
+            },
+            
+            // Constants
+            MAX_ACTIONS: 3,
+            
+            // Ad topics configuration
+            AD_TOPICS: {
+                economy: {
+                    name: 'Economy & Jobs',
+                    baseAppeal: 15,
+                    stateBonus: {
+                        'Michigan': 10, 'Pennsylvania': 10, 'Nevada': 8,
+                        'Wisconsin': 8, 'Ohio': 10
+                    },
+                    baseMessage: 'Focus on job creation and economic growth'
+                },
+                healthcare: {
+                    name: 'Healthcare',
+                    baseAppeal: 12,
+                    stateBonus: {
+                        'Iowa': 8, 'New Hampshire': 7, 'Arizona': 10,
+                        'Florida': 12
+                    },
+                    baseMessage: 'Affordable healthcare for all Americans'
+                },
+                immigration: {
+                    name: 'Immigration',
+                    baseAppeal: 10,
+                    stateBonus: {
+                        'Texas': 15, 'Arizona': 12, 'Nevada': 10,
+                        'California': 8, 'Florida': 10
+                    },
+                    baseMessage: 'Comprehensive immigration reform'
+                },
+                guns: {
+                    name: 'Gun Rights/Safety',
+                    baseAppeal: 8,
+                    stateBonus: {
+                        'Texas': 12, 'Tennessee': 10, 'Alabama': 10,
+                        'Vermont': -5, 'Massachusetts': -8
+                    },
+                    baseMessage: 'Second Amendment protection'
+                },
+                education: {
+                    name: 'Education',
+                    baseAppeal: 10,
+                    stateBonus: {
+                        'Iowa': 10, 'New Hampshire': 8, 'Massachusetts': 10,
+                        'Vermont': 8
+                    },
+                    baseMessage: 'Investing in our schools and students'
+                },
+                climate: {
+                    name: 'Climate & Environment',
+                    baseAppeal: 8,
+                    stateBonus: {
+                        'California': 12, 'Colorado': 10, 'Vermont': 10,
+                        'Maine': 8, 'Texas': -5, 'Oklahoma': -8
+                    },
+                    baseMessage: 'Combat climate change'
+                },
+                values: {
+                    name: 'Traditional Values',
+                    baseAppeal: 8,
+                    stateBonus: {
+                        'Iowa': 12, 'South Carolina': 10, 'Tennessee': 10,
+                        'Alabama': 12, 'Utah': 15
+                    },
+                    baseMessage: 'Faith and family values'
+                },
+                defense: {
+                    name: 'Defense & Veterans',
+                    baseAppeal: 10,
+                    stateBonus: {
+                        'Virginia': 12, 'South Carolina': 10, 'Texas': 8,
+                        'North Carolina': 8
+                    },
+                    baseMessage: 'Strong military and veteran support'
+                }
+            },
+            
+            // Primary calendar
+            PRIMARY_CALENDAR: {
+                democrat: [
+                    {name: 'South Carolina', date: 'February 3', delegates: 55, type: 'primary'},
+                    {name: 'Nevada', date: 'February 6', delegates: 35, type: 'primary'},
+                    {name: 'New Hampshire', date: 'February 13', delegates: 23, type: 'primary'},
+                    {name: 'Michigan', date: 'February 27', delegates: 117, type: 'primary'}
+                ],
+                republican: [
+                    {name: 'Iowa', date: 'January 15', delegates: 40, type: 'caucus'},
+                    {name: 'New Hampshire', date: 'January 23', delegates: 22, type: 'primary'},
+                    {name: 'Nevada', date: 'February 6', delegates: 26, type: 'caucus'},
+                    {name: 'South Carolina', date: 'February 24', delegates: 50, type: 'primary'}
+                ]
+            },
+            
+            SUPER_TUESDAY_STATES: [
+                {name: 'California', delegates: 172, cost: 20000000},
+                {name: 'Texas', delegates: 155, cost: 15000000},
+                {name: 'North Carolina', delegates: 91, cost: 5000000},
+                {name: 'Virginia', delegates: 79, cost: 4000000},
+                {name: 'Massachusetts', delegates: 71, cost: 3000000},
+                {name: 'Minnesota', delegates: 67, cost: 3000000},
+                {name: 'Colorado', delegates: 61, cost: 3000000},
+                {name: 'Tennessee', delegates: 58, cost: 2000000},
+                {name: 'Alabama', delegates: 50, cost: 2000000},
+                {name: 'Oklahoma', delegates: 37, cost: 2000000},
+                {name: 'Arkansas', delegates: 31, cost: 1000000},
+                {name: 'Utah', delegates: 29, cost: 1000000},
+                {name: 'Maine', delegates: 20, cost: 1000000},
+                {name: 'Vermont', delegates: 16, cost: 500000}
+            ],
+            
+            // DOM cache
+            elements: {},
+            
+            // Event handlers bound once
+            handlers: {},
+            
+            init() {
+                this.cacheElements();
+                this.setupEventListeners();
+                this.showSetup();
+            },
+            
+            cacheElements() {
+                this.elements = {
+                    gameArea: document.getElementById('game-area'),
+                    phase: document.getElementById('phase'),
+                    phaseDesc: document.getElementById('phase-desc'),
+                    money: document.getElementById('money'),
+                    polling: document.getElementById('polling'),
+                    baseSupport: document.getElementById('base-support'),
+                    fieldOffices: document.getElementById('field-offices'),
+                    donors: document.getElementById('donors'),
+                    delegateCount: document.getElementById('delegate-count'),
+                    delegatesNeeded: document.getElementById('delegates-needed'),
+                    endorsements: document.getElementById('endorsements'),
+                    coalition: document.getElementById('coalition'),
+                    opponents: document.getElementById('opponents'),
+                    upcomingStates: document.getElementById('upcoming-states'),
+                    eventLog: document.getElementById('event-log'),
+                    actionCounter: document.getElementById('action-counter'),
+                    actionsTaken: document.getElementById('actions-taken'),
+                    modal: document.getElementById('modal'),
+                    modalTitle: document.getElementById('modal-title'),
+                    modalText: document.getElementById('modal-text')
+                };
+            },
+            
+            setupEventListeners() {
+                // Control buttons
+                document.getElementById('undo-btn').addEventListener('click', () => this.undo());
+                document.getElementById('save-btn').addEventListener('click', () => this.saveGame());
+                document.getElementById('load-btn').addEventListener('click', () => this.loadGame());
+                document.getElementById('reset-btn').addEventListener('click', () => this.resetGame());
+                document.getElementById('help-btn').addEventListener('click', () => this.showHelp());
+                document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
+                
+                // Delegate for dynamic content
+                this.elements.gameArea.addEventListener('click', this.handleClick.bind(this));
+            },
+            
+            handleClick(e) {
+                const target = e.target.closest('[data-action]');
+                if (!target) return;
+                
+                const action = target.dataset.action;
+                const param = target.dataset.param;
+                
+                if (this[action]) {
+                    e.preventDefault();
+                    this[action](param);
+                }
+            },
+            
+            saveLastState() {
+                // Lightweight state save
+                this.state.lastState = {
+                    money: this.state.money,
+                    polling: this.state.polling,
+                    baseSupport: this.state.baseSupport,
+                    actionsThisMonth: this.state.actionsThisMonth,
+                    donors: this.state.donors,
+                    endorsements: [...this.state.endorsements]
+                };
+            },
+            
+            undo() {
+                if (this.state.lastState) {
+                    Object.assign(this.state, this.state.lastState);
+                    this.state.lastState = null;
+                    this.updateDisplay();
+                    this.showInvisiblePrimary();
+                    this.addLog('Action undone', 'info');
+                }
+            },
+            
+            showSetup() {
+                this.elements.gameArea.innerHTML = `
+                    <h2>Your Congressional Career Was a Success!</h2>
+                    <p style="margin-bottom: 20px;">You've served two successful terms in Congress, built a national profile, and now it's time for the ultimate challenge: running for President of the United States.</p>
+                    
+                    <h3>Choose Your Party</h3>
+                    <div style="margin-bottom: 20px;">
+                        <button class="btn-danger" data-action="selectParty" data-param="republican">🐘 Republican</button>
+                        <button class="btn-success" data-action="selectParty" data-param="democrat">🐴 Democrat</button>
+                    </div>
+                    
+                    <div id="primary-calendar" style="display: none; margin-bottom: 20px;">
+                        <h3>Your Primary Calendar</h3>
+                        <div id="calendar-list"></div>
+                    </div>
+                    
+                    <div id="candidate-type" style="display: none;">
+                        <h3>Choose Your Campaign Style</h3>
+                        <div id="type-options"></div>
+                    </div>
+                `;
+            },
+            
+            selectParty(party) {
+                this.state.party = party;
+                this.state.delegatesNeeded = party === 'republican' ? 1215 : 1968;
+                
+                // Show calendar
+                const calendarEl = document.getElementById('calendar-list');
+                const calendar = this.PRIMARY_CALENDAR[party];
+                calendarEl.innerHTML = calendar.map(event => 
+                    `<div class="state-card">
+                        <strong>${event.name}</strong> - ${event.date}
+                        <br>${event.delegates} delegates (${event.type})
+                    </div>`
+                ).join('');
+                document.getElementById('primary-calendar').style.display = 'block';
+                
+                // Show candidate types
+                const typeOptions = document.getElementById('type-options');
+                
+                if (party === 'republican') {
+                    typeOptions.innerHTML = `
+                        <button data-action="selectType" data-param="establishment">
+                            Establishment Conservative<br>
+                            <small>Pro-business, experienced, suburban appeal</small>
+                        </button>
+                        <button data-action="selectType" data-param="religious">
+                            Religious Conservative<br>
+                            <small>Evangelical base, Iowa strength, values voter</small>
+                        </button>
+                        <button data-action="selectType" data-param="populist">
+                            Populist Outsider<br>
+                            <small>Anti-establishment, media savvy, rural appeal</small>
+                        </button>
+                        <button data-action="selectType" data-param="libertarian">
+                            Libertarian-Leaning<br>
+                            <small>Fiscal focus, young voters, New Hampshire strength</small>
+                        </button>
+                    `;
+                } else {
+                    typeOptions.innerHTML = `
+                        <button data-action="selectType" data-param="progressive">
+                            Progressive Insurgent<br>
+                            <small>Bernie-style, young voters, small donors</small>
+                        </button>
+                        <button data-action="selectType" data-param="moderate">
+                            Establishment Moderate<br>
+                            <small>Biden-style, Black voters, endorsements</small>
+                        </button>
+                        <button data-action="selectType" data-param="labor">
+                            Labor-Focused<br>
+                            <small>Union support, Rust Belt, working class</small>
+                        </button>
+                        <button data-action="selectType" data-param="identity">
+                            Identity-Focused<br>
+                            <small>Diverse coalition, social justice, urban</small>
+                        </button>
+                    `;
+                }
+                
+                document.getElementById('candidate-type').style.display = 'block';
+                
+                // Generate opponents
+                this.state.opponents = this.getOpponents(party);
+                this.updateOpponents();
+            },
+            
+            selectType(type) {
+                this.state.candidateType = type;
+                
+                // Set initial advantages
+                const advantages = {
+                    'establishment': { money: 2000000, endorsements: ['Former President'], baseSupport: 30 },
+                    'moderate': { money: 2000000, endorsements: ['Major Donor Network'], baseSupport: 30 },
+                    'progressive': { donors: 15000, baseSupport: 40, coalitions: {progressive: 35} },
+                    'religious': { donors: 15000, baseSupport: 40, fieldOffices: {Iowa: 5} },
+                    'populist': { polling: 20, baseSupport: 35, coalitions: {populist: 25} },
+                    'labor': { endorsements: ['AFL-CIO'], fieldOffices: {Nevada: 3}, baseSupport: 28 },
+                    'libertarian': { donors: 10000, baseSupport: 22, coalitions: {libertarian: 20} },
+                    'identity': { endorsements: ['Civil Rights Leader'], baseSupport: 25 }
+                };
+                
+                const advantage = advantages[type] || {};
+                Object.assign(this.state, advantage);
+                
+                this.startInvisiblePrimary();
+            },
+            
+            startInvisiblePrimary() {
+                this.state.phase = 'invisible';
+                this.state.monthsUntilPrimary = 12;
+                this.state.actionsThisMonth = 0;
+                this.showInvisiblePrimary();
+                this.updateDisplay();
+                this.addLog('You announce your candidacy for President!', 'success');
+            },
+            
+            showInvisiblePrimary() {
+                const s = this.state;
+                const canAct = s.actionsThisMonth < this.MAX_ACTIONS;
+                
+                this.elements.gameArea.innerHTML = `
+                    <h2>Invisible Primary - ${s.monthsUntilPrimary} Month${s.monthsUntilPrimary !== 1 ? 's' : ''} Until First Primary</h2>
+                    <p>Build your campaign infrastructure before voting begins! You can take up to 3 actions per month.</p>
+                    
+                    <h3>Campaign Actions</h3>
+                    <button data-action="fundraise" data-param="small" ${!canAct || s.money < 100000 ? 'disabled' : ''}>
+                        Small Dollar Fundraising<br>
+                        <small>Cost: $100k, Gain: 5000 donors, improves base support</small>
+                    </button>
+                    <button data-action="fundraise" data-param="major" ${!canAct || s.donors < 10000 ? 'disabled' : ''}>
+                        Major Donor Events<br>
+                        <small>Req: 10k donors, Gain: $2-5M</small>
+                    </button>
+                    <button data-action="buildFieldOffice" ${!canAct || s.money < 500000 ? 'disabled' : ''}>
+                        Build Field Office<br>
+                        <small>Cost: $500k, Choose state</small>
+                    </button>
+                    <button data-action="seekEndorsement" ${!canAct || s.polling < 10 ? 'disabled' : ''}>
+                        Seek Endorsement<br>
+                        <small>Req: 10%+ polling, improves establishment support</small>
+                    </button>
+                    <button data-action="debatePrep" ${!canAct || s.monthsUntilPrimary % 3 !== 0 ? 'disabled' : ''}>
+                        Debate Preparation<br>
+                        <small>Available every 3 months</small>
+                    </button>
+                    <button data-action="showMediaOptions" ${!canAct || s.money < 1000000 ? 'disabled' : ''}>
+                        Media Blitz<br>
+                        <small>Cost: $1M+, Choose topic and scope</small>
+                    </button>
+                    <button data-action="baseOutreach" ${!canAct ? 'disabled' : ''}>
+                        Base Outreach<br>
+                        <small>Rally the party faithful, improve base support</small>
+                    </button>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn-warning" data-action="endMonth">End Month →</button>
+                    </div>
+                `;
+                
+                this.updateDisplay();
+            },
+            
+            showMediaOptions() {
+                this.elements.gameArea.innerHTML = `
+                    <h2>Media Campaign Strategy</h2>
+                    <p>Choose your message and target audience. Different topics resonate differently in each state.</p>
+                    
+                    <h3>Select Topic</h3>
+                    <div class="topic-grid">
+                        ${Object.entries(this.AD_TOPICS).map(([key, topic]) => `
+                            <button class="topic-btn" data-action="selectMediaTopic" data-param="${key}">
+                                ${topic.name}<br>
+                                <small>${topic.baseMessage}</small>
+                            </button>
+                        `).join('')}
+                    </div>
+                    
+                    <div id="media-scope" style="display: none; margin-top: 20px;">
+                        <h3>Campaign Scope</h3>
+                        <button data-action="runMediaCampaign" data-param="local">
+                            Local Media<br><small>$1M - Single state focus</small>
+                        </button>
+                        <button data-action="runMediaCampaign" data-param="regional" ${this.state.money < 3000000 ? 'disabled' : ''}>
+                            Regional Media<br><small>$3M - Multiple states</small>
+                        </button>
+                        <button data-action="runMediaCampaign" data-param="national" ${this.state.money < 5000000 ? 'disabled' : ''}>
+                            National Media<br><small>$5M - Nationwide coverage</small>
+                        </button>
+                    </div>
+                    
+                    <button data-action="showInvisiblePrimary" style="margin-top: 20px;">← Back</button>
+                `;
+            },
+            
+            selectMediaTopic(topic) {
+                this.state.selectedMediaTopic = topic;
+                document.getElementById('media-scope').style.display = 'block';
+                
+                // Highlight selected
+                document.querySelectorAll('.topic-btn').forEach(btn => {
+                    btn.classList.toggle('selected', btn.dataset.param === topic);
+                });
+            },
+            
+            runMediaCampaign(scope) {
+                if (!this.state.selectedMediaTopic) return;
+                
+                this.saveLastState();
+                
+                const costs = { local: 1000000, regional: 3000000, national: 5000000 };
+                const cost = costs[scope];
+                
+                if (this.state.money < cost) return;
+                
+                this.state.money -= cost;
+                this.state.actionsThisMonth++;
+                
+                const topic = this.AD_TOPICS[this.state.selectedMediaTopic];
+                let impact = topic.baseAppeal;
+                
+                if (scope === 'regional') impact *= 1.5;
+                if (scope === 'national') impact *= 2;
+                
+                this.state.polling += Math.floor(impact / 3);
+                this.state.mediaAttention += Math.floor(impact);
+                
+                // Base support bonus for certain topics
+                if (this.state.selectedMediaTopic === 'values' || this.state.selectedMediaTopic === 'guns') {
+                    this.state.baseSupport = Math.min(60, this.state.baseSupport + 5);
+                }
+                
+                this.addLog(`${scope.charAt(0).toUpperCase() + scope.slice(1)} media campaign on ${topic.name} increases polling!`, 'success');
+                this.showInvisiblePrimary();
+            },
+            
+            fundraise(type) {
+                this.saveLastState();
+                this.state.actionsThisMonth++;
+                
+                if (type === 'small') {
+                    this.state.money -= 100000;
+                    const newDonors = 5000 + Math.floor(Math.random() * 3000);
+                    this.state.donors += newDonors;
+                    this.state.baseSupport = Math.min(60, this.state.baseSupport + 3);
+                    this.addLog(`Small dollar drive adds ${newDonors.toLocaleString()} donors, base support +3%`, 'success');
+                } else {
+                    const raised = 2000000 + Math.floor(Math.random() * 3000000);
+                    this.state.money += raised;
+                    this.addLog(`Major donor event raises $${(raised/1000000).toFixed(1)}M`, 'success');
+                }
+                
+                this.showInvisiblePrimary();
+            },
+            
+            buildFieldOffice() {
+                const earlyStates = this.state.party === 'democrat' ? 
+                    ['South Carolina', 'Nevada', 'New Hampshire', 'Michigan'] :
+                    ['Iowa', 'New Hampshire', 'Nevada', 'South Carolina'];
+                
+                const state = prompt(`Which early state? (${earlyStates.join(', ')})`);
+                if (earlyStates.includes(state)) {
+                    this.saveLastState();
+                    this.state.actionsThisMonth++;
+                    this.state.money -= 500000;
+                    this.state.fieldOffices[state] = (this.state.fieldOffices[state] || 0) + 1;
+                    this.addLog(`Opened field office in ${state}`, 'success');
+                    this.showInvisiblePrimary();
+                }
+            },
+            
+            seekEndorsement() {
+                this.saveLastState();
+                this.state.actionsThisMonth++;
+                
+                const endorsements = [
+                    'Governor', 'Senator', 'House Leader', 'Major Newspaper',
+                    'Labor Union', 'Veterans Group', 'Business Leader'
+                ];
+                const newEndorsement = endorsements[Math.floor(Math.random() * endorsements.length)];
+                
+                if (Math.random() < 0.6 + (this.state.polling / 100)) {
+                    this.state.endorsements.push(newEndorsement);
+                    this.state.polling += 2;
+                    this.state.coalitions.establishment = (this.state.coalitions.establishment || 0) + 5;
+                    this.addLog(`Secured endorsement from ${newEndorsement}!`, 'success');
+                } else {
+                    this.addLog(`Failed to secure ${newEndorsement} endorsement`, 'warning');
+                }
+                
+                this.showInvisiblePrimary();
+            },
+            
+            debatePrep() {
+                this.saveLastState();
+                this.state.actionsThisMonth++;
+                const performance = Math.floor(Math.random() * 10) + 5;
+                const isStrong = performance > 7;
+                
+                this.state.polling += isStrong ? 5 : 2;
+                this.state.momentum += isStrong ? 10 : 5;
+                
+                this.addLog(`Debate performance was ${isStrong ? 'strong' : 'adequate'}! Polling +${isStrong ? 5 : 2}%`, 'success');
+                
+                // Opponents react
+                this.state.opponents.forEach(opp => {
+                    opp.polling += Math.floor(Math.random() * 3);
+                });
+                
+                this.showInvisiblePrimary();
+            },
+            
+            baseOutreach() {
+                this.saveLastState();
+                this.state.actionsThisMonth++;
+                this.state.baseSupport = Math.min(60, this.state.baseSupport + 8);
+                this.state.polling += 2;
+                this.state.coalitions.base = (this.state.coalitions.base || 25) + 5;
+                this.addLog('Base outreach energizes party faithful! Base support +8%', 'success');
+                this.showInvisiblePrimary();
+            },
+            
+            endMonth() {
+                this.state.monthsUntilPrimary--;
+                this.state.actionsThisMonth = 0;
+                
+                // Random events
+                if (Math.random() < 0.3) {
+                    const events = [
+                        { text: 'Scandal rocks opponent campaign!', polling: 2, opponent: -5 },
+                        { text: 'Economic news boosts your message', polling: 3, momentum: 5 },
+                        { text: 'Gaffe on campaign trail', polling: -2, base: -3 }
+                    ];
+                    const event = events[Math.floor(Math.random() * events.length)];
+                    
+                    if (event.polling) this.state.polling += event.polling;
+                    if (event.momentum) this.state.momentum += event.momentum;
+                    if (event.base) this.state.baseSupport = Math.max(15, this.state.baseSupport + event.base);
+                    if (event.opponent && this.state.opponents[0]) {
+                        this.state.opponents[0].polling += event.opponent;
+                    }
+                    
+                    this.showModal('Campaign Event', event.text);
+                }
+                
+                if (this.state.monthsUntilPrimary <= 0) {
+                    this.startEarlyStates();
+                } else {
+                    this.showInvisiblePrimary();
+                }
+            },
+            
+            startEarlyStates() {
+                this.state.phase = 'early';
+                this.state.currentState = 0;
+                this.addLog('Primary voting begins!', 'success');
+                this.showEarlyState();
+            },
+            
+            showEarlyState() {
+                const calendar = this.PRIMARY_CALENDAR[this.state.party];
+                
+                if (this.state.currentState >= calendar.length) {
+                    this.startSuperTuesday();
+                    return;
+                }
+                
+                const currentPrimary = calendar[this.state.currentState];
+                
+                this.elements.gameArea.innerHTML = `
+                    <h2>${currentPrimary.name} ${currentPrimary.type === 'caucus' ? 'Caucus' : 'Primary'}</h2>
+                    <p>${currentPrimary.date} - ${currentPrimary.delegates} delegates at stake</p>
+                    
+                    <div class="stat-box">
+                        <div class="stat-label">Your Polling</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${this.state.polling}%">${this.state.polling}%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-box">
+                        <div class="stat-label">Field Offices Here</div>
+                        <div class="stat-value">${this.state.fieldOffices[currentPrimary.name] || 0}</div>
+                    </div>
+                    
+                    <h3>Final Push Strategy</h3>
+                    <button data-action="groundGame" data-param="${currentPrimary.name}" 
+                            ${this.state.money < 1000000 ? 'disabled' : ''}>
+                        Ground Game Surge<br><small>Cost: $1M, +5-10% turnout</small>
+                    </button>
+                    <button data-action="airWar" data-param="${currentPrimary.name}" 
+                            ${this.state.money < 2000000 ? 'disabled' : ''}>
+                        TV Ad Blitz<br><small>Cost: $2M, +3-7% persuasion</small>
+                    </button>
+                    <button data-action="rallyPush" data-param="${currentPrimary.name}">
+                        Rally & Retail Politics<br><small>Personal time, +momentum</small>
+                    </button>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn-warning" data-action="runEarlyState" data-param="${currentPrimary.name}">
+                            Run ${currentPrimary.name} Election
+                        </button>
+                    </div>
+                `;
+                
+                this.updateDisplay();
+            },
+            
+            groundGame(state) {
+                this.state.money -= 1000000;
+                const boost = 5 + Math.floor(Math.random() * 5);
+                const fieldBonus = (this.state.fieldOffices[state] || 0);
+                this.state.polling += Math.floor(boost * (1 + fieldBonus * 0.2));
+                this.addLog(`Ground game increases turnout by ${boost}%`, 'success');
+                this.updateDisplay();
+            },
+            
+            airWar(state) {
+                this.state.money -= 2000000;
+                const boost = 3 + Math.floor(Math.random() * 4);
+                this.state.polling += boost;
+                this.addLog(`TV ads persuade ${boost}% of voters`, 'success');
+                this.updateDisplay();
+            },
+            
+            rallyPush(state) {
+                this.state.momentum += 10;
+                this.state.polling += 2;
+                this.state.baseSupport = Math.min(65, this.state.baseSupport + 3);
+                this.addLog('Retail politics energizes base supporters!', 'success');
+                this.updateDisplay();
+            },
+            
+            runEarlyState(state) {
+                const calendar = this.PRIMARY_CALENDAR[this.state.party];
+                const currentPrimary = calendar[this.state.currentState];
+                
+                // Calculate results
+                const baseVote = this.state.polling;
+                const fieldBonus = (this.state.fieldOffices[state] || 0) * 2;
+                const momentumBonus = this.state.momentum / 10;
+                const baseBonus = this.state.baseSupport / 10;
+                const totalVote = Math.min(45, baseVote + fieldBonus + momentumBonus + baseBonus + Math.floor(Math.random() * 10) - 5);
+                
+                // Democrat 15% threshold
+                const threshold = this.state.party === 'democrat' ? 15 : 0;
+                
+                // Calculate delegates
+                const delegates = currentPrimary.delegates;
+                let delegatesWon = 0;
+                
+                if (totalVote >= threshold) {
+                    if (totalVote > 35) { // Win
+                        delegatesWon = Math.floor(delegates * 0.4);
+                        this.state.momentum += 15;
+                        this.state.polling += 5;
+                        this.state.statesWon.push(state);
+                        this.addLog(`Victory in ${state}! Won ${delegatesWon} delegates`, 'success');
+                        this.showModal('Victory!', `You won ${state} with ${totalVote.toFixed(1)}% of the vote!`);
+                    } else { // Place but not win
+                        delegatesWon = Math.floor(delegates * (totalVote / 100) * 0.5);
+                        this.state.momentum -= 5;
+                        this.state.statesLost.push(state);
+                        this.addLog(`Finished in ${state} with ${delegatesWon} delegates`, 'warning');
+                        this.showModal('Results', `Got ${totalVote.toFixed(1)}% in ${state}`);
+                    }
+                } else {
+                    this.addLog(`Failed to meet 15% threshold in ${state} - no delegates!`, 'danger');
+                    this.showModal('Threshold Miss', 'Failed to reach 15% - no delegates awarded');
+                }
+                
+                this.state.delegateCount += delegatesWon;
+                
+                // Update opponents
+                this.state.opponents.forEach(opp => {
+                    const oppVote = opp.polling + Math.floor(Math.random() * 10) - 5;
+                    if (oppVote >= threshold) {
+                        opp.delegates += Math.floor(delegates * (oppVote / 100) * 0.3);
+                    }
+                    if (oppVote > totalVote) {
+                        opp.polling += 3;
+                    }
+                });
+                
+                this.state.currentState++;
+                this.updateDisplay();
+                this.showEarlyState();
+            },
+            
+            startSuperTuesday() {
+                this.state.phase = 'super';
+                this.addLog('Super Tuesday! Allocate resources across 14 states', 'success');
+                
+                this.elements.gameArea.innerHTML = `
+                    <h2>Super Tuesday Resource Allocation</h2>
+                    <p>Available Funds: $${(this.state.money/1000000).toFixed(1)}M</p>
+                    <p>Allocated: $<span id="allocated">0</span>M</p>
+                    
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${this.SUPER_TUESDAY_STATES.map(state => `
+                            <div class="state-card">
+                                <strong>${state.name}</strong> - ${state.delegates} delegates
+                                <br>Min investment: $${(state.cost/1000000).toFixed(1)}M
+                                <br>
+                                <input type="range" id="${state.name}-slider" 
+                                       min="0" max="${Math.min(this.state.money, state.cost * 3)}" 
+                                       value="0" step="100000" 
+                                       data-state="${state.name}">
+                                <span id="${state.name}-amount">$0M</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <button class="btn-warning" data-action="runSuperTuesday" style="margin-top: 20px;">
+                        Run Super Tuesday Elections
+                    </button>
+                `;
+                
+                // Add slider listeners
+                this.SUPER_TUESDAY_STATES.forEach(state => {
+                    const slider = document.getElementById(`${state.name}-slider`);
+                    slider.addEventListener('input', (e) => {
+                        const amount = parseInt(e.target.value);
+                        this.state.superTuesdayAllocations[state.name] = amount;
+                        document.getElementById(`${state.name}-amount`).textContent = `$${(amount/1000000).toFixed(1)}M`;
+                        
+                        const total = Object.values(this.state.superTuesdayAllocations).reduce((a, b) => a + b, 0);
+                        document.getElementById('allocated').textContent = (total/1000000).toFixed(1);
+                    });
+                });
+                
+                this.updateDisplay();
+            },
+            
+            runSuperTuesday() {
+                let totalDelegatesWon = 0;
+                let statesWonCount = 0;
+                const threshold = this.state.party === 'democrat' ? 15 : 0;
+                
+                this.SUPER_TUESDAY_STATES.forEach(state => {
+                    const investment = this.state.superTuesdayAllocations[state.name] || 0;
+                    const investmentRatio = investment / state.cost;
+                    
+                    const basePerformance = this.state.polling / 100;
+                    const investmentBonus = Math.min(0.3, investmentRatio * 0.15);
+                    const momentumBonus = this.state.momentum / 200;
+                    const baseBonus = this.state.baseSupport / 200;
+                    
+                    const performance = basePerformance + investmentBonus + momentumBonus + baseBonus + (Math.random() * 0.2 - 0.1);
+                    const votePct = Math.max(5, Math.min(50, performance * 100));
+                    
+                    let delegatesWon = 0;
+                    if (votePct >= threshold) {
+                        delegatesWon = Math.floor(state.delegates * (votePct / 100));
+                    }
+                    
+                    totalDelegatesWon += delegatesWon;
+                    if (votePct > 35) {
+                        statesWonCount++;
+                        this.state.statesWon.push(state.name);
+                    }
+                });
+                
+                this.state.delegateCount += totalDelegatesWon;
+                const totalSpent = Object.values(this.state.superTuesdayAllocations).reduce((a, b) => a + b, 0);
+                this.state.money -= totalSpent;
+                
+                this.addLog(`Super Tuesday: Won ${totalDelegatesWon} delegates across ${statesWonCount} states`, 
+                           statesWonCount > 7 ? 'success' : statesWonCount > 4 ? 'warning' : 'danger');
+                
+                this.checkVictory();
+            },
+            
+            checkVictory() {
+                const needed = this.state.delegatesNeeded;
+                const won = this.state.delegateCount;
+                
+                if (won >= needed) {
+                    this.showModal('Victory!', `Congratulations! You've secured ${won} delegates and won the nomination!`);
+                } else if (won > needed * 0.65) {
+                    this.showModal('Strong Finish', `You've won ${won} delegates. A major force in the party!`);
+                } else if (won > needed * 0.4) {
+                    this.showModal('Respectable Showing', `With ${won} delegates, you've made your mark.`);
+                } else {
+                    this.showModal('Campaign Ends', `Your campaign ends with ${won} delegates.`);
+                }
+                
+                this.elements.gameArea.innerHTML = `
+                    <h2>Campaign Summary</h2>
+                    <div class="stat-box">
+                        <div class="stat-label">Total Delegates Won</div>
+                        <div class="stat-value">${won} / ${needed}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">States Won</div>
+                        <div class="stat-value">${this.state.statesWon.length}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Final Polling</div>
+                        <div class="stat-value">${this.state.polling}%</div>
+                    </div>
+                    <button onclick="location.reload()">Play Again</button>
+                `;
+                
+                this.updateDisplay();
+            },
+            
+            updateDisplay() {
+                const s = this.state;
+                
+                // Phase
+                let phaseText = '';
+                if (s.phase === 'invisible') {
+                    phaseText = `Invisible Primary (${s.monthsUntilPrimary} months)`;
+                    this.elements.phaseDesc.textContent = 'Building campaign before voting';
+                } else if (s.phase === 'early') {
+                    phaseText = 'Early States';
+                    this.elements.phaseDesc.textContent = 'First primaries and caucuses';
+                } else if (s.phase === 'super') {
+                    phaseText = 'Super Tuesday';
+                    this.elements.phaseDesc.textContent = '14 states vote simultaneously';
+                } else {
+                    phaseText = s.phase;
+                }
+                this.elements.phase.textContent = phaseText;
+                
+                // Stats
+                this.elements.money.textContent = `$${(s.money/1000000).toFixed(1)}M`;
+                this.elements.polling.style.width = `${Math.min(100, s.polling)}%`;
+                this.elements.polling.textContent = `${s.polling}%`;
+                this.elements.baseSupport.style.width = `${Math.min(100, s.baseSupport)}%`;
+                this.elements.baseSupport.textContent = `${s.baseSupport}%`;
+                this.elements.fieldOffices.textContent = Object.values(s.fieldOffices).reduce((a, b) => a + b, 0);
+                this.elements.donors.textContent = s.donors.toLocaleString();
+                this.elements.delegateCount.textContent = s.delegateCount;
+                this.elements.delegatesNeeded.textContent = `Need ${s.delegatesNeeded} to Win`;
+                
+                // Actions counter
+                if (s.phase === 'invisible') {
+                    this.elements.actionsTaken.textContent = s.actionsThisMonth;
+                    this.elements.actionCounter.style.display = 'block';
+                } else {
+                    this.elements.actionCounter.style.display = 'none';
+                }
+                
+                // Endorsements
+                if (s.endorsements.length > 0) {
+                    this.elements.endorsements.innerHTML = s.endorsements.map(e => 
+                        `<span class="endorsement-badge">${e}</span>`
+                    ).join('');
+                } else {
+                    this.elements.endorsements.innerHTML = '<span style="color: #95a5a6;">None yet</span>';
+                }
+                
+                // Coalition
+                const coalitions = Object.entries(s.coalitions).filter(([k, v]) => v > 0);
+                if (coalitions.length > 0) {
+                    this.elements.coalition.innerHTML = coalitions.map(([key, value]) => `
+                        <div class="coalition-segment" style="background: ${
+                            key === 'base' ? '#e74c3c' :
+                            key === 'moderate' ? '#3498db' :
+                            key === 'progressive' ? '#27ae60' :
+                            key === 'establishment' ? '#f39c12' :
+                            key === 'evangelical' ? '#9b59b6' :
+                            '#34495e'
+                        }; flex: ${value};">
+                            ${key.charAt(0).toUpperCase() + key.slice(1)} ${value}%
+                        </div>
+                    `).join('');
+                }
+                
+                this.updateOpponents();
+            },
+            
+            updateOpponents() {
+                if (this.state.opponents.length > 0) {
+                    this.elements.opponents.innerHTML = this.state.opponents.map(opp => `
+                        <div class="opponent-card">
+                            <strong>${opp.name}</strong>
+                            <br>${opp.type}
+                            <br>Polling: ${opp.polling}%
+                            <br>Delegates: ${opp.delegates}
+                        </div>
+                    `).join('');
+                }
+            },
+            
+            addLog(message, type = 'info') {
+                this.state.eventLog.unshift({ message, type });
+                if (this.state.eventLog.length > 5) this.state.eventLog.pop();
+                
+                this.elements.eventLog.innerHTML = this.state.eventLog
+                    .map(e => `<div class="event-log ${e.type}">${e.message}</div>`)
+                    .join('');
+            },
+            
+            showModal(title, text) {
+                this.elements.modalTitle.textContent = title;
+                this.elements.modalText.textContent = text;
+                this.elements.modal.classList.add('active');
+            },
+            
+            closeModal() {
+                this.elements.modal.classList.remove('active');
+            },
+            
+            saveGame() {
+                localStorage.setItem('presidentialPrimarySave', JSON.stringify(this.state));
+                this.showModal('Game Saved', 'Your campaign progress has been saved.');
+            },
+            
+            loadGame() {
+                const save = localStorage.getItem('presidentialPrimarySave');
+                if (save) {
+                    this.state = JSON.parse(save);
+                    this.updateDisplay();
+                    if (this.state.phase === 'invisible') this.showInvisiblePrimary();
+                    else if (this.state.phase === 'early') this.showEarlyState();
+                    else if (this.state.phase === 'super') this.startSuperTuesday();
+                    this.showModal('Game Loaded', 'Your saved campaign has been restored.');
+                } else {
+                    this.showModal('No Save Found', 'No saved game found.');
+                }
+            },
+            
+            resetGame() {
+                if (confirm('Are you sure you want to reset? All progress will be lost.')) {
+                    location.reload();
+                }
+            },
+            
+            showHelp() {
+                this.showModal('How to Play',
+                    'GOAL: Win your party\'s presidential nomination by securing enough delegates.\n\n' +
+                    'PHASES:\n' +
+                    '1. Invisible Primary (12 months): Build campaign infrastructure\n' +
+                    '2. Early States: Campaign in first 4 primary states\n' +
+                    '3. Super Tuesday: Allocate resources across 14 states\n\n' +
+                    'STRATEGY:\n' +
+                    '• Build field offices for ground game\n' +
+                    '• Choose media topics that resonate in different states\n' +
+                    '• Maintain base support while expanding coalition\n' +
+                    '• Democrats need 15% minimum to win any delegates\n\n' +
+                    'BASE SUPPORT: Your party\'s core voters who always participate.'
+                );
+            },
+            
+            getOpponents(party) {
+                return party === 'republican' ? [
+                    { name: 'Gov Smith', type: 'Establishment', polling: 20, delegates: 0 },
+                    { name: 'Sen Cruz', type: 'Religious', polling: 15, delegates: 0 },
+                    { name: 'CEO Johnson', type: 'Populist', polling: 25, delegates: 0 }
+                ] : [
+                    { name: 'Sen Warren', type: 'Progressive', polling: 22, delegates: 0 },
+                    { name: 'VP Harris', type: 'Moderate', polling: 25, delegates: 0 },
+                    { name: 'Gov Brown', type: 'Labor', polling: 12, delegates: 0 }
+                ];
+            }
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => Game.init());
+    </script>
+</body>
+</html>
