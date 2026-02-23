@@ -513,25 +513,78 @@
 
         /* Print Styles */
         @media print {
-            .header, .hero, .btn-primary, .btn-secondary, .selection-controls, .no-print {
+            .header, .hero, .btn-primary, .btn-secondary, .selection-controls, .no-print, .action-buttons, .stats-bar, .placement-notice {
                 display: none !important;
+            }
+
+            body {
+                background: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
             }
 
             .container {
                 margin: 0;
                 padding: 10px;
+                max-width: 100%;
             }
 
             .crossword-container {
-                flex-direction: column;
+                display: block !important;
+            }
+
+            .crossword-grid {
+                box-shadow: none !important;
+                padding: 10px;
+                margin-bottom: 20px;
+            }
+
+            .crossword-cell {
+                width: 28px !important;
+                height: 28px !important;
+                border: 1px solid #000 !important;
+            }
+
+            .crossword-cell.empty {
+                background: #000 !important;
+                background-color: #000 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                /* Fallback: use box-shadow which prints more reliably */
+                box-shadow: inset 0 0 0 50px #000 !important;
             }
 
             .crossword-cell input {
-                border: 1px solid #999;
+                border: none !important;
+                font-size: 0.9em !important;
+            }
+
+            .cell-number {
+                font-size: 0.5em !important;
+            }
+
+            .clues-section {
+                max-width: 100% !important;
+            }
+
+            .clues-card {
+                box-shadow: none !important;
+                border: 1px solid #ccc;
+                page-break-inside: avoid;
+            }
+
+            .clue-item {
+                padding: 4px 0 !important;
+                font-size: 0.9em;
             }
 
             .answer-key {
                 page-break-before: always;
+                display: block !important;
+                box-shadow: none !important;
+                border: 1px solid #ccc;
             }
         }
 
@@ -2444,9 +2497,64 @@
         .completion-banner.show { display: block; }
         .completion-banner h3 { font-size: 1.4em; margin-bottom: 5px; }
         @media print {
-            .action-buttons, .stats-bar { display: none !important; }
-            .answer-key { page-break-before: always; display: block !important; }
-            body { background: white; }
+            .action-buttons, .stats-bar, .completion-banner { display: none !important; }
+            body { 
+                background: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            .container { max-width: 100%; padding: 0; }
+            .header { 
+                background: linear-gradient(135deg, var(--primary-blue), var(--primary-green)) !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                padding: 15px !important;
+                margin-bottom: 15px !important;
+            }
+            .crossword-container { display: block !important; }
+            .crossword-grid { 
+                box-shadow: none !important; 
+                padding: 10px !important;
+                margin-bottom: 20px !important;
+            }
+            .crossword-cell {
+                width: 26px !important;
+                height: 26px !important;
+                border: 1px solid #000 !important;
+            }
+            .crossword-cell.empty {
+                background: #000 !important;
+                background-color: #000 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                box-shadow: inset 0 0 0 50px #000 !important;
+            }
+            .crossword-cell input {
+                border: none !important;
+                font-size: 0.85em !important;
+            }
+            .cell-number { font-size: 0.45em !important; }
+            .clues-section { max-width: 100% !important; }
+            .clues-card { 
+                box-shadow: none !important; 
+                border: 1px solid #ccc !important;
+                padding: 15px !important;
+                page-break-inside: avoid;
+            }
+            .clue-item { padding: 3px 0 !important; font-size: 0.85em !important; }
+            .name-input { 
+                box-shadow: none !important; 
+                border: 1px solid #ccc !important;
+                padding: 10px !important;
+            }
+            .answer-key { 
+                page-break-before: always; 
+                display: block !important; 
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
         }
         .name-input {
             background: white;
