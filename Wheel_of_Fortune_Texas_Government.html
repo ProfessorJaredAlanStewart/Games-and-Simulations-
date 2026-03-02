@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheel of Fortune — Texas Government Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Bebas+Neue&family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --gold: #D4AF37; --gold-light: #F4D942; --gold-dark: #A67C00;
+            --teal: #006B6B; --teal-dark: #004444;
+            --board-bg: #0B3D91; --board-tile: #1565C0;
+            --stage-bg: #0a0a1a; --magenta: #C2185B;
+        }
+        body {
+            font-family: 'Lato', sans-serif; background: var(--stage-bg);
+            background-image: radial-gradient(ellipse at 50% 0%, rgba(0,107,107,0.10) 0%, transparent 60%),
+                              radial-gradient(ellipse at 50% 100%, rgba(100,50,150,0.06) 0%, transparent 50%);
+            color: white; min-height: 100vh; overflow-x: hidden;
+        }
+
+        /* ═══ SETUP ═══ */
+        .setup-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:40px 20px; }
+        .setup-screen.hidden { display:none; }
+        .setup-logo {
+            font-family:'Bebas Neue',sans-serif; font-size:clamp(2.5em,6vw,4.5em); letter-spacing:6px;
+            background:linear-gradient(180deg,#F4D942 0%,#D4AF37 40%,#A67C00 100%);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            text-align:center; margin-bottom:5px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+        }
+        .setup-subtitle { font-family:'Oswald',sans-serif; font-size:clamp(1em,2.5vw,1.4em); color:var(--teal); letter-spacing:8px; text-transform:uppercase; text-align:center; margin-bottom:40px; }
+        .setup-box { background:linear-gradient(135deg,rgba(0,107,107,0.1),rgba(0,0,0,0.5)); border:2px solid var(--gold-dark); border-radius:16px; padding:40px; max-width:650px; width:100%; }
+        .setup-label { font-family:'Oswald',sans-serif; font-size:1.15em; color:var(--gold); margin-bottom:15px; letter-spacing:2px; }
+        .player-count-row { display:flex; gap:12px; justify-content:center; margin-bottom:30px; flex-wrap:wrap; }
+        .pc-btn { width:60px; height:60px; background:rgba(255,255,255,0.05); border:2px solid var(--gold-dark); color:var(--gold); font-family:'Bebas Neue',sans-serif; font-size:1.8em; border-radius:10px; cursor:pointer; transition:all 0.2s; }
+        .pc-btn:hover { background:rgba(212,175,55,0.15); transform:scale(1.08); }
+        .pc-btn.selected { background:var(--gold); color:#0a0a1a; border-color:var(--gold); }
+        .player-names { display:grid; gap:12px; margin-bottom:30px; }
+        .pname-input { background:rgba(255,255,255,0.06); border:2px solid rgba(212,175,55,0.3); color:white; padding:14px 18px; font-size:1.1em; border-radius:8px; font-family:'Lato',sans-serif; }
+        .pname-input::placeholder { color:rgba(255,255,255,0.3); }
+        .pname-input:focus { outline:none; border-color:var(--gold); }
+        .start-btn { display:block; margin:0 auto; background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:#0a0a1a; border:none; padding:16px 50px; font-family:'Bebas Neue',sans-serif; font-size:1.8em; letter-spacing:3px; border-radius:12px; cursor:pointer; box-shadow:0 6px 20px rgba(212,175,55,0.4); transition:all 0.3s; }
+        .start-btn:hover { transform:scale(1.05); box-shadow:0 8px 30px rgba(212,175,55,0.6); }
+
+        /* ═══ GAME SCREEN ═══ */
+        .game-screen { display:none; }
+        .game-screen.active { display:block; }
+        .game-header { text-align:center; padding:12px 20px 4px; background:linear-gradient(180deg,rgba(0,0,0,0.5),transparent); }
+        .game-title { font-family:'Bebas Neue',sans-serif; font-size:1.4em; background:linear-gradient(180deg,#F4D942,#D4AF37); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:4px; }
+
+        /* ═══ SCOREBOARD ═══ */
+        .scoreboard { display:flex; justify-content:center; gap:10px; padding:8px 20px; flex-wrap:wrap; }
+        .player-card { background:linear-gradient(180deg,#1a1a3a,#0d0d2a); border:2px solid #333; border-radius:10px; padding:8px 20px; min-width:150px; text-align:center; transition:all 0.3s; }
+        .player-card.active { border-color:var(--gold); box-shadow:0 0 18px rgba(212,175,55,0.35); }
+        .player-card .pname { font-family:'Oswald',sans-serif; font-size:0.9em; color:var(--gold); letter-spacing:2px; }
+        .player-card .pscore { font-family:'Bebas Neue',sans-serif; font-size:1.8em; color:#66BB6A; }
+        .player-card .pscore.negative { color:#EF5350; }
+        .player-card .round-score { font-size:0.72em; color:#777; }
+
+        /* ═══ PUZZLE BOARD ═══ */
+        .board-wrapper { max-width:880px; margin:10px auto; padding:0 12px; }
+        .category-bar { text-align:center; padding:6px; margin-bottom:6px; background:linear-gradient(90deg,transparent,rgba(0,107,107,0.25),transparent); border-radius:8px; }
+        .category-label { font-family:'Oswald',sans-serif; font-size:1.05em; color:var(--gold-light); letter-spacing:4px; text-transform:uppercase; }
+        .puzzle-board { background:linear-gradient(180deg,#0D47A1,#0B3D91 50%,#093283); border:5px solid var(--gold-dark); border-radius:12px; padding:16px 14px; box-shadow:0 0 40px rgba(11,61,145,0.5),inset 0 0 60px rgba(0,0,0,0.35); }
+        .board-row { display:flex; justify-content:center; gap:6px; margin-bottom:6px; }
+        .board-row:last-child { margin-bottom:0; }
+        .tile { width:48px; height:54px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:1.9em; position:relative; }
+        .tile.letter { background:linear-gradient(180deg,#1976D2,#1565C0 50%,#0D47A1); border:2px solid rgba(100,180,255,0.2); color:transparent; box-shadow:inset 0 2px 6px rgba(0,0,0,0.5); }
+        .tile.letter.revealed { background:linear-gradient(180deg,#FFFDE7,#FFF9C4 50%,#FFF59D); border-color:rgba(255,255,255,0.6); color:#1a1a1a; box-shadow:0 0 12px rgba(255,253,231,0.35); animation:tileFlip 0.5s ease-out; }
+        @keyframes tileFlip { 0%{transform:rotateX(90deg) scale(0.8);opacity:0.4;} 60%{transform:rotateX(-8deg) scale(1.05);} 100%{transform:rotateX(0deg) scale(1);opacity:1;} }
+        .tile.space { background:transparent; border:none; }
+
+        /* ═══ USED LETTERS ═══ */
+        .used-letters-bar { max-width:880px; margin:6px auto 0; padding:0 12px; }
+        .used-letters-inner { display:flex; align-items:center; gap:8px; padding:6px 14px; background:rgba(0,0,0,0.3); border-radius:8px; flex-wrap:wrap; }
+        .used-label { font-family:'Oswald',sans-serif; font-size:0.75em; color:#666; letter-spacing:2px; text-transform:uppercase; white-space:nowrap; }
+        .used-letter { font-family:'Bebas Neue',sans-serif; font-size:1em; color:#555; background:rgba(255,255,255,0.05); border-radius:4px; width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; }
+        .used-letter.hit { color:#66BB6A; background:rgba(102,187,106,0.12); }
+        .used-letter.miss { color:#EF5350; background:rgba(239,83,80,0.10); }
+
+        /* ═══ GAME LOWER ═══ */
+        .game-lower { display:flex; align-items:flex-start; justify-content:center; gap:30px; padding:14px 20px; flex-wrap:wrap; max-width:1100px; margin:0 auto; }
+
+        /* ═══ WHEEL ═══ */
+        .wheel-container { position:relative; width:380px; height:380px; flex-shrink:0; }
+        .wheel-canvas { width:380px; height:380px; transition:filter 0.3s; }
+        .wheel-canvas.spinning { filter:drop-shadow(0 0 30px rgba(212,175,55,0.5)); }
+        .wheel-pointer { position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:16px solid transparent; border-right:16px solid transparent; border-top:38px solid var(--gold); filter:drop-shadow(0 4px 6px rgba(0,0,0,0.8)); z-index:10; }
+        .wheel-center-cap { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:48px; height:48px; background:radial-gradient(circle at 35% 35%,#FFF8E1,var(--gold),var(--gold-dark)); border-radius:50%; border:3px solid #fff; box-shadow:0 0 15px rgba(0,0,0,0.7); z-index:5; display:flex; align-items:center; justify-content:center; font-size:1.3em; color:#5D4037; }
+
+        /* ═══ ACTION PANEL ═══ */
+        .action-panel { max-width:340px; width:100%; }
+        .turn-indicator { text-align:center; margin-bottom:10px; padding:8px 12px; background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.2); border-radius:8px; }
+        .turn-name { font-family:'Oswald',sans-serif; color:var(--gold); font-size:1.1em; letter-spacing:2px; }
+        .round-badge { font-size:0.75em; color:#888; margin-top:2px; }
+        .spin-result { text-align:center; margin-bottom:12px; min-height:50px; }
+        .spin-result-value { font-family:'Bebas Neue',sans-serif; font-size:2.6em; color:var(--gold); line-height:1; }
+        .spin-result-label { font-size:0.82em; color:#999; margin-top:2px; }
+        .action-buttons { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+        .action-btn { padding:13px 22px; border:2px solid; border-radius:10px; font-family:'Oswald',sans-serif; font-size:1.05em; letter-spacing:2px; cursor:pointer; transition:all 0.2s; text-transform:uppercase; }
+        .action-btn:disabled { opacity:0.25; cursor:not-allowed; transform:none!important; }
+        .action-btn:hover:not(:disabled) { transform:scale(1.03); }
+        .btn-spin { background:linear-gradient(135deg,var(--teal),var(--teal-dark)); border-color:var(--gold); color:var(--gold); }
+        .btn-vowel { background:linear-gradient(135deg,#4a148c,#311b92); border-color:#7B1FA2; color:#CE93D8; }
+        .btn-solve { background:linear-gradient(135deg,#b71c1c,#880e4f); border-color:var(--magenta); color:#F48FB1; }
+
+        /* ═══ GAME CONTROLS ═══ */
+        .game-controls { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+        .ctrl-btn { flex:1; min-width:90px; padding:8px 10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); color:#888; font-family:'Oswald',sans-serif; font-size:0.78em; letter-spacing:1px; text-transform:uppercase; border-radius:6px; cursor:pointer; transition:all 0.2s; }
+        .ctrl-btn:hover { background:rgba(255,255,255,0.08); color:#ccc; border-color:rgba(255,255,255,0.25); }
+
+        /* ═══ LETTER PICKER ═══ */
+        .letter-picker { display:none; background:rgba(0,0,0,0.6); border:2px solid rgba(212,175,55,0.3); border-radius:12px; padding:14px; margin-top:8px; }
+        .letter-picker.active { display:block; }
+        .letter-picker-title { font-family:'Oswald',sans-serif; color:var(--gold); text-align:center; margin-bottom:10px; letter-spacing:2px; font-size:0.95em; }
+        .letter-grid { display:flex; flex-wrap:wrap; gap:5px; justify-content:center; }
+        .letter-btn { width:38px; height:38px; background:rgba(255,255,255,0.07); border:2px solid rgba(255,255,255,0.15); color:white; font-family:'Bebas Neue',sans-serif; font-size:1.3em; border-radius:6px; cursor:pointer; transition:all 0.15s; }
+        .letter-btn:hover:not(:disabled) { background:var(--gold); color:#0a0a1a; border-color:var(--gold); transform:scale(1.1); }
+        .letter-btn:disabled { opacity:0.12; cursor:not-allowed; }
+        .letter-btn.vowel { border-color:rgba(156,39,176,0.4); }
+
+        /* ═══ SOLVE OVERLAY ═══ */
+        .solve-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.88); z-index:1000; justify-content:center; align-items:center; }
+        .solve-overlay.active { display:flex; }
+        .solve-box { background:linear-gradient(135deg,#1a1a3a,#0d0d2a); border:3px solid var(--gold); border-radius:16px; padding:35px; max-width:550px; width:90%; text-align:center; }
+        .solve-box h2 { font-family:'Bebas Neue',sans-serif; color:var(--gold); font-size:1.8em; letter-spacing:3px; margin-bottom:18px; }
+        .solve-input { width:100%; padding:14px; font-size:1.3em; font-family:'Bebas Neue',sans-serif; letter-spacing:3px; text-transform:uppercase; background:rgba(255,255,255,0.08); border:2px solid var(--gold-dark); border-radius:8px; color:var(--gold-light); text-align:center; margin-bottom:18px; }
+        .solve-input:focus { outline:none; border-color:var(--gold); }
+        .solve-buttons { display:flex; gap:12px; justify-content:center; }
+        .solve-confirm { padding:10px 40px; background:var(--gold); color:#0a0a1a; border:none; font-family:'Bebas Neue',sans-serif; font-size:1.3em; letter-spacing:2px; border-radius:8px; cursor:pointer; }
+        .solve-cancel { padding:10px 28px; background:transparent; color:#aaa; border:2px solid #555; font-family:'Oswald',sans-serif; font-size:1em; letter-spacing:2px; border-radius:8px; cursor:pointer; }
+
+        /* ═══ TOAST ═══ */
+        .toast { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); background:rgba(10,10,30,0.95); border:3px solid var(--gold); border-radius:16px; padding:28px 45px; z-index:2000; text-align:center; transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275); pointer-events:none; box-shadow:0 0 50px rgba(212,175,55,0.3); }
+        .toast.show { transform:translate(-50%,-50%) scale(1); }
+        .toast-big { font-family:'Bebas Neue',sans-serif; font-size:2.3em; color:var(--gold); letter-spacing:3px; }
+        .toast-sub { font-size:1em; color:#ccc; margin-top:6px; }
+
+        /* ═══ ROUND OVERLAY ═══ */
+        .round-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.94); z-index:3000; justify-content:center; align-items:center; flex-direction:column; }
+        .round-overlay.active { display:flex; }
+        .round-overlay h1 { font-family:'Bebas Neue',sans-serif; font-size:3.2em; background:linear-gradient(180deg,#F4D942,#D4AF37); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:6px; animation:roundPop 0.6s ease-out; }
+        .round-overlay p { font-family:'Oswald',sans-serif; color:#999; font-size:1.15em; letter-spacing:3px; margin-top:6px; }
+        .round-overlay .hint-text { font-family:'Lato',sans-serif; color:#aaa; font-size:0.95em; margin-top:8px; font-style:italic; }
+        .round-overlay button { margin-top:28px; padding:13px 50px; background:var(--gold); color:#0a0a1a; border:none; font-family:'Bebas Neue',sans-serif; font-size:1.5em; letter-spacing:3px; border-radius:10px; cursor:pointer; transition:transform 0.2s; }
+        .round-overlay button:hover { transform:scale(1.05); }
+        @keyframes roundPop { 0%{transform:scale(0.5);opacity:0;} 100%{transform:scale(1);opacity:1;} }
+
+        /* ═══ CONFIRM DIALOG ═══ */
+        .confirm-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:4000; justify-content:center; align-items:center; }
+        .confirm-overlay.active { display:flex; }
+        .confirm-box { background:#1a1a3a; border:2px solid var(--gold); border-radius:14px; padding:30px 35px; max-width:420px; width:90%; text-align:center; }
+        .confirm-box p { font-family:'Oswald',sans-serif; color:#ddd; font-size:1.1em; letter-spacing:1px; margin-bottom:20px; }
+        .confirm-btns { display:flex; gap:12px; justify-content:center; }
+        .confirm-yes { padding:10px 30px; background:var(--gold); color:#0a0a1a; border:none; font-family:'Oswald',sans-serif; font-size:1em; letter-spacing:2px; border-radius:8px; cursor:pointer; }
+        .confirm-no { padding:10px 30px; background:transparent; color:#aaa; border:2px solid #555; font-family:'Oswald',sans-serif; font-size:1em; letter-spacing:2px; border-radius:8px; cursor:pointer; }
+
+        @media (max-width:850px) { .wheel-container{width:300px;height:300px;} .wheel-canvas{width:300px;height:300px;} .tile{width:40px;height:46px;font-size:1.5em;} .game-lower{gap:18px;} }
+        @media (max-width:600px) { .wheel-container{width:250px;height:250px;} .wheel-canvas{width:250px;height:250px;} .tile{width:30px;height:35px;font-size:1.15em;} .board-row{gap:3px;margin-bottom:3px;} .puzzle-board{padding:10px 6px;} }
+    </style>
+</head>
+<body>
+
+<div class="setup-screen" id="setupScreen">
+    <div class="setup-logo">WHEEL OF FORTUNE</div>
+    <div class="setup-subtitle">Texas Government Edition</div>
+    <div class="setup-box">
+        <div class="setup-label">Number of Players / Teams</div>
+        <div class="player-count-row" id="playerCountRow"></div>
+        <div id="playerNamesArea" style="display:none;">
+            <div class="setup-label">Player / Team Names</div>
+            <div class="player-names" id="playerNamesGrid"></div>
+        </div>
+        <button class="start-btn" id="startBtn" style="display:none;" onclick="startGame()">SPIN TO WIN</button>
+    </div>
+</div>
+
+<div class="game-screen" id="gameScreen">
+    <div class="game-header"><div class="game-title">WHEEL OF FORTUNE — Texas Government Edition</div></div>
+    <div class="scoreboard" id="scoreboard"></div>
+    <div class="board-wrapper">
+        <div class="category-bar"><div class="category-label" id="categoryLabel"></div></div>
+        <div class="puzzle-board" id="puzzleBoard"></div>
+    </div>
+    <div class="used-letters-bar"><div class="used-letters-inner" id="usedLettersBar"><span class="used-label">Used:</span></div></div>
+    <div class="game-lower">
+        <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <canvas class="wheel-canvas" id="wheelCanvas" width="760" height="760"></canvas>
+            <div class="wheel-center-cap">★</div>
+        </div>
+        <div class="action-panel">
+            <div class="turn-indicator">
+                <div class="turn-name" id="turnName">—</div>
+                <div class="round-badge" id="roundBadge"></div>
+            </div>
+            <div class="spin-result" id="spinResult">
+                <div class="spin-result-value" id="spinResultValue"></div>
+                <div class="spin-result-label" id="spinResultLabel"></div>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn btn-spin" id="btnSpin" onclick="spinWheel()">🎡  SPIN THE WHEEL</button>
+                <button class="action-btn btn-vowel" id="btnVowel" onclick="buyVowel()" disabled>🅰  BUY A VOWEL — $250</button>
+                <button class="action-btn btn-solve" id="btnSolve" onclick="openSolve()">💡  SOLVE THE PUZZLE</button>
+            </div>
+            <div class="letter-picker" id="letterPicker">
+                <div class="letter-picker-title" id="letterPickerTitle">Pick a consonant</div>
+                <div class="letter-grid" id="letterGrid"></div>
+            </div>
+            <div class="game-controls">
+                <button class="ctrl-btn" onclick="showHint()">💬 Hint</button>
+                <button class="ctrl-btn" onclick="skipPuzzle()">⏭ Skip Puzzle</button>
+                <button class="ctrl-btn" onclick="confirmResetRound()">🔄 Reset Round</button>
+                <button class="ctrl-btn" onclick="confirmResetGame()">🏠 Reset Game</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="solve-overlay" id="solveOverlay">
+    <div class="solve-box">
+        <h2>SOLVE THE PUZZLE</h2>
+        <input type="text" class="solve-input" id="solveInput" placeholder="TYPE YOUR ANSWER" autocomplete="off">
+        <div class="solve-buttons">
+            <button class="solve-confirm" onclick="submitSolve()">SOLVE</button>
+            <button class="solve-cancel" onclick="closeSolve()">CANCEL</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-big" id="toastBig"></div><div class="toast-sub" id="toastSub"></div></div>
+
+<div class="round-overlay" id="roundOverlay">
+    <h1 id="roundTitle"></h1>
+    <p id="roundSub"></p>
+    <div class="hint-text" id="roundHint"></div>
+    <button id="roundBtn" onclick="dismissRoundOverlay()">LET'S GO</button>
+</div>
+
+<div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+        <p id="confirmMsg"></p>
+        <div class="confirm-btns">
+            <button class="confirm-yes" id="confirmYes">YES</button>
+            <button class="confirm-no" onclick="closeConfirm()">CANCEL</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  PUZZLES — 64 Texas Government terms
+// ═══════════════════════════════════════════════════════════════
+const puzzles = [
+    { category:"TEXAS GOVERNMENT OFFICE", answer:"LIEUTENANT GOVERNOR", hint:"Presides over the Texas Senate" },
+    { category:"CONSTITUTIONAL TERM", answer:"PLURAL EXECUTIVE", hint:"Power split among several elected officers" },
+    { category:"TEXAS GOVERNMENT OFFICE", answer:"COMPTROLLER OF PUBLIC ACCOUNTS", hint:"Certifies the state budget" },
+    { category:"LANDMARK COURT CASE", answer:"SMITH V ALLWRIGHT", hint:"Ended the white primary in Texas" },
+    { category:"LEGISLATIVE TERM", answer:"BIENNIAL SESSION", hint:"Legislature meets every two years" },
+    { category:"CONSTITUTIONAL PRINCIPLE", answer:"SEPARATION OF POWERS", hint:"Divides government into three branches" },
+    { category:"TEXAS GOVERNMENT TERM", answer:"LINE ITEM VETO", hint:"Governor can strike specific budget items" },
+    { category:"TEXAS HISTORY", answer:"RECONSTRUCTION", hint:"Post-Civil War federal military oversight" },
+    { category:"LANDMARK COURT CASE", answer:"SWEATT V PAINTER", hint:"Challenged segregation at UT Law School" },
+    { category:"POLITICAL TERM", answer:"GERRYMANDERING", hint:"Drawing district lines for advantage" },
+    { category:"TEXAS GOVERNMENT OFFICE", answer:"ATTORNEY GENERAL", hint:"Chief legal officer of the state" },
+    { category:"POLITICAL CULTURE", answer:"TRADITIONALISTIC", hint:"Culture rooted in social hierarchy" },
+    { category:"CONSTITUTIONAL TERM", answer:"CHECKS AND BALANCES", hint:"Each branch limits the others" },
+    { category:"LEGISLATIVE TERM", answer:"STANDING COMMITTEE", hint:"Permanent committee that screens bills" },
+    { category:"LANDMARK COURT CASE", answer:"HERNANDEZ V TEXAS", hint:"Jury exclusion of Latinos unconstitutional" },
+    { category:"TEXAS GOVERNMENT TERM", answer:"SENATORIAL COURTESY", hint:"Senators can reject local appointments" },
+    { category:"POLITICAL TERM", answer:"VOTER TURNOUT", hint:"Percentage of eligible voters who cast ballots" },
+    { category:"TEXAS GOVERNMENT TERM", answer:"SPECIAL SESSION", hint:"Called by the governor, limited to 30 days" },
+    { category:"FEDERALISM TERM", answer:"RESERVED POWERS", hint:"Belong to states under the Tenth Amendment" },
+    { category:"TEXAS POLITICAL FIGURE", answer:"MINNIE FISHER CUNNINGHAM", hint:"Led women's suffrage in Texas" },
+    { category:"LANDMARK COURT CASE", answer:"LAWRENCE V TEXAS", hint:"Struck down a Texas anti-sodomy statute" },
+    { category:"POLITICAL TERM", answer:"INTEREST GROUP", hint:"Organizations that lobby government" },
+    { category:"TEXAS GOVERNMENT OFFICE", answer:"COMMISSIONER OF AGRICULTURE", hint:"Oversees farming and rural affairs" },
+    { category:"FEDERALISM TERM", answer:"SUPREMACY CLAUSE", hint:"Federal law prevails over state law" },
+    { category:"CONSTITUTIONAL TERM", answer:"BILL OF RIGHTS", hint:"Protects individual liberties in Texas" },
+    { category:"TEXAS GOVERNMENT TERM", answer:"CONFERENCE COMMITTEE", hint:"Resolves House-Senate bill differences" },
+    { category:"POLITICAL CULTURE", answer:"INDIVIDUALISTIC", hint:"Culture emphasizing personal advancement" },
+    { category:"LEGISLATIVE TERM", answer:"FILIBUSTER", hint:"Extended speech to delay legislation" },
+    { category:"LANDMARK COURT CASE", answer:"OBERGEFELL V HODGES", hint:"Legalized same-sex marriage nationwide" },
+    { category:"TEXAS GOVERNMENT TERM", answer:"APPOINTIVE POWER", hint:"Governor fills board and commission seats" },
+    { category:"JUDICIAL TERM", answer:"PARTISAN ELECTION", hint:"How Texas selects its judges" },
+    { category:"TEXAS POLITICAL FIGURE", answer:"ANN RICHARDS", hint:"45th governor known for sharp wit" },
+    { category:"FEDERALISM TERM", answer:"CONCURRENT POWERS", hint:"Shared by national and state governments" },
+    { category:"CONSTITUTIONAL TERM", answer:"AMENDMENT PROCESS", hint:"Two-thirds vote plus voter ratification" },
+    { category:"LOCAL GOVERNMENT TERM", answer:"COMMISSIONERS COURT", hint:"Governing body of a Texas county" },
+    { category:"TEXAS GOVERNMENT TERM", answer:"SUNSET REVIEW", hint:"Periodic evaluation of state agencies" },
+    { category:"LEGISLATIVE TERM", answer:"REDISTRICTING", hint:"Redrawing legislative district boundaries" },
+    { category:"TEXAS GOVERNMENT TERM", answer:"RAINY DAY FUND", hint:"State savings for economic downturns" },
+    { category:"CONSTITUTIONAL TERM", answer:"POPULAR SOVEREIGNTY", hint:"Government authority flows from the people" },
+    { category:"LANDMARK COURT CASE", answer:"SHELBY COUNTY V HOLDER", hint:"Struck down Voting Rights Act preclearance" },
+    { category:"POLITICAL TERM", answer:"POLITICAL ACTION COMMITTEE", hint:"Raises money to support candidates" },
+    { category:"TEXAS GOVERNMENT OFFICE", answer:"LAND COMMISSIONER", hint:"Manages public lands and veterans benefits" },
+    { category:"FEDERALISM TERM", answer:"UNFUNDED MANDATES", hint:"Federal requirements without federal funding" },
+    { category:"TEXAS HISTORY", answer:"JUNETEENTH", hint:"June 19 1865 emancipation reached Texas" },
+    { category:"LEGISLATIVE TERM", answer:"SPEAKER OF THE HOUSE", hint:"Leads the Texas House of Representatives" },
+    { category:"JUDICIAL TERM", answer:"COURT OF CRIMINAL APPEALS", hint:"Highest criminal court in Texas" },
+    { category:"TEXAS GOVERNMENT TERM", answer:"EXECUTIVE ORDER", hint:"Directive issued by the governor" },
+    { category:"POLITICAL TERM", answer:"OPEN PRIMARY", hint:"Any registered voter may participate" },
+    { category:"CONSTITUTIONAL TERM", answer:"DUE PROCESS", hint:"Government must follow fair procedures" },
+    { category:"TEXAS POLITICAL FIGURE", answer:"SAM HOUSTON", hint:"First president of the Republic of Texas" },
+    { category:"LANDMARK COURT CASE", answer:"EDGEWOOD V KIRBY", hint:"Required equitable school funding in Texas" },
+    { category:"LEGISLATIVE TERM", answer:"CALENDARS COMMITTEE", hint:"Controls which bills reach the House floor" },
+    { category:"TEXAS GOVERNMENT TERM", answer:"BLOCK GRANT", hint:"Federal funds given to states with broad discretion" },
+    { category:"LOCAL GOVERNMENT TERM", answer:"HOME RULE CITY", hint:"City with power to govern its own affairs" },
+    { category:"POLITICAL TERM", answer:"STRAIGHT TICKET VOTING", hint:"Selecting all candidates from one party" },
+    { category:"FEDERALISM TERM", answer:"FULL FAITH AND CREDIT", hint:"States must honor other states legal proceedings" },
+    { category:"JUDICIAL TERM", answer:"GRAND JURY", hint:"Panel that decides whether to indict" },
+    { category:"TEXAS GOVERNMENT TERM", answer:"COMPTROLLER REVENUE ESTIMATE", hint:"Official projection of available state funds" },
+    { category:"POLITICAL CULTURE", answer:"MORALISTIC", hint:"Government should promote the public good" },
+    { category:"TEXAS POLITICAL FIGURE", answer:"BARBARA JORDAN", hint:"First Black Texan elected to Congress post-Reconstruction" },
+    { category:"LEGISLATIVE TERM", answer:"TWO THIRDS RULE", hint:"Senate tradition requiring supermajority to debate" },
+    { category:"CONSTITUTIONAL TERM", answer:"EQUAL PROTECTION", hint:"Fourteenth Amendment guarantee of legal equality" },
+    { category:"TEXAS GOVERNMENT TERM", answer:"TEXAS RANGERS", hint:"State law enforcement with frontier roots" },
+    { category:"LANDMARK COURT CASE", answer:"BROWN V BOARD OF EDUCATION", hint:"Declared school segregation unconstitutional" },
+];
+
+// ═══════════════════════════════════════════════════════════════
+//  WHEEL SEGMENTS
+// ═══════════════════════════════════════════════════════════════
+const wheelSegments = [
+    { label:"$300",  value:300,  bg:"#C62828", fg:"#fff" },
+    { label:"$500",  value:500,  bg:"#1565C0", fg:"#fff" },
+    { label:"$200",  value:200,  bg:"#2E7D32", fg:"#fff" },
+    { label:"$800",  value:800,  bg:"#E65100", fg:"#fff" },
+    { label:"$350",  value:350,  bg:"#6A1B9A", fg:"#fff" },
+    { label:"$450",  value:450,  bg:"#00838F", fg:"#fff" },
+    { label:"BANKRUPT", value:-1, bg:"#111",   fg:"#fff" },
+    { label:"$600",  value:600,  bg:"#AD1457", fg:"#fff" },
+    { label:"$150",  value:150,  bg:"#283593", fg:"#fff" },
+    { label:"$700",  value:700,  bg:"#558B2F", fg:"#fff" },
+    { label:"$250",  value:250,  bg:"#BF360C", fg:"#fff" },
+    { label:"$2500", value:2500, bg:"#FFD600", fg:"#1a1a1a" },
+    { label:"$400",  value:400,  bg:"#0277BD", fg:"#fff" },
+    { label:"LOSE TURN",value:-2,bg:"#EEE",    fg:"#222" },
+    { label:"$550",  value:550,  bg:"#4E342E", fg:"#fff" },
+    { label:"$900",  value:900,  bg:"#1B5E20", fg:"#fff" },
+    { label:"$100",  value:100,  bg:"#D84315", fg:"#fff" },
+    { label:"$1000", value:1000, bg:"#4A148C", fg:"#fff" },
+    { label:"$650",  value:650,  bg:"#006064", fg:"#fff" },
+    { label:"BANKRUPT", value:-1, bg:"#111",   fg:"#fff" },
+    { label:"$750",  value:750,  bg:"#880E4F", fg:"#fff" },
+    { label:"$200",  value:200,  bg:"#33691E", fg:"#fff" },
+    { label:"$500",  value:500,  bg:"#0D47A1", fg:"#fff" },
+    { label:"$300",  value:300,  bg:"#E53935", fg:"#fff" },
+];
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let players=[], currentPlayerIdx=0, currentPuzzle=null;
+let revealedLetters=new Set(), guessedLetters=new Set(), guessedResults={};
+let currentSpinValue=0, isSpinning=false, wheelAngle=0;
+let roundNumber=0, usedPuzzleIndices=[], gamePhase='idle';
+const VOWELS=new Set('AEIOU'), VOWEL_COST=250, MAX_COLS=14;
+
+// ═══════════════════════════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════════════════════════
+function initSetup(){
+    const row=document.getElementById('playerCountRow');
+    for(let i=2;i<=5;i++){
+        const btn=document.createElement('button'); btn.className='pc-btn'; btn.textContent=i;
+        btn.addEventListener('click',e=>{selectedCount=i;
+            document.querySelectorAll('.pc-btn').forEach(b=>b.classList.remove('selected'));
+            e.target.classList.add('selected'); buildNameInputs();
+        }); row.appendChild(btn);
+    }
+}
+let selectedCount=0;
+function buildNameInputs(){
+    const g=document.getElementById('playerNamesGrid'); g.innerHTML='';
+    for(let i=1;i<=selectedCount;i++){
+        const inp=document.createElement('input'); inp.className='pname-input';
+        inp.placeholder=`Player / Team ${i}`; inp.id=`pname${i}`; inp.maxLength=20; g.appendChild(inp);
+    }
+    document.getElementById('playerNamesArea').style.display='block';
+    document.getElementById('startBtn').style.display='block';
+}
+function startGame(){
+    players=[];
+    for(let i=1;i<=selectedCount;i++){
+        const name=document.getElementById(`pname${i}`).value.trim()||`Player ${i}`;
+        players.push({name,roundScore:0,totalScore:0});
+    }
+    document.getElementById('setupScreen').classList.add('hidden');
+    document.getElementById('gameScreen').classList.add('active');
+    drawWheel(); buildLetterPicker(); startNewRound();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  WHEEL DRAWING — Proper curved text
+// ═══════════════════════════════════════════════════════════════
+const canvas=document.getElementById('wheelCanvas'), ctx=canvas.getContext('2d');
+const W=canvas.width, CX=W/2, CY=W/2, R=W/2-22;
+
+function drawWheel(angle=0){
+    ctx.clearRect(0,0,W,W);
+    const n=wheelSegments.length, arc=2*Math.PI/n;
+    ctx.save(); ctx.translate(CX,CY); ctx.rotate(angle);
+
+    // Draw segments
+    for(let i=0;i<n;i++){
+        const seg=wheelSegments[i], a0=i*arc-Math.PI/2, a1=a0+arc, amid=a0+arc/2;
+
+        // Fill
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R,a0,a1); ctx.closePath();
+        ctx.fillStyle=seg.bg; ctx.fill();
+
+        // Shine gradient
+        ctx.save(); ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R,a0,a1); ctx.closePath(); ctx.clip();
+        const gx=Math.cos(amid), gy=Math.sin(amid);
+        const gr=ctx.createLinearGradient(gx*R*0.2,gy*R*0.2,gx*R,gy*R);
+        gr.addColorStop(0,'rgba(255,255,255,0.15)'); gr.addColorStop(1,'rgba(0,0,0,0.12)');
+        ctx.fillStyle=gr; ctx.fill(); ctx.restore();
+
+        // Border
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(a0)*R,Math.sin(a0)*R);
+        ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1.5; ctx.stroke();
+    }
+
+    // Outer ring arc
+    ctx.beginPath(); ctx.arc(0,0,R,0,2*Math.PI);
+    ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=2; ctx.stroke();
+
+    // ── TEXT: position with trig, always readable ──
+    for(let i=0;i<n;i++){
+        const seg=wheelSegments[i], amid=i*arc-Math.PI/2+arc/2;
+        const textR=R*0.72;
+
+        // Position
+        const tx=textR*Math.cos(amid), ty=textR*Math.sin(amid);
+
+        // Determine rotation so text reads from outer edge
+        // Normalize amid to [0, 2π)
+        const na=((amid%(2*Math.PI))+(2*Math.PI))%(2*Math.PI);
+        // If label points "downward" (right half going down, or left half) → flip
+        const isBottom=na>Math.PI/2 && na<Math.PI*1.5;
+        const textAngle=isBottom ? amid-Math.PI/2 : amid+Math.PI/2;
+
+        ctx.save(); ctx.translate(tx,ty); ctx.rotate(textAngle);
+        ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle=seg.fg;
+
+        const label=seg.label;
+        const fontSize=label.length>6?18:label.length>4?22:26;
+        ctx.font=`bold ${fontSize}px 'Bebas Neue',sans-serif`;
+        ctx.fillText(label,0,0);
+        ctx.restore();
+    }
+
+    // Gold outer ring
+    ctx.beginPath(); ctx.arc(0,0,R+8,0,2*Math.PI);
+    ctx.strokeStyle='#D4AF37'; ctx.lineWidth=10; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,R+14,0,2*Math.PI);
+    ctx.strokeStyle='rgba(160,120,30,0.5)'; ctx.lineWidth=2; ctx.stroke();
+
+    // Pegs
+    for(let i=0;i<n;i++){
+        const pa=i*arc-Math.PI/2;
+        ctx.beginPath(); ctx.arc(Math.cos(pa)*(R+8),Math.sin(pa)*(R+8),5,0,2*Math.PI);
+        ctx.fillStyle='#C0C0C0'; ctx.fill(); ctx.strokeStyle='#666'; ctx.lineWidth=1; ctx.stroke();
+    }
+
+    // Center hub
+    ctx.beginPath(); ctx.arc(0,0,35,0,2*Math.PI); ctx.fillStyle='#1a1a1a'; ctx.fill();
+
+    ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  WHEEL SPIN
+// ═══════════════════════════════════════════════════════════════
+function spinWheel(){
+    if(isSpinning||gamePhase==='picking')return;
+    isSpinning=true; gamePhase='spinning';
+    disableActions();
+    document.getElementById('spinResultValue').textContent='';
+    document.getElementById('spinResultLabel').textContent='Spinning...';
+    document.getElementById('wheelCanvas').classList.add('spinning');
+    const n=wheelSegments.length, arc=2*Math.PI/n;
+    const target=wheelAngle+(5+Math.random()*4)*2*Math.PI+Math.random()*2*Math.PI;
+    const t0=performance.now(), dur=4000+Math.random()*1500;
+    function anim(now){
+        const p=Math.min((now-t0)/dur,1), e=1-Math.pow(1-p,3);
+        drawWheel(wheelAngle+(target-wheelAngle)*e);
+        if(p<1)requestAnimationFrame(anim);
+        else{
+            wheelAngle=target%(2*Math.PI); isSpinning=false;
+            document.getElementById('wheelCanvas').classList.remove('spinning');
+            const pa=((2*Math.PI)-(wheelAngle%(2*Math.PI)))%(2*Math.PI);
+            onSpinResult(wheelSegments[Math.floor(pa/arc)%n]);
+        }
+    }
+    requestAnimationFrame(anim);
+}
+function onSpinResult(seg){
+    if(seg.value===-1){
+        show('spinResultValue','BANKRUPT!'); show('spinResultLabel','Round earnings lost!');
+        showToast('💀 BANKRUPT!',`${players[currentPlayerIdx].name} loses $${players[currentPlayerIdx].roundScore}`);
+        players[currentPlayerIdx].roundScore=0; updateScoreboard(); setTimeout(()=>nextPlayer(),2200);
+    } else if(seg.value===-2){
+        show('spinResultValue','LOSE A TURN'); show('spinResultLabel','');
+        showToast('LOSE A TURN',''); setTimeout(()=>nextPlayer(),2200);
+    } else {
+        currentSpinValue=seg.value; gamePhase='spun';
+        show('spinResultValue',`$${seg.value}`); show('spinResultLabel','per consonant — Pick a letter!');
+        showConsonantPicker();
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  LETTER PICKER
+// ═══════════════════════════════════════════════════════════════
+function buildLetterPicker(){
+    const g=document.getElementById('letterGrid'); g.innerHTML='';
+    for(let c=65;c<=90;c++){
+        const L=String.fromCharCode(c), btn=document.createElement('button');
+        btn.className='letter-btn'+(VOWELS.has(L)?' vowel':'');
+        btn.textContent=L; btn.id=`lbtn_${L}`;
+        btn.addEventListener('click',()=>pickLetter(L)); g.appendChild(btn);
+    }
+}
+function showConsonantPicker(){
+    show('letterPickerTitle','Pick a consonant'); updateLetterBtns('consonant');
+    document.getElementById('letterPicker').classList.add('active'); gamePhase='picking';
+}
+function showVowelPicker(){
+    show('letterPickerTitle','Pick a vowel ($250)'); updateLetterBtns('vowel');
+    document.getElementById('letterPicker').classList.add('active'); gamePhase='picking';
+}
+function updateLetterBtns(mode){
+    for(let c=65;c<=90;c++){
+        const L=String.fromCharCode(c), btn=document.getElementById(`lbtn_${L}`);
+        if(guessedLetters.has(L))btn.disabled=true;
+        else if(mode==='consonant')btn.disabled=VOWELS.has(L);
+        else if(mode==='vowel')btn.disabled=!VOWELS.has(L);
+        else btn.disabled=false;
+    }
+}
+function pickLetter(L){
+    if(guessedLetters.has(L))return;
+    guessedLetters.add(L);
+    document.getElementById(`lbtn_${L}`).disabled=true;
+    document.getElementById('letterPicker').classList.remove('active');
+    const ct=[...currentPuzzle.answer.toUpperCase()].filter(ch=>ch===L).length;
+    if(ct>0){
+        guessedResults[L]='hit'; revealLetterOnBoard(L);
+        if(VOWELS.has(L)){ showToast(`${L}!`,`${ct} found!`); }
+        else{ const earn=ct*currentSpinValue; players[currentPlayerIdx].roundScore+=earn;
+            showToast(`${L}!`,`${ct} × $${currentSpinValue} = +$${earn}`); }
+        updateScoreboard(); updateUsedLetters();
+        if(isPuzzleSolved()){setTimeout(()=>solvePuzzle(true),1500);return;}
+        setTimeout(()=>{gamePhase='idle';enableActions();},1200);
+    } else {
+        guessedResults[L]='miss'; updateUsedLetters();
+        showToast(`No ${L}'s`,'Turn passes...'); setTimeout(()=>nextPlayer(),1800);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BUY VOWEL / SOLVE
+// ═══════════════════════════════════════════════════════════════
+function buyVowel(){
+    if(players[currentPlayerIdx].roundScore<VOWEL_COST)return;
+    players[currentPlayerIdx].roundScore-=VOWEL_COST; updateScoreboard(); showVowelPicker();
+}
+function openSolve(){
+    document.getElementById('solveInput').value='';
+    document.getElementById('solveOverlay').classList.add('active');
+    setTimeout(()=>document.getElementById('solveInput').focus(),100);
+}
+function closeSolve(){document.getElementById('solveOverlay').classList.remove('active');}
+document.getElementById('solveInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter')submitSolve(); if(e.key==='Escape')closeSolve();
+});
+function submitSolve(){
+    const guess=document.getElementById('solveInput').value.trim().toUpperCase().replace(/[^A-Z ]/g,'');
+    const answer=currentPuzzle.answer.toUpperCase().replace(/[^A-Z ]/g,'');
+    closeSolve();
+    if(guess===answer)solvePuzzle(true);
+    else{showToast('INCORRECT!','Turn passes...'); setTimeout(()=>nextPlayer(),2000);}
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PUZZLE BOARD
+// ═══════════════════════════════════════════════════════════════
+function layoutPuzzle(ans){
+    const words=ans.split(' '), rows=[]; let row=[], len=0;
+    words.forEach(w=>{
+        if(len+(len>0?1:0)+w.length>MAX_COLS){rows.push(row);row=[];len=0;}
+        if(len>0){row.push(' ');len++;}
+        for(const ch of w)row.push(ch); len+=w.length;
+    });
+    if(row.length)rows.push(row);
+    return rows.map(r=>{
+        const pad=MAX_COLS-r.length, left=Math.floor(pad/2), out=[];
+        for(let i=0;i<left;i++)out.push(null); out.push(...r);
+        while(out.length<MAX_COLS)out.push(null); return out;
+    });
+}
+function renderBoard(){
+    const b=document.getElementById('puzzleBoard'); b.innerHTML='';
+    layoutPuzzle(currentPuzzle.answer).forEach((row,ri)=>{
+        const rd=document.createElement('div'); rd.className='board-row';
+        row.forEach((c,ci)=>{
+            const t=document.createElement('div');
+            if(c===null||c===' ')t.className='tile space';
+            else{t.className='tile letter'; t.dataset.letter=c.toUpperCase(); t.textContent=c.toUpperCase();
+                if(revealedLetters.has(c.toUpperCase()))t.classList.add('revealed');}
+            rd.appendChild(t);
+        }); b.appendChild(rd);
+    });
+}
+function revealLetterOnBoard(L){
+    revealedLetters.add(L);
+    document.querySelectorAll(`.tile.letter[data-letter="${L}"]`).forEach((t,i)=>
+        setTimeout(()=>t.classList.add('revealed'),i*180));
+}
+function revealAll(){
+    [...new Set(currentPuzzle.answer.toUpperCase().replace(/ /g,''))].forEach(ch=>revealedLetters.add(ch));
+    document.querySelectorAll('.tile.letter').forEach(t=>t.classList.add('revealed'));
+}
+function isPuzzleSolved(){
+    return[...currentPuzzle.answer.toUpperCase()].every(ch=>ch===' '||revealedLetters.has(ch));
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  USED LETTERS BAR
+// ═══════════════════════════════════════════════════════════════
+function updateUsedLetters(){
+    const bar=document.getElementById('usedLettersBar');
+    bar.innerHTML='<span class="used-label">Used:</span>';
+    const sorted=[...guessedLetters].sort();
+    sorted.forEach(L=>{
+        const span=document.createElement('span');
+        span.className='used-letter '+(guessedResults[L]||'miss');
+        span.textContent=L; bar.appendChild(span);
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ROUND FLOW
+// ═══════════════════════════════════════════════════════════════
+function startNewRound(){
+    roundNumber++; revealedLetters.clear(); guessedLetters.clear(); guessedResults={};
+    currentSpinValue=0; gamePhase='idle'; players.forEach(p=>p.roundScore=0);
+    let idx; do{idx=Math.floor(Math.random()*puzzles.length);}
+    while(usedPuzzleIndices.includes(idx)&&usedPuzzleIndices.length<puzzles.length);
+    usedPuzzleIndices.push(idx); currentPuzzle=puzzles[idx];
+    document.getElementById('categoryLabel').textContent=currentPuzzle.category;
+    renderBoard(); buildLetterPicker(); updateScoreboard(); updateUsedLetters(); enableActions();
+    document.getElementById('roundBadge').textContent=`Round ${roundNumber} of 5  •  ${puzzles.length - usedPuzzleIndices.length} puzzles remaining`;
+    showRoundOverlay(`ROUND ${roundNumber}`,currentPuzzle.category,`Hint: ${currentPuzzle.hint}`);
+}
+function solvePuzzle(correct){
+    if(!correct)return; revealAll();
+    const w=players[currentPlayerIdx], earn=Math.max(w.roundScore,100);
+    w.totalScore+=earn; gamePhase='solved'; disableActions();
+    showToast(`🎉 ${w.name} WINS!`,`+$${earn} added to total!`,2800); updateScoreboard();
+    setTimeout(()=>{
+        if(roundNumber>=5||usedPuzzleIndices.length>=puzzles.length)endGame();
+        else startNewRound();
+    },3500);
+}
+function nextPlayer(){
+    currentPlayerIdx=(currentPlayerIdx+1)%players.length;
+    gamePhase='idle'; currentSpinValue=0;
+    show('spinResultValue',''); show('spinResultLabel','');
+    document.getElementById('letterPicker').classList.remove('active');
+    updateScoreboard(); enableActions();
+}
+function enableActions(){
+    document.getElementById('btnSpin').disabled=false;
+    document.getElementById('btnVowel').disabled=
+        players[currentPlayerIdx].roundScore<VOWEL_COST||[...'AEIOU'].every(v=>guessedLetters.has(v));
+    document.getElementById('btnSolve').disabled=false;
+    document.getElementById('turnName').textContent=`${players[currentPlayerIdx].name}'s Turn`;
+}
+function disableActions(){
+    document.getElementById('btnSpin').disabled=true;
+    document.getElementById('btnVowel').disabled=true;
+    document.getElementById('btnSolve').disabled=true;
+    document.getElementById('letterPicker').classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GAME CONTROLS
+// ═══════════════════════════════════════════════════════════════
+function showHint(){
+    if(currentPuzzle)showToast('💬 HINT',currentPuzzle.hint,2500);
+}
+function skipPuzzle(){
+    showConfirm('Skip this puzzle? No one earns points.',()=>{
+        revealAll(); showToast('PUZZLE SKIPPED',currentPuzzle.answer,2500);
+        setTimeout(()=>{
+            if(usedPuzzleIndices.length>=puzzles.length)endGame(); else startNewRound();
+        },3000);
+    });
+}
+function confirmResetRound(){
+    showConfirm('Reset this round? Scores reset, new puzzle dealt.',()=>{
+        roundNumber--; startNewRound();
+    });
+}
+function confirmResetGame(){
+    showConfirm('Reset entire game? All scores return to zero.',()=>{
+        usedPuzzleIndices=[]; roundNumber=0; currentPlayerIdx=0;
+        players.forEach(p=>{p.totalScore=0;p.roundScore=0;});
+        startNewRound();
+    });
+}
+
+function endGame(){
+    const sorted=[...players].sort((a,b)=>b.totalScore-a.totalScore);
+    setTimeout(()=>{
+        showRoundOverlay(`🏆 ${sorted[0].name.toUpperCase()} WINS! 🏆`,`Total: $${sorted[0].totalScore.toLocaleString()}`,'');
+        document.getElementById('roundBtn').textContent='PLAY AGAIN';
+        document.getElementById('roundBtn').onclick=()=>{
+            usedPuzzleIndices=[];roundNumber=0;currentPlayerIdx=0;
+            players.forEach(p=>{p.totalScore=0;p.roundScore=0;});
+            document.getElementById('roundBtn').textContent="LET'S GO";
+            document.getElementById('roundBtn').onclick=dismissRoundOverlay;
+            dismissRoundOverlay(); startNewRound();
+        };
+    },500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SCOREBOARD
+// ═══════════════════════════════════════════════════════════════
+function updateScoreboard(){
+    const sb=document.getElementById('scoreboard'); sb.innerHTML='';
+    players.forEach((p,i)=>{
+        const c=document.createElement('div');
+        c.className='player-card'+(i===currentPlayerIdx?' active':'');
+        c.innerHTML=`<div class="pname">${p.name}</div>
+            <div class="pscore${p.roundScore<0?' negative':''}">$${p.roundScore.toLocaleString()}</div>
+            <div class="round-score">Total: $${p.totalScore.toLocaleString()}</div>`;
+        sb.appendChild(c);
+    });
+    const vb=document.getElementById('btnVowel');
+    if(vb&&gamePhase!=='solved')
+        vb.disabled=players[currentPlayerIdx].roundScore<VOWEL_COST||[...'AEIOU'].every(v=>guessedLetters.has(v));
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════════════════════════
+function show(id,text){document.getElementById(id).textContent=text;}
+function showToast(big,sub,dur=1800){
+    const t=document.getElementById('toast');
+    show('toastBig',big); show('toastSub',sub);
+    t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),dur);
+}
+function showRoundOverlay(title,sub,hint){
+    show('roundTitle',title); show('roundSub',sub);
+    show('roundHint',hint||'');
+    document.getElementById('roundOverlay').classList.add('active');
+}
+function dismissRoundOverlay(){document.getElementById('roundOverlay').classList.remove('active');}
+
+function showConfirm(msg,onYes){
+    show('confirmMsg',msg);
+    document.getElementById('confirmOverlay').classList.add('active');
+    document.getElementById('confirmYes').onclick=()=>{closeConfirm();onYes();};
+}
+function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('active');}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+initSetup(); drawWheel();
+</script>
+</body>
+</html>
