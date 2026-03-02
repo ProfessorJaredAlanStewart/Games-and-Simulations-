@@ -451,6 +451,168 @@
             display: block;
         }
 
+        /* Daily Double Styles */
+        .daily-double-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.97);
+            z-index: 1002;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .daily-double-overlay.active {
+            display: flex;
+        }
+
+        .dd-announcement {
+            text-align: center;
+            animation: ddPulse 0.8s ease-in-out;
+        }
+
+        @keyframes ddPulse {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .dd-star {
+            font-size: 5em;
+            display: block;
+            margin-bottom: 10px;
+            animation: ddSpin 1.5s ease-out;
+        }
+
+        @keyframes ddSpin {
+            0% { transform: rotate(0deg) scale(0.5); opacity: 0; }
+            50% { transform: rotate(360deg) scale(1.2); }
+            100% { transform: rotate(720deg) scale(1); opacity: 1; }
+        }
+
+        .dd-title {
+            font-size: 3.5em;
+            color: #f4c542;
+            font-weight: bold;
+            font-family: Georgia, serif;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+        }
+
+        .dd-team-name {
+            font-size: 1.8em;
+            color: #4caf50;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .dd-current-score {
+            font-size: 1.2em;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+
+        .dd-wager-section {
+            background: rgba(6, 12, 233, 0.9);
+            border: 4px solid #f4c542;
+            border-radius: 15px;
+            padding: 35px 50px;
+            text-align: center;
+            max-width: 550px;
+            width: 90%;
+        }
+
+        .dd-wager-label {
+            font-size: 1.5em;
+            color: #f4c542;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-family: Georgia, serif;
+        }
+
+        .dd-wager-range {
+            font-size: 1em;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .dd-wager-input {
+            background: rgba(255, 255, 255, 0.15);
+            border: 3px solid #f4c542;
+            color: #f4c542;
+            padding: 18px;
+            font-size: 2.5em;
+            border-radius: 10px;
+            font-family: Georgia, serif;
+            text-align: center;
+            width: 250px;
+            font-weight: bold;
+        }
+
+        .dd-wager-input:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(244, 197, 66, 0.5);
+        }
+
+        .dd-quick-wagers {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0 25px;
+            flex-wrap: wrap;
+        }
+
+        .dd-quick-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(244, 197, 66, 0.5);
+            color: #f4c542;
+            padding: 8px 16px;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: Georgia, serif;
+            transition: all 0.2s;
+        }
+
+        .dd-quick-btn:hover {
+            background: rgba(244, 197, 66, 0.3);
+            border-color: #f4c542;
+        }
+
+        .dd-submit-btn {
+            background: linear-gradient(135deg, #f4c542 0%, #d4a532 100%);
+            color: #060CE9;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 10px;
+            font-family: Georgia, serif;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+        }
+
+        .dd-submit-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6);
+        }
+
+        .dd-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 0.45em;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .clue-box {
+            position: relative;
+        }
+
         .feedback-title {
             font-size: 1.4em;
             margin-bottom: 15px;
@@ -676,6 +838,23 @@
             <div class="round-transition">
                 <button class="next-round-btn" id="nextRoundBtn">DOUBLE JEOPARDY!</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Daily Double Overlay (standalone, not inside modal) -->
+    <div class="daily-double-overlay" id="dailyDoubleOverlay">
+        <div class="dd-announcement">
+            <span class="dd-star">⭐</span>
+            <div class="dd-title">DAILY DOUBLE!</div>
+            <div class="dd-team-name" id="ddTeamName"></div>
+            <div class="dd-current-score" id="ddCurrentScore"></div>
+        </div>
+        <div class="dd-wager-section">
+            <div class="dd-wager-label">Enter Your Wager</div>
+            <div class="dd-wager-range" id="ddWagerRange"></div>
+            <input type="number" class="dd-wager-input" id="ddWagerInput" min="0" value="0">
+            <div class="dd-quick-wagers" id="ddQuickWagers"></div>
+            <button class="dd-submit-btn" onclick="submitDailyDoubleWager()">LOCK IN WAGER</button>
         </div>
     </div>
 
@@ -1273,7 +1452,7 @@
                         {
                                 "id": "Question_20",
                                 "title": "21: Which of the following regions is most likely to elect Democratic representatives today?",
-                                "question": "Which of the following regions is most likely to elect Democratic representatives today?",
+                                "question": "Which of the following regions historically served as a stronghold for the Democratic Party in Texas, though it has shifted significantly toward the Republican Party in recent elections?",
                                 "type": "Multiple Choice",
                                 "difficulty": "Complex",
                                 "reference": "Texas\u2019s Cultural Regions",
@@ -1296,7 +1475,7 @@
                                         }
                                 ],
                                 "correct_answer": "South Texas",
-                                "feedback": "Correct. South Texas is most likely to elect Democratic representatives today because the region tends to be more liberal compared to other regions in Texas. Ranchero culture also influences the region, which a culturally rich area including Creole, Mestizo, and Mexican American heritage."
+                                "feedback": "Correct. South Texas was historically a Democratic stronghold due to its majority-Hispanic population and cultural traditions. However, beginning in 2020 and accelerating through the 2022 and 2024 elections, South Texas experienced a dramatic shift toward the Republican Party, with many traditionally Democratic border counties voting Republican for the first time in generations."
                         },
                         {
                                 "id": "Question_21",
@@ -3290,7 +3469,7 @@
                                         }
                                 ],
                                 "correct_answer": "The right to privacy",
-                                "feedback": "Correct. Roe v. Wade evaluated whether Texas legislation violated a woman\u2019s constitutional right to privacy. The case questioned whether state prohibitions against abortion violate a woman\u2019s fundamental liberty and right to privacy. In 1973, the U.S. Supreme Court declared that Texas\u2019s legislation making abortion illegal was unconstitutional. The case also established the balancing test and a trimester framework for understanding how the law applies to pregnancy."
+                                "feedback": "Correct. Roe v. Wade evaluated whether Texas legislation violated a woman\u2019s constitutional right to privacy. In 1973, the U.S. Supreme Court declared that Texas\u2019s legislation making abortion illegal was unconstitutional, establishing the trimester framework. Note: Roe v. Wade was later overturned by Dobbs v. Jackson Women\u2019s Health Organization (2022), which returned the authority to regulate abortion to the states. Texas subsequently enacted a near-total ban on abortion."
                         },
                         {
                                 "id": "Question_44",
@@ -3346,7 +3525,7 @@
                                         }
                                 ],
                                 "correct_answer": "Texas has resisted efforts to liberalize marijuana policy.",
-                                "feedback": "Correct. Texas has resisted efforts to liberalized marijuana policy. For example, 35 states have adopted medical marijuana legislation similar to California\u2019s 1996 legalization efforts, but Texas has still not legalized medical marijuana."
+                                "feedback": "Correct. Texas has generally resisted efforts to liberalize marijuana policy compared to other states. While Texas passed a limited Compassionate Use Act in 2015 allowing low-THC cannabis for certain medical conditions\u2014and expanded it in 2019, 2021, and significantly in 2025\u2014its medical cannabis program remains far more restrictive than most other states. Recreational marijuana remains illegal."
                         },
                         {
                                 "id": "Question_46",
@@ -3855,8 +4034,8 @@
                                                 "text": "During the Constitution of 1845"
                                         }
                                 ],
-                                "correct_answer": "After reconstruction",
-                                "feedback": "Correct. E.J. Davis served as governor of Texas after the Reconstruction and during the period of the 1869 Texas Constitution. Davis used the power granted under the constitution to pursue activist government policies to protect civil rights, enforce law and order, modernize transportation, and expand education."
+                                "correct_answer": "During Reconstruction",
+                                "feedback": "Correct. E.J. Davis served as governor of Texas during Reconstruction (1870\u20131874) under the Constitution of 1869. Davis used the power granted under the constitution to pursue activist government policies to protect civil rights, enforce law and order, modernize transportation, and expand education. His departure from office in 1874 is widely regarded as the end of Reconstruction in Texas."
                         },
                         {
                                 "id": "Question_15",
@@ -4952,8 +5131,8 @@
                         },
                         {
                                 "id": "Question_54",
-                                "title": "55: In what court does Justice Eva Guzman serve?",
-                                "question": "In what court does Justice Eva Guzman serve?",
+                                "title": "55: On which court did Justice Eva Guzman make history as the first Hispanic woman elected to statewide office in Texas?",
+                                "question": "On which court did Justice Eva Guzman make history as the first Hispanic woman elected to statewide office in Texas?",
                                 "type": "Multiple Choice",
                                 "difficulty": "Complex",
                                 "reference": "Applying What You Have Learned about the Texas Constitution",
@@ -4976,7 +5155,7 @@
                                         }
                                 ],
                                 "correct_answer": "The Texas Supreme Court",
-                                "feedback": "Correct. Justice Eva Guzman serves on the Texas Supreme Court. Former governor Rick Perry appointed Guzman in 2009, and she became the first Hispanic woman to win statewide office in Texas."
+                                "feedback": "Correct. Justice Eva Guzman served on the Texas Supreme Court from 2009 to 2021. Former Governor Rick Perry appointed Guzman in 2009, and she became the first Hispanic woman to win statewide office in Texas when she won election to a full term in 2010. Guzman resigned in 2021."
                         }
                 ]
         },
@@ -7143,8 +7322,8 @@
                                                 "text": "1966"
                                         }
                                 ],
-                                "correct_answer": "1992",
-                                "feedback": "Correct. Republicans in Texas won both the U.S. Senate seats for the first time since Reconstruction in 1992 when U.S. Senator Kay Bailey Hutchinson won the seat. Shortly after, Republicans continued their competitive winning streak when Republican George W. Bush defeated Democratic Governor Ann Richards."
+                                "correct_answer": "1993",
+                                "feedback": "Correct. Republicans in Texas won both U.S. Senate seats for the first time since Reconstruction in 1993, when Kay Bailey Hutchison won a special election to replace Lloyd Bentsen. Shortly after, Republicans continued their competitive winning streak when George W. Bush defeated Democratic Governor Ann Richards in 1994."
                         },
                         {
                                 "id": "Question_26",
@@ -17087,6 +17266,14 @@
         let answered = false;
         let gameBoard = null;
         let usedQuestions = { round1: {}, round2: {} };
+        let dailyDoubles = { round1: null, round2: null };
+        let isDailyDouble = false;
+        let dailyDoubleWager = 0;
+        let pendingDDCategory = null;
+        let pendingDDIndex = null;
+        let pendingDDValue = null;
+        let pendingDDElement = null;
+        let pendingDDGameData = null;
 
         // Helper function to clean feedback text
         function cleanFeedbackText(text) {
@@ -17179,6 +17366,14 @@
                     questions: selectedQuestions
                 };
             }
+
+            // Assign one random Daily Double per round
+            for (const roundKey of ['round1', 'round2']) {
+                const categories = Object.keys(board[roundKey]);
+                const randomCat = categories[Math.floor(Math.random() * categories.length)];
+                const randomIdx = Math.floor(Math.random() * 5);
+                dailyDoubles[roundKey] = `${randomCat}-${randomIdx}`;
+            }
             
             return board;
         }
@@ -17189,12 +17384,19 @@
             currentRound = 1;
             answeredCount = 0;
             currentTeamIndex = 0;
+            isDailyDouble = false;
+            dailyDoubleWager = 0;
             
             loadRound(1);
             updateTeamsDisplay();
             updateCurrentTeamIndicator();
             
             updateSkipButton();
+
+            // Enter key submits wager
+            document.getElementById('ddWagerInput').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') submitDailyDoubleWager();
+            });
         }
 
         function updateTeamsDisplay() {
@@ -17298,12 +17500,82 @@
         function openQuestion(category, index, value, element, gameData) {
             if (element.classList.contains('used')) return;
 
+            const roundKey = currentRound === 1 ? 'round1' : 'round2';
+            const questionKey = `${category}-${index}`;
+
+            // Check if this is a Daily Double
+            if (dailyDoubles[roundKey] === questionKey) {
+                isDailyDouble = true;
+                pendingDDCategory = category;
+                pendingDDIndex = index;
+                pendingDDValue = value;
+                pendingDDElement = element;
+                pendingDDGameData = gameData;
+                showDailyDoubleWager();
+                return;
+            }
+
+            isDailyDouble = false;
+            dailyDoubleWager = 0;
+            showQuestionModal(category, index, value, element, gameData);
+        }
+
+        function showDailyDoubleWager() {
+            const team = teams[currentTeamIndex];
+            const maxWager = Math.max(team.score, pendingDDValue);
+
+            document.getElementById('ddTeamName').textContent = `${team.name}'s Daily Double!`;
+            document.getElementById('ddCurrentScore').textContent = `Current Score: $${team.score}`;
+            document.getElementById('ddWagerRange').textContent = `You may wager from $0 up to $${maxWager}`;
+            
+            const input = document.getElementById('ddWagerInput');
+            input.max = maxWager;
+            input.value = 0;
+
+            // Generate quick wager buttons
+            const quickDiv = document.getElementById('ddQuickWagers');
+            quickDiv.innerHTML = '';
+            const quickAmounts = [];
+            if (maxWager > 0) {
+                quickAmounts.push(Math.round(maxWager * 0.25));
+                quickAmounts.push(Math.round(maxWager * 0.5));
+                quickAmounts.push(Math.round(maxWager * 0.75));
+                quickAmounts.push(maxWager);
+            }
+            const uniqueAmounts = [...new Set(quickAmounts.filter(a => a > 0))];
+            uniqueAmounts.forEach(amt => {
+                const btn = document.createElement('button');
+                btn.className = 'dd-quick-btn';
+                btn.textContent = `$${amt}`;
+                btn.addEventListener('click', () => { input.value = amt; });
+                quickDiv.appendChild(btn);
+            });
+
+            document.getElementById('dailyDoubleOverlay').classList.add('active');
+            setTimeout(() => input.focus(), 600);
+        }
+
+        function submitDailyDoubleWager() {
+            const team = teams[currentTeamIndex];
+            const maxWager = Math.max(team.score, pendingDDValue);
+            let wager = parseInt(document.getElementById('ddWagerInput').value) || 0;
+            
+            if (wager < 0) wager = 0;
+            if (wager > maxWager) wager = maxWager;
+
+            dailyDoubleWager = wager;
+            document.getElementById('dailyDoubleOverlay').classList.remove('active');
+            showQuestionModal(pendingDDCategory, pendingDDIndex, pendingDDValue, pendingDDElement, pendingDDGameData);
+        }
+
+        function showQuestionModal(category, index, value, element, gameData) {
+
             currentQuestion = gameData[category].questions[index];
             currentValue = value;
             currentElement = element;
             answered = false;
 
-            document.getElementById('modalValue').textContent = `$${value}`;
+            document.getElementById('modalValue').textContent = isDailyDouble ? `⭐ DAILY DOUBLE ⭐  —  Wager: $${dailyDoubleWager}` : `$${value}`;
             document.getElementById('currentTeamDisplay').textContent = `${teams[currentTeamIndex].name}'s turn`;
             document.getElementById('questionText').textContent = currentQuestion.question;
 
@@ -17334,14 +17606,15 @@
             buttons.forEach(btn => btn.disabled = true);
 
             const isCorrect = selectedAnswer === currentQuestion.correct_answer;
+            const pointValue = isDailyDouble ? dailyDoubleWager : currentValue;
 
             if (isCorrect) {
                 button.classList.add('correct');
-                teams[currentTeamIndex].score += currentValue;
+                teams[currentTeamIndex].score += pointValue;
                 showFeedback(true);
             } else {
                 button.classList.add('incorrect');
-                teams[currentTeamIndex].score -= currentValue;
+                teams[currentTeamIndex].score -= pointValue;
                 showFeedback(false);
                 
                 buttons.forEach(btn => {
@@ -17375,10 +17648,13 @@
 
         function resetQuestion() {
             document.getElementById('modal').classList.remove('active');
+            document.getElementById('dailyDoubleOverlay').classList.remove('active');
             currentQuestion = null;
             currentValue = 0;
             currentElement = null;
             answered = false;
+            isDailyDouble = false;
+            dailyDoubleWager = 0;
         }
 
         function resetRound() {
@@ -17482,7 +17758,10 @@
             const oerInfo = getOERKnowledge(currentQuestion);
             const feedbackText = cleanFeedbackText(currentQuestion.feedback);
             
+            const ddNote = isDailyDouble ? `<div style="color: #f4c542; font-size: 1.1em; margin-bottom: 10px;">⭐ Daily Double — ${isCorrect ? 'Won' : 'Lost'} $${dailyDoubleWager}!</div>` : '';
+            
             feedbackDiv.innerHTML = `
+                ${ddNote}
                 <div class="feedback-title">${isCorrect ? '✓ CORRECT!' : '✗ INCORRECT'}</div>
                 <div>${feedbackText}</div>
                 <div class="learn-more">
@@ -17496,6 +17775,8 @@
         function closeModal() {
             document.getElementById('modal').classList.remove('active');
             answered = false;
+            isDailyDouble = false;
+            dailyDoubleWager = 0;
         }
 
         function startRound2() {
