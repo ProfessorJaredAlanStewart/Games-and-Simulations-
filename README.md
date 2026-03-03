@@ -32,6 +32,13 @@ No logins. No installations. No cost. Just open and play.
 |----------|-------------|
 | [Generic Schedule Builder](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Generic%20Schedule%20Builder%20(For%20Dist%20to%20Chairs).html) | Flexible schedule builder for creating and distributing course schedules. Designed for department chairs. |
 
+## 🥾 Trailblazer Treks
+
+| Resource | Level | Description |
+|----------|-------|-------------|
+| [Federal Government Trailblazer Trek](https://professorjaredalanstewart.github.io/tcc-govt-modules/) | Federal | Interactive learning trek through American federal government — the Constitution, branches of government, civil liberties, and public policy. |
+| [Texas Government Trailblazer Trek](https://professorjaredalanstewart.github.io/texas-govt-modules/) | Texas | Interactive learning trek through Texas government — the Texas Constitution, the legislature, the executive branch, and local government. |
+
 ---
 
 ## How to Use
