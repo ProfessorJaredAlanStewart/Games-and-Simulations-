@@ -3,1861 +3,1266 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Keep Your Job - Congressional Simulation Game</title>
-  
-  <!-- React and ReactDOM from cdnjs -->
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
-  
-  <!-- Babel from cdnjs -->
+  <title>Keep Your Seat — Congressional Simulation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-  
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-  <!-- jsPDF for certificate generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --bg-deep: #f0f2f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #fafbfc;
+      --bg-surface: #f5f6f8;
+      --border: #d4d8e1;
+      --border-light: #e2e5ec;
+      --text-primary: #1a1d2e;
+      --text-secondary: #4a5068;
+      --text-muted: #6b7190;
+      --accent-blue: #2563eb;
+      --accent-blue-glow: rgba(37,99,235,0.15);
+      --accent-blue-light: #eff4ff;
+      --accent-red: #dc2626;
+      --accent-red-glow: rgba(220,38,38,0.1);
+      --accent-red-light: #fef2f2;
+      --accent-green: #16a34a;
+      --accent-green-glow: rgba(22,163,74,0.1);
+      --accent-green-light: #f0fdf4;
+      --accent-gold: #ca8a04;
+      --accent-gold-glow: rgba(202,138,4,0.1);
+      --accent-gold-light: #fefce8;
+      --accent-purple: #7c3aed;
+      --accent-purple-glow: rgba(124,58,237,0.1);
+      --accent-purple-light: #f5f3ff;
+      --dem-blue: #2563eb;
+      --dem-blue-bg: #eff4ff;
+      --rep-red: #dc2626;
+      --rep-red-bg: #fef2f2;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Source Sans 3', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+      --shadow-lg: 0 4px 16px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);
+      --shadow-xl: 0 8px 30px rgba(0,0,0,0.12);
     }
-    
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      font-family: Georgia, 'Times New Roman', serif;
-      background: #f3f4f6;
-      color: #111827;
-      font-size: 16px;
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text-primary);
       line-height: 1.6;
+      min-height: 100vh;
+      font-size: 16px;
     }
-    
-    h1, h2, h3, h4, h5, h6, .btn, .stat-label, .stat-value, button, .badge, .location-btn {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    }
-    
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    
+
+    #root { position: relative; z-index: 1; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+
+    /* Typography */
+    h1 { font-family: var(--font-display); font-weight: 900; letter-spacing: -0.02em; color: var(--text-primary); }
+    h2, h3, h4 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em; color: var(--text-primary); }
+
+    /* Card */
     .card {
-      background: white;
-      border-radius: 8px;
-      padding: 28px;
-      margin-bottom: 24px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-    
-    .btn {
-      padding: 14px 28px;
-      border: none;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .btn-primary {
-      background: #2563eb;
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background: #1d4ed8;
-    }
-    
-    .btn-primary:disabled {
-      background: #9ca3af;
-      cursor: not-allowed;
-    }
-    
-    .btn-success {
-      background: #10b981;
-      color: white;
-    }
-    
-    .btn-danger {
-      background: #ef4444;
-      color: white;
-    }
-    
-    .btn-warning {
-      background: #f59e0b;
-      color: white;
-    }
-    
-    .btn-secondary {
-      background: #6b7280;
-      color: white;
-    }
-    
-    .btn-secondary:hover {
-      background: #4b5563;
-    }
-    
-    .grid {
-      display: grid;
-      gap: 16px;
-    }
-    
-    .grid-2 {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .grid-3 {
-      grid-template-columns: repeat(3, 1fr);
-    }
-    
-    .grid-4 {
-      grid-template-columns: repeat(4, 1fr);
-    }
-    
-    @media (max-width: 768px) {
-      .grid-2, .grid-3, .grid-4 {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    .stat-box {
-      background: #f9fafb;
-      padding: 20px;
-      border-radius: 6px;
-      text-align: center;
-    }
-    
-    .stat-label {
-      font-size: 14px;
-      color: #6b7280;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-    
-    .stat-value {
-      font-size: 28px;
-      font-weight: bold;
-    }
-    
-    h1 {
-      font-size: 56px;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 36px;
-      color: #111827;
-    }
-    
-    h2 {
-      font-size: 36px;
-      font-weight: bold;
-      margin-bottom: 20px;
-      color: #111827;
-    }
-    
-    h3 {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 16px;
-      color: #111827;
-    }
-    
-    p {
-      font-size: 16px;
-      line-height: 1.6;
-    }
-    
-    li {
-      line-height: 1.8;
-    }
-    
-    .district-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
       padding: 24px;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: white;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
     }
-    
-    .district-card:hover {
-      border-color: #2563eb;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transform: translateY(-2px);
-    }
-    
-    .badge {
-      display: inline-block;
-      padding: 6px 16px;
-      border-radius: 4px;
-      font-size: 14px;
-      font-weight: 600;
-      margin-top: 10px;
-    }
-    
-    .badge-dem {
-      background: #dbeafe;
-      color: #1e40af;
-    }
-    
-    .badge-rep {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-    
-    .log-item {
-      padding: 14px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      font-size: 16px;
-      border-left: 4px solid;
-    }
-    
-    .log-success {
-      background: #d1fae5;
-      color: #065f46;
-      border-left-color: #10b981;
-    }
-    
-    .log-warning {
-      background: #fed7aa;
-      color: #92400e;
-      border-left-color: #f59e0b;
-    }
-    
-    .log-info {
-      background: #dbeafe;
-      color: #1e40af;
-      border-left-color: #3b82f6;
-    }
-    
-    .action-btn {
-      width: 100%;
-      padding: 20px;
-      margin-bottom: 14px;
-      background: #f9fafb;
-      border: 2px solid #e5e7eb;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-      font-size: 15px;
-    }
-    
-    .action-btn:hover:not(:disabled) {
-      background: #f3f4f6;
-      border-color: #9ca3af;
-    }
-    
-    .action-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .action-btn.selected {
-      background: #dbeafe;
-      border-color: #2563eb;
-      border-width: 3px;
-    }
-    
-    .location-btn {
+
+    /* Buttons — big, bold, unmistakable */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
       padding: 14px 28px;
-      border: 2px solid #e5e7eb;
-      background: white;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-right: 12px;
-      margin-bottom: 8px;
-      font-weight: 600;
-      font-size: 16px;
-      transition: all 0.2s;
+      border: 2px solid transparent;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-weight: 700; font-size: 16px;
+      cursor: pointer; transition: all 0.2s;
     }
-    
-    .location-btn.active {
-      background: #2563eb;
-      color: white;
-      border-color: #2563eb;
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-primary { background: var(--accent-blue); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #1d4ed8; box-shadow: 0 4px 12px var(--accent-blue-glow); }
+    .btn-success { background: var(--accent-green); color: #fff; }
+    .btn-success:hover:not(:disabled) { background: #15803d; }
+    .btn-danger { background: var(--accent-red); color: #fff; }
+    .btn-danger:hover:not(:disabled) { background: #b91c1c; }
+    .btn-gold { background: #eab308; color: #1a1500; font-weight: 800; }
+    .btn-gold:hover:not(:disabled) { background: #ca8a04; }
+    .btn-ghost { background: #fff; color: var(--text-primary); border: 2px solid var(--border); }
+    .btn-ghost:hover:not(:disabled) { background: var(--bg-surface); border-color: #b0b6c4; }
+    .btn-ghost.active { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+
+    /* Grid */
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .grid-6 { grid-template-columns: repeat(6, 1fr); }
+    @media (max-width: 900px) { .grid-3, .grid-4, .grid-6 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .grid-2, .grid-3, .grid-4, .grid-6 { grid-template-columns: 1fr; } }
+
+    /* Stat boxes */
+    .stat-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 16px 12px;
+      text-align: center;
     }
-    
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 20px;
+    .stat-label {
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
     }
-    
-    .modal-content {
-      background: white;
-      border-radius: 12px;
-      padding: 36px;
-      max-width: 700px;
-      width: 100%;
-      max-height: 85vh;
-      overflow-y: auto;
-      font-size: 16px;
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 28px; font-weight: 600;
+      line-height: 1.2;
+      color: var(--text-primary);
     }
-    
-    .ticker {
-      animation: scroll 60s linear infinite;
-      font-size: 16px;
-    }
-    
-    @keyframes scroll {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-    
-    .news-ticker {
-      background: #dc2626;
-      color: white;
-      padding: 10px;
+    .stat-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+    /* News ticker */
+    .ticker-wrap {
+      background: #b91c1c;
+      padding: 10px 0;
       overflow: hidden;
       white-space: nowrap;
-      margin-bottom: 24px;
-    }
-    
-    .character-avatar {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 16px;
-      background: #f9fafb;
-      border-radius: 8px;
-      margin-bottom: 14px;
-    }
-    
-    .avatar-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: white;
-      font-weight: bold;
-    }
-    
-    .media-panel {
-      background: #f9fafb;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 14px;
-    }
-    
-    .chart-container {
-      position: relative;
-      height: 280px;
-      margin: 24px 0;
-    }
-    
-    .explanation-box {
-      background: #fef3c7;
-      border: 2px solid #f59e0b;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-      font-size: 16px;
-    }
-    
-    .pc-warning-box {
-      background: linear-gradient(135deg, #fef2f2, #fee2e2);
-      border: 3px solid #ef4444;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 6px rgba(239, 68, 68, 0.1);
-    }
-    
-    .pc-status-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 16px;
-    }
-    
-    .pc-positive {
-      background: #d1fae5;
-      color: #065f46;
-    }
-    
-    .pc-negative {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-    
-    .pc-neutral {
-      background: #f3f4f6;
-      color: #4b5563;
-    }
-    
-    .issue-select-panel {
-      background: #f0f9ff;
-      border: 2px solid #0ea5e9;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    
-    .issue-btn {
-      padding: 12px 20px;
-      margin: 6px;
-      border: 2px solid #e5e7eb;
-      background: white;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-    
-    .issue-btn:hover {
-      background: #f0f9ff;
-      border-color: #0ea5e9;
-    }
-    
-    .issue-btn.selected {
-      background: #0ea5e9;
-      color: white;
-      border-color: #0ea5e9;
-    }
-    
-    .control-panel {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      display: flex;
-      gap: 10px;
-      z-index: 100;
-      flex-direction: column;
-      align-items: flex-end;
-    }
-    
-    .control-btn {
-      padding: 12px 20px;
-      background: rgba(107, 114, 128, 0.9);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: all 0.2s;
-    }
-    
-    .control-btn:hover:not(:disabled) {
-      background: rgba(75, 85, 99, 0.95);
-      transform: translateY(-2px);
-    }
-    
-    .control-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .save-load-panel {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      margin-bottom: 10px;
-      min-width: 200px;
-    }
-    
-    .save-slot {
-      padding: 8px 12px;
-      margin: 4px 0;
-      background: #f3f4f6;
-      border-radius: 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 14px;
-    }
-    
-    .save-slot button {
-      padding: 4px 8px;
-      font-size: 12px;
-      margin-left: 8px;
-    }
-    
-    .bill-card {
-      position: relative;
-      padding: 20px;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
-      background: white;
-    }
-    
-    .bill-card.voted {
-      border: 3px solid #10b981;
-      background: #f0fdf4;
-    }
-    
-    .bill-tooltip {
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      margin-bottom: 10px;
-      padding: 16px;
-      background: rgba(31, 41, 55, 0.95);
-      color: white;
-      border-radius: 8px;
-      font-size: 14px;
-      width: 300px;
-      z-index: 200;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    
-    .bill-card:hover .bill-tooltip {
-      opacity: 1;
-    }
-    
-    .tooltip-section {
-      margin-bottom: 12px;
-    }
-    
-    .tooltip-section:last-child {
-      margin-bottom: 0;
-    }
-    
-    .tooltip-label {
-      font-weight: 600;
-      margin-bottom: 4px;
-      font-size: 12px;
-      text-transform: uppercase;
-      opacity: 0.8;
-    }
-    
-    .certificate-preview {
-      background: white;
-      padding: 40px;
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      margin: 20px 0;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .congress-control-banner {
-      background: linear-gradient(90deg, #1e40af, #dc2626);
-      color: white;
-      padding: 12px;
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       margin-bottom: 16px;
-      text-align: center;
-      font-weight: 600;
+      position: relative;
     }
-    
-    .approval-floor-ceiling {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: #6b7280;
-      margin-top: 4px;
+    .ticker-wrap::before {
+      content: 'LIVE';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      background: #7f1d1d;
+      color: #fecaca;
+      font-weight: 800; font-size: 12px; letter-spacing: 0.15em;
+      display: flex; align-items: center; padding: 0 16px;
+      z-index: 2;
     }
-    
-    .committee-tier-box {
-      background: #f0f9ff;
-      border: 2px solid #0ea5e9;
-      border-radius: 8px;
-      padding: 16px;
+    .ticker {
+      display: inline-block;
+      white-space: nowrap;
+      animation: tickerScroll 45s linear infinite;
+      color: #fff;
+      font-weight: 600; font-size: 15px;
+      padding-left: 80px;
+    }
+    @keyframes tickerScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Tabs — big and clear */
+    .tab-bar {
+      display: flex; gap: 4px;
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      padding: 5px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow);
       margin-bottom: 20px;
     }
-    
-    .mb-2 { margin-bottom: 10px; }
-    .mb-4 { margin-bottom: 20px; }
-    .mb-6 { margin-bottom: 30px; }
+    .tab-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-weight: 700; font-size: 15px;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .tab-btn:hover { color: var(--text-primary); background: var(--bg-surface); }
+    .tab-btn.active {
+      background: var(--accent-blue);
+      color: #fff;
+      border-color: var(--accent-blue);
+      box-shadow: 0 2px 8px var(--accent-blue-glow);
+    }
+
+    /* Action cards — clear interactive feel */
+    .action-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .action-card:hover:not(.disabled) {
+      border-color: var(--accent-blue);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    .action-card.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .action-card .icon { font-size: 36px; margin-bottom: 8px; display: block; }
+    .action-card .label { font-weight: 700; font-size: 16px; color: var(--text-primary); margin-bottom: 4px; }
+    .action-card .meta { font-size: 14px; color: var(--text-muted); }
+    .action-card .cost { font-family: var(--font-mono); color: var(--accent-gold); font-weight: 700; font-size: 18px; }
+    .action-card.ad-card.selected { border-color: var(--accent-blue); background: var(--accent-blue-light); }
+
+    /* Bill cards */
+    .bill-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .bill-card:hover { border-color: var(--border); box-shadow: var(--shadow-lg); }
+    .bill-card.voted { border-color: var(--accent-green); background: var(--accent-green-light); }
+    .bill-card .bill-name { font-weight: 700; font-size: 17px; color: var(--text-primary); margin-bottom: 6px; }
+    .bill-card .bill-issue {
+      display: inline-block;
+      font-size: 13px; font-weight: 600;
+      padding: 3px 12px; border-radius: 100px;
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .bill-card .vote-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* Vote buttons — very clear */
+    .vote-btn {
+      padding: 14px 10px;
+      border: 2px solid transparent;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-weight: 800; font-size: 15px;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .vote-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .vote-with {
+      background: #dcfce7; color: #15803d; border-color: #86efac;
+    }
+    .vote-with:hover:not(:disabled) { background: #bbf7d0; border-color: #4ade80; }
+    .vote-against {
+      background: #fee2e2; color: #b91c1c; border-color: #fca5a5;
+    }
+    .vote-against:hover:not(:disabled) { background: #fecaca; border-color: #f87171; }
+    .vote-btn .pc-change { font-family: var(--font-mono); font-size: 13px; opacity: 0.75; }
+
+    /* Committee cards */
+    .comm-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      text-align: center;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .comm-card:hover:not(.locked):not(.joined) {
+      border-color: var(--accent-blue);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+    .comm-card.locked { opacity: 0.45; cursor: not-allowed; }
+    .comm-card.joined { border-color: var(--accent-green); background: var(--accent-green-light); }
+    .comm-tier {
+      display: inline-block;
+      font-size: 12px; font-weight: 800;
+      padding: 3px 12px; border-radius: 100px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .tier-1 { background: #f3f4f6; color: #4b5563; }
+    .tier-2 { background: #dbeafe; color: #1d4ed8; }
+    .tier-3 { background: #fef3c7; color: #92400e; }
+
+    /* PAC cards */
+    .pac-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 18px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pac-card:hover:not(.disabled) {
+      border-color: var(--accent-gold);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+    .pac-card.disabled { opacity: 0.35; cursor: not-allowed; }
+    .pac-card .font-bold { color: var(--text-primary); }
+    .pac-amount { font-family: var(--font-mono); color: #b45309; font-weight: 700; font-size: 20px; }
+
+    /* Log items */
+    .log-item {
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      border-left: 4px solid;
+      color: var(--text-primary);
+    }
+    .log-success { background: #f0fdf4; border-left-color: var(--accent-green); }
+    .log-warning { background: #fefce8; border-left-color: #eab308; }
+    .log-info { background: #eff6ff; border-left-color: var(--accent-blue); }
+    .log-danger { background: #fef2f2; border-left-color: var(--accent-red); }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px;
+      animation: fadeIn 0.2s;
+    }
+    .modal-content {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 640px; width: 100%;
+      max-height: 85vh; overflow-y: auto;
+      box-shadow: var(--shadow-xl);
+      animation: modalIn 0.3s;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-content h2 { font-size: 24px; margin-bottom: 16px; color: var(--text-primary); }
+    .modal-content p, .modal-content div { line-height: 1.7; color: var(--text-primary); font-size: 15px; }
+
+    /* Tooltip */
+    .tooltip-popup {
+      position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+      background: #1e293b; border: 1px solid #334155;
+      border-radius: var(--radius-sm); padding: 16px;
+      width: 300px; z-index: 100;
+      box-shadow: var(--shadow-xl);
+      font-size: 14px; color: #e2e8f0;
+      pointer-events: none;
+    }
+    .tooltip-popup::after {
+      content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+      border: 6px solid transparent; border-top-color: #1e293b;
+    }
+    .tooltip-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 4px; }
+    .tooltip-section { margin-bottom: 10px; }
+
+    /* District select cards */
+    .district-select-card {
+      background: #fff;
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .district-select-card:hover {
+      border-color: var(--accent-blue);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-xl);
+    }
+    .district-select-card .party-stripe {
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    }
+    .district-select-card h3 { font-size: 20px; margin-bottom: 4px; color: var(--text-primary); }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 4px 14px; border-radius: 100px;
+      font-size: 13px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .badge-dem { background: #dbeafe; color: #1e40af; }
+    .badge-rep { background: #fee2e2; color: #991b1b; }
+    .badge-swing { background: #ede9fe; color: #5b21b6; }
+
+    /* Approval bar */
+    .approval-bar-container {
+      width: 100%; height: 10px;
+      background: #e5e7eb;
+      border-radius: 5px;
+      overflow: visible;
+      position: relative;
+      margin-top: 6px;
+    }
+    .approval-bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .approval-bar-marker {
+      position: absolute;
+      top: -3px; bottom: -3px;
+      width: 3px;
+      background: var(--text-primary);
+      border-radius: 2px;
+    }
+
+    /* Congress control banner */
+    .congress-banner {
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      text-align: center;
+      font-weight: 700; font-size: 14px;
+      margin-bottom: 16px;
+    }
+    .congress-dem { background: #dbeafe; color: #1e40af; border: 2px solid #93c5fd; }
+    .congress-rep { background: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
+    .congress-split { background: #ede9fe; color: #5b21b6; border: 2px solid #c4b5fd; }
+
+    /* PC indicator */
+    .pc-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 100px;
+      font-weight: 700; font-size: 14px;
+    }
+    .pc-positive { background: #dcfce7; color: #15803d; border: 2px solid #86efac; }
+    .pc-negative { background: #fee2e2; color: #b91c1c; border: 2px solid #fca5a5; }
+    .pc-neutral { background: #f3f4f6; color: #4b5563; border: 2px solid #d1d5db; }
+
+    /* Casework button — prominent */
+    .casework-btn {
+      background: #dcfce7;
+      border: 2px solid #86efac;
+      border-radius: var(--radius);
+      padding: 18px 24px;
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      cursor: pointer; transition: all 0.2s;
+      width: 100%;
+      font-family: var(--font-body);
+      color: #15803d;
+      font-weight: 800; font-size: 16px;
+    }
+    .casework-btn:hover:not(:disabled) {
+      background: #bbf7d0;
+      border-color: #4ade80;
+      box-shadow: 0 4px 12px rgba(22,163,74,0.15);
+    }
+    .casework-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* Media panel */
+    .media-box {
+      background: var(--bg-surface);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .media-box .source {
+      font-size: 12px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+    .media-headline { font-weight: 700; font-size: 16px; color: var(--text-primary); }
+    .tweet { font-size: 15px; color: var(--text-primary); padding: 6px 0; border-bottom: 1px solid var(--border-light); }
+    .tweet:last-child { border-bottom: none; }
+
+    /* Random event banner */
+    .event-banner {
+      background: #fefce8;
+      border: 2px solid #fde047;
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .event-banner h4 { color: #92400e; font-size: 18px; margin-bottom: 8px; }
+    .event-banner p { color: var(--text-primary); }
+
+    /* Election result */
+    .election-result { text-align: center; padding: 48px 24px; }
+    .election-result h1 { font-size: 52px; margin-bottom: 8px; }
+
+    /* Research citation box */
+    .cite-box {
+      background: #fefce8;
+      border: 2px solid #fde047;
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+    .cite-box h4 { color: #92400e; font-size: 15px; margin-bottom: 8px; }
+    .cite-box p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* Difficulty badge */
+    .diff-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 3px 10px;
+      border-radius: 4px;
+    }
+    .diff-easy { background: #dcfce7; color: #15803d; }
+    .diff-medium { background: #fef3c7; color: #92400e; }
+    .diff-hard { background: #fee2e2; color: #b91c1c; }
+
+    /* Issue pills */
+    .issue-pill {
+      padding: 8px 16px;
+      border: 2px solid var(--border-light);
+      border-radius: 100px;
+      background: #fff;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .issue-pill:hover { background: var(--bg-surface); border-color: var(--border); }
+    .issue-pill.selected { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+
+    /* Control panel (fixed) */
+    .ctrl-panel {
+      position: fixed; bottom: 16px; right: 16px;
+      display: flex; flex-direction: column; gap: 6px;
+      z-index: 100;
+    }
+    .ctrl-btn {
+      padding: 10px 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: var(--shadow-lg);
+    }
+    .ctrl-btn:hover { background: var(--bg-surface); color: var(--text-primary); }
+    .ctrl-btn.danger { border-color: #fca5a5; color: var(--accent-red); }
+    .ctrl-btn.danger:hover { background: #fef2f2; }
+
+    /* Utility classes */
     .text-sm { font-size: 15px; }
-    .text-xs { font-size: 14px; }
-    .text-gray { color: #6b7280; }
-    .font-bold { font-weight: 700; }
+    .text-xs { font-size: 13px; }
+    .text-muted { color: var(--text-muted); }
+    .text-secondary { color: var(--text-secondary); }
     .text-center { text-align: center; }
+    .font-bold { font-weight: 700; }
+    .font-mono { font-family: var(--font-mono); }
+    .mb-1 { margin-bottom: 6px; }
+    .mb-2 { margin-bottom: 12px; }
+    .mb-3 { margin-bottom: 16px; }
+    .mb-4 { margin-bottom: 24px; }
+    .mt-2 { margin-top: 12px; }
+    .mt-4 { margin-top: 24px; }
+    .flex { display: flex; }
+    .flex-center { display: flex; align-items: center; justify-content: center; }
+    .gap-2 { gap: 12px; }
+    .gap-1 { gap: 6px; }
+    .w-full { width: 100%; }
+    .relative { position: relative; }
+
+    /* Hero (menu page) */
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 68px; font-weight: 900;
+      text-align: center;
+      line-height: 1.05;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .hero-sub {
+      text-align: center;
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-deep); }
+    ::-webkit-scrollbar-thumb { background: #c1c5d0; border-radius: 4px; }
+
+    /* Pulse animations for low approval */
+    @keyframes pulse-red { 0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.2); } 50% { box-shadow: 0 0 8px 3px rgba(220,38,38,0.15); } }
+    .pulse-red { animation: pulse-red 2s infinite; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-
   <script type="text/babel">
-    // Congressional Simulation Game
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    // ============================================================
+    // DATA
+    // ============================================================
+    const DISTRICTS = [
+      { id:1, name:"TX-16 (El Paso)", party:"Democrat", lean:"D+17", primaryLean:"D+25",
+        demographics:{hispanic:82,white:14,black:3,asian:1,medianIncome:47000,population:760000},
+        industries:["Military (Fort Bliss)","Healthcare","Retail","Manufacturing"],
+        description:"Urban border district, heavily Hispanic working-class population",
+        difficulty:"easy" },
+      { id:2, name:"CA-45 (Orange County)", party:"Democrat", lean:"D+3", primaryLean:"D+8",
+        demographics:{hispanic:34,white:32,asian:28,black:2,medianIncome:93000,population:750000},
+        industries:["Technology","Finance","Healthcare","Professional Services"],
+        description:"Suburban swing district, diverse and affluent",
+        difficulty:"hard" },
+      { id:3, name:"MI-3 (Grand Rapids)", party:"Republican", lean:"R+6", primaryLean:"R+12",
+        demographics:{white:77,hispanic:11,black:6,asian:3,medianIncome:58000,population:730000},
+        industries:["Manufacturing","Furniture","Healthcare","Agriculture"],
+        description:"Mix of urban Grand Rapids and rural areas",
+        difficulty:"medium" },
+      { id:4, name:"GA-6 (North Atlanta)", party:"Democrat", lean:"EVEN", primaryLean:"D+5",
+        demographics:{white:58,black:20,asian:13,hispanic:7,medianIncome:87000,population:765000},
+        industries:["Technology","Corporate HQ","Healthcare","Professional Services"],
+        description:"Highly educated suburban Atlanta, true swing district",
+        difficulty:"hard" },
+      { id:5, name:"NY-14 (Bronx/Queens)", party:"Democrat", lean:"D+29", primaryLean:"D+35",
+        demographics:{hispanic:50,white:19,asian:16,black:11,medianIncome:62000,population:720000},
+        industries:["Healthcare","Retail","Food Service","Transportation"],
+        description:"Very liberal urban district, AOC's district",
+        difficulty:"easy" },
+      { id:6, name:"IA-4 (Northwest Iowa)", party:"Republican", lean:"R+16", primaryLean:"R+22",
+        demographics:{white:92,hispanic:5,black:1,asian:1,medianIncome:54000,population:770000},
+        industries:["Agriculture","Meat Processing","Manufacturing","Renewable Energy"],
+        description:"Rural conservative district, agriculture-dominated",
+        difficulty:"easy" },
+      { id:7, name:"PA-7 (Lehigh Valley)", party:"Democrat", lean:"D+2", primaryLean:"D+7",
+        demographics:{white:69,hispanic:19,black:7,asian:4,medianIncome:64000,population:745000},
+        industries:["Healthcare","Logistics","Manufacturing","Tourism"],
+        description:"Swing district, blue-collar communities",
+        difficulty:"hard" },
+      { id:8, name:"FL-27 (Miami)", party:"Republican", lean:"R+5", primaryLean:"R+10",
+        demographics:{hispanic:73,white:18,black:5,asian:2,medianIncome:56000,population:770000},
+        industries:["Tourism","International Trade","Healthcare","Finance"],
+        description:"Cuban-American dominated, anti-communist sentiment strong",
+        difficulty:"medium" },
+      { id:9, name:"WA-8 (Seattle Suburbs)", party:"Democrat", lean:"D+1", primaryLean:"D+6",
+        demographics:{white:71,asian:12,hispanic:11,black:3,medianIncome:89000,population:755000},
+        industries:["Technology","Agriculture","Tourism","Aerospace"],
+        description:"Mix of tech suburbs and rural areas, razor-thin margin",
+        difficulty:"hard" },
+      { id:10, name:"AL-7 (Birmingham)", party:"Democrat", lean:"D+35", primaryLean:"D+40",
+        demographics:{black:63,white:33,hispanic:2,asian:1,medianIncome:41000,population:680000},
+        industries:["Healthcare","Education","Manufacturing","Government"],
+        description:"Majority-Black district, urban and rural mix",
+        difficulty:"easy" }
+    ];
+
+    const INTEREST_GROUPS = [
+      { name:"Tech Industry PAC", amount:5000, issues:["tech"], liberal:true, desc:"Silicon Valley interests", emoji:"💻" },
+      { name:"NRA", amount:5000, issues:["guns"], liberal:false, desc:"Gun rights advocacy", emoji:"🎯" },
+      { name:"Environmental Defense", amount:5000, issues:["environment"], liberal:true, desc:"Climate action", emoji:"🌿" },
+      { name:"Chamber of Commerce", amount:5000, issues:["business"], liberal:false, desc:"Business interests", emoji:"🏢" },
+      { name:"Teachers Union", amount:5000, issues:["education"], liberal:true, desc:"Education advocacy", emoji:"📚" },
+      { name:"AFL-CIO", amount:5000, issues:["labor"], liberal:true, desc:"Labor unions", emoji:"⚙️" },
+      { name:"Energy Companies PAC", amount:5000, issues:["energy"], liberal:false, desc:"Oil & gas", emoji:"⛽" },
+      { name:"Healthcare PAC", amount:5000, issues:["healthcare"], liberal:false, desc:"Insurance & pharma", emoji:"💊" },
+      { name:"Trial Lawyers", amount:5000, issues:["legal"], liberal:true, desc:"Legal reform", emoji:"⚖️" },
+      { name:"Small Business PAC", amount:5000, issues:["business"], liberal:false, desc:"Main street", emoji:"🏪" },
+      { name:"Progressive Action", amount:5000, issues:["social"], liberal:true, desc:"Social justice", emoji:"✊" },
+      { name:"Defense Industry", amount:5000, issues:["defense"], liberal:false, desc:"Military contractors", emoji:"🛡️" }
+    ];
+
+    const BILLS = [
+      { id:1, name:"Medicare for All Act", issue:"healthcare", liberal:true, pcGain:15,
+        description:"Single-payer healthcare covering all Americans. Eliminates most private insurance.",
+        demSupport:"+85%", repSupport:"-95%", controlReq:'dem' },
+      { id:2, name:"Tax Cuts & Jobs Act 2.0", issue:"taxes", liberal:false, pcGain:13,
+        description:"Extends 2017 tax cuts permanently. Reduces corporate rate to 15%.",
+        demSupport:"-75%", repSupport:"+90%", controlReq:'rep' },
+      { id:3, name:"Clean Energy Investment Act", issue:"environment", liberal:true, pcGain:10,
+        description:"Tax credits for renewable energy. $500B over 10 years. Carbon pricing.",
+        demSupport:"+75%", repSupport:"-60%", controlReq:null },
+      { id:4, name:"2nd Amendment Protection Act", issue:"guns", liberal:false, pcGain:9,
+        description:"Protects gun manufacturers from lawsuits. Blocks federal red flag laws.",
+        demSupport:"-75%", repSupport:"+80%", controlReq:'rep' },
+      { id:5, name:"Infrastructure Investment Act", issue:"infrastructure", liberal:null, pcGain:8,
+        description:"Bipartisan $1.2 trillion infrastructure package. Roads, bridges, broadband.",
+        demSupport:"+70%", repSupport:"+40%", controlReq:null },
+      { id:6, name:"Defense Authorization Act", issue:"defense", liberal:null, pcGain:5,
+        description:"Annual defense budget $850B. Must-pass legislation.",
+        demSupport:"+45%", repSupport:"+85%", controlReq:null },
+      { id:7, name:"Worker Freedom Act", issue:"labor", liberal:true, pcGain:9,
+        description:"$15 minimum wage. Paid family leave. Strengthens OSHA protections.",
+        demSupport:"+75%", repSupport:"-80%", controlReq:'dem' },
+      { id:8, name:"Border Security Enhancement Act", issue:"immigration", liberal:false, pcGain:8,
+        description:"Increases Border Patrol funding 25%. Enhanced surveillance technology.",
+        demSupport:"-45%", repSupport:"+75%", controlReq:null },
+      { id:9, name:"Farm Bill Reauthorization", issue:"agriculture", liberal:null, pcGain:6,
+        description:"Five-year farm subsidies and SNAP funding. Must-pass legislation.",
+        demSupport:"+55%", repSupport:"+60%", controlReq:null },
+      { id:10, name:"Police Reform Act", issue:"crime", liberal:true, pcGain:8,
+        description:"Ends qualified immunity. Creates national police misconduct database.",
+        demSupport:"+70%", repSupport:"-75%", controlReq:'dem' },
+      { id:11, name:"Small Business Tax Relief Act", issue:"business", liberal:false, pcGain:7,
+        description:"20% tax deduction for pass-through entities. Reduces regulations.",
+        demSupport:"-40%", repSupport:"+80%", controlReq:null },
+      { id:12, name:"Voting Rights Restoration Act", issue:"voting", liberal:true, pcGain:11,
+        description:"Restores federal preclearance. Combats voter ID laws. Expands early voting.",
+        demSupport:"+90%", repSupport:"-85%", controlReq:'dem' }
+    ];
+
+    const ISSUES = [
+      { id:"healthcare", name:"Healthcare", liberal:true, owner:"Democrat", icon:"🏥" },
+      { id:"environment", name:"Environment", liberal:true, owner:"Democrat", icon:"🌱" },
+      { id:"guns", name:"Gun Rights", liberal:false, owner:"Republican", icon:"🎯" },
+      { id:"taxes", name:"Tax Cuts", liberal:false, owner:"Republican", icon:"💰" },
+      { id:"education", name:"Education", liberal:true, owner:"Democrat", icon:"📚" },
+      { id:"defense", name:"Defense", liberal:false, owner:"Republican", icon:"🛡️" },
+      { id:"labor", name:"Workers' Rights", liberal:true, owner:"Democrat", icon:"⚙️" },
+      { id:"business", name:"Business", liberal:false, owner:"Republican", icon:"💼" },
+      { id:"immigration", name:"Immigration", liberal:false, owner:"Republican", icon:"🗽" },
+      { id:"social", name:"Social Issues", liberal:true, owner:"Democrat", icon:"👥" },
+      { id:"infrastructure", name:"Infrastructure", liberal:null, owner:"Bipartisan", icon:"🏗️" },
+      { id:"crime", name:"Crime & Justice", liberal:false, owner:"Republican", icon:"⚖️" }
+    ];
+
+    const COMMITTEES = [
+      { name:"Agriculture", tier:1, pcGain:8, minRound:3, minPC:0 },
+      { name:"Financial Services", tier:1, pcGain:8, minRound:3, minPC:0 },
+      { name:"Transportation", tier:1, pcGain:8, minRound:3, minPC:0 },
+      { name:"Veterans Affairs", tier:1, pcGain:8, minRound:3, minPC:0 },
+      { name:"Small Business", tier:1, pcGain:8, minRound:3, minPC:0 },
+      { name:"Science & Tech", tier:1, pcGain:8, minRound:3, minPC:0 },
+      { name:"Armed Services", tier:2, pcGain:12, minRound:6, minPC:5 },
+      { name:"Judiciary", tier:2, pcGain:12, minRound:6, minPC:5 },
+      { name:"Foreign Affairs", tier:2, pcGain:12, minRound:6, minPC:5 },
+      { name:"Education & Labor", tier:2, pcGain:12, minRound:6, minPC:5 },
+      { name:"Energy & Commerce", tier:3, pcGain:20, minRound:9, minPC:15 },
+      { name:"Rules", tier:3, pcGain:25, minRound:9, minPC:20 },
+      { name:"Ways & Means", tier:3, pcGain:25, minRound:9, minPC:20 },
+      { name:"Appropriations", tier:3, pcGain:30, minRound:9, minPC:25 }
+    ];
+
+    const AD_TYPES = [
+      { id:'tv', name:'TV Ads', cost:50000, mult:1.8, icon:'📺', desc:'Broad reach, older voters' },
+      { id:'digital', name:'Digital Ads', cost:15000, mult:1.4, icon:'💻', desc:'Targeted, younger voters' },
+      { id:'radio', name:'Radio Ads', cost:8000, mult:1.2, icon:'📻', desc:'Cost effective, commuters' },
+      { id:'speech', name:'Public Speech', cost:0, mult:1.0, icon:'🎤', desc:'Free, +3 PC, choose issue' }
+    ];
+
+    // Random events that can fire each round
+    const RANDOM_EVENTS = [
+      { id:'scandal', name:'Ethics Investigation', desc:'A media outlet is investigating campaign finance irregularities in your office.', approvalChange:-4, moneyChange:0, pcChange:0, chance:0.08 },
+      { id:'natural_disaster', name:'Natural Disaster in District', desc:'A severe storm has damaged homes in your district. Constituents look to you for federal aid.', approvalChange:0, moneyChange:-20000, pcChange:0, choice:true, choiceA:{label:'Push for emergency funding', approval:5, pc:-3, money:-20000}, choiceB:{label:'Follow party line on spending', approval:-2, pc:5, money:0}, chance:0.1 },
+      { id:'viral_moment', name:'Viral Social Media Moment', desc:'A clip of you at a town hall goes viral — but context matters.', approvalChange:3, moneyChange:0, pcChange:0, chance:0.1 },
+      { id:'recession', name:'Economic Downturn', desc:'Economic indicators are negative. Voters blame incumbents.', approvalChange:-3, moneyChange:0, pcChange:0, chance:0.07 },
+      { id:'good_jobs', name:'Job Growth in District', desc:'A new employer announces 500 jobs in your district. You take credit.', approvalChange:4, moneyChange:0, pcChange:2, chance:0.09 },
+      { id:'opponent_ad', name:'Opposition Attack Ad', desc:'Your opponent runs negative ads highlighting your voting record.', approvalChange:-3, moneyChange:0, pcChange:0, chance:0.12 },
+      { id:'endorsement', name:'Major Endorsement', desc:'A popular local figure publicly endorses your reelection.', approvalChange:3, moneyChange:5000, pcChange:0, chance:0.08 },
+      { id:'national_crisis', name:'National Security Crisis', desc:'A foreign policy crisis dominates the news. How do you respond?', approvalChange:0, moneyChange:0, pcChange:0, choice:true, choiceA:{label:'Support the President\'s response', approval:2, pc:4, money:0}, choiceB:{label:'Call for Congressional oversight', approval:3, pc:-2, money:0}, chance:0.06 },
+      { id:'gov_shutdown', name:'Government Shutdown Looms', desc:'Budget negotiations have stalled. A shutdown would hurt your constituents.', approvalChange:0, moneyChange:0, pcChange:0, choice:true, choiceA:{label:'Vote for compromise bill', approval:2, pc:-5, money:0}, choiceB:{label:'Hold the line with your party', approval:-3, pc:8, money:0}, chance:0.08 },
+    ];
+
+    // ============================================================
+    // MAIN APP
+    // ============================================================
     function App() {
-      // Game state
-      const [gameState, setGameState] = React.useState('menu');
-      const [selectedDistrict, setSelectedDistrict] = React.useState(null);
-      const [round, setRound] = React.useState(1);
-      const [actionsLeft, setActionsLeft] = React.useState(3);
-      const [money, setMoney] = React.useState(200000);
-      const [approval, setApproval] = React.useState(50);
-      const [congressApproval, setCongressApproval] = React.useState(20);
-      const [politicalCapital, setPoliticalCapital] = React.useState(0);
-      const [incumbencyBonus, setIncumbencyBonus] = React.useState(0);
-      const [location, setLocation] = React.useState('district');
-      const [gameLog, setGameLog] = React.useState([]);
-      const [committees, setCommittees] = React.useState([]);
-      const [primaryChallenge, setPrimaryChallenge] = React.useState(false);
-      const [showModal, setShowModal] = React.useState(false);
-      const [modalContent, setModalContent] = React.useState({ title: '', message: '' });
-      const [headlines, setHeadlines] = React.useState(['New Representative Takes Office']);
-      const [tweets, setTweets] = React.useState(['Welcome to Congress!']);
-      const [showDashboard, setShowDashboard] = React.useState(false);
-      const [showCharacters, setShowCharacters] = React.useState(false);
-      const [showDistrictInfo, setShowDistrictInfo] = React.useState(false);
-      const [approvalHistory, setApprovalHistory] = React.useState([50]);
-      const [moneyHistory, setMoneyHistory] = React.useState([200000]);
-      const [caseworkCount, setCaseworkCount] = React.useState(0);
-      const [issueOwnership, setIssueOwnership] = React.useState({});
-      const [votedBills, setVotedBills] = React.useState([]);
-      const [selectedAdType, setSelectedAdType] = React.useState(null);
-      const [selectedAdIssue, setSelectedAdIssue] = React.useState(null);
-      const [selectedSpeechIssue, setSelectedSpeechIssue] = React.useState(null);
-      const [showSpeechPanel, setShowSpeechPanel] = React.useState(false);
-      const [lastAction, setLastAction] = React.useState(null);
-      const [showSaveLoad, setShowSaveLoad] = React.useState(false);
-      const [savedGames, setSavedGames] = React.useState([]);
-      const [hoveredBill, setHoveredBill] = React.useState(null);
-      const [voteHistory, setVoteHistory] = React.useState([]);
-      const [congressControl, setCongressControl] = React.useState('split');
-      const [approvalFloor, setApprovalFloor] = React.useState(25);
-      const [approvalCeiling, setApprovalCeiling] = React.useState(75);
-      const [retrospectiveVoting, setRetrospectiveVoting] = React.useState(0);
+      const [gameState, setGameState] = useState('menu'); // menu, select, playing, event, roundEnd, primary, election
+      const [district, setDistrict] = useState(null);
+      const [round, setRound] = useState(1);
+      const [actions, setActions] = useState(3);
+      const [money, setMoney] = useState(200000);
+      const [approval, setApproval] = useState(50);
+      const [congApproval, setCongApproval] = useState(20);
+      const [pc, setPc] = useState(0);
+      const [incBonus, setIncBonus] = useState(0);
+      const [location, setLocation] = useState('district');
+      const [log, setLog] = useState([]);
+      const [committees, setCommittees] = useState([]);
+      const [primaryThreat, setPrimaryThreat] = useState(false);
+      const [modal, setModal] = useState(null);
+      const [headlines, setHeadlines] = useState(['New Representative Takes Office']);
+      const [tweets, setTweets] = useState(['Welcome to Congress!']);
+      const [approvalHist, setApprovalHist] = useState([]);
+      const [casework, setCasework] = useState(0);
+      const [issueOwn, setIssueOwn] = useState({});
+      const [votedBills, setVotedBills] = useState([]);
+      const [voteHist, setVoteHist] = useState([]);
+      const [congControl, setCongControl] = useState('split');
+      const [retroVote, setRetroVote] = useState(0);
+      const [hoveredBill, setHoveredBill] = useState(null);
+      const [selectedAd, setSelectedAd] = useState(null);
+      const [selectedIssue, setSelectedIssue] = useState(null);
+      const [lastState, setLastState] = useState(null);
+      const [currentEvent, setCurrentEvent] = useState(null);
+      const [roundSummary, setRoundSummary] = useState(null);
+      const [approvalFloor, setApprovalFloor] = useState(25);
+      const [approvalCeil, setApprovalCeil] = useState(75);
 
-      // Load saved games on mount
-      React.useEffect(() => {
-        const saves = [];
-        for (let i = 1; i <= 3; i++) {
-          const save = localStorage.getItem(`congressGame_slot${i}`);
-          if (save) {
-            try {
-              const data = JSON.parse(save);
-              saves.push({ slot: i, data, timestamp: data.timestamp });
-            } catch (e) {
-              console.error('Failed to load save slot', i);
-            }
+      // Compute bounds
+      useEffect(() => {
+        if (!district) return;
+        const leanNum = parseInt((district.lean.match(/\d+/) || [0])[0]) || 0;
+        const aligned = district.lean.startsWith(district.party[0]);
+        if (district.lean === 'EVEN') { setApprovalFloor(20); setApprovalCeil(70); }
+        else if (aligned) {
+          setApprovalFloor(leanNum > 15 ? 35 : leanNum > 5 ? 30 : 25);
+          setApprovalCeil(leanNum > 15 ? 80 : leanNum > 5 ? 75 : 70);
+        } else {
+          setApprovalFloor(leanNum > 15 ? 15 : leanNum > 5 ? 20 : 25);
+          setApprovalCeil(leanNum > 15 ? 55 : leanNum > 5 ? 60 : 65);
+        }
+      }, [district]);
+
+      const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+      const cApproval = (v) => clamp(v, approvalFloor, approvalCeil);
+
+      const addLog = (msg, type='info') => {
+        setLog(prev => [{msg, type, round}, ...prev].slice(0, 12));
+      };
+
+      const pushHeadline = (h) => setHeadlines(prev => [...prev, h].slice(-6));
+      const pushTweet = (t) => setTweets(prev => [...prev, t].slice(-5));
+
+      const saveState = () => {
+        setLastState({money, approval, pc, committees:[...committees], votedBills:[...votedBills],
+          casework, issueOwn:{...issueOwn}, primaryThreat, actions, voteHist:[...voteHist]});
+      };
+
+      const undoLast = () => {
+        if (!lastState || actions >= 3) return;
+        setMoney(lastState.money); setApproval(lastState.approval); setPc(lastState.pc);
+        setCommittees(lastState.committees); setVotedBills(lastState.votedBills);
+        setCasework(lastState.casework); setIssueOwn(lastState.issueOwn);
+        setPrimaryThreat(lastState.primaryThreat); setActions(lastState.actions);
+        setVoteHist(lastState.voteHist); setLastState(null);
+        addLog('Last action undone', 'info');
+      };
+
+      // ---- GAME ACTIONS ----
+      const calcImpact = (issueId) => {
+        if (!district) return 0;
+        const iss = ISSUES.find(i => i.id === issueId);
+        const aligned = (iss?.liberal && district.party === 'Democrat') || (!iss?.liberal && district.party === 'Republican');
+        const swing = district.lean === 'EVEN';
+        let impact = aligned ? (swing ? 2 : 3) : (swing ? -3 : -1);
+        if (issueOwn[issueId]) impact += Math.floor(issueOwn[issueId] / 3);
+        impact += retroVote;
+        return impact;
+      };
+
+      const selectDistrict = (d) => {
+        setDistrict(d);
+        const startAppr = d.lean.startsWith(d.party[0]) ? 60 : (d.lean === 'EVEN' ? 50 : 45);
+        setApproval(startAppr);
+        setApprovalHist([startAppr]);
+        const own = {};
+        ISSUES.forEach(iss => { if (iss.owner === d.party) own[iss.id] = 5; });
+        setIssueOwn(own);
+        const ctrl = ['dem','rep','split'][Math.floor(Math.random()*3)];
+        setCongControl(ctrl);
+        addLog(`You now represent ${d.name}!`, 'success');
+        setGameState('playing');
+      };
+
+      const handleVote = (bill, withParty) => {
+        if (actions <= 0 || votedBills.includes(bill.id)) return;
+        saveState();
+        const pcDelta = withParty ? bill.pcGain : -Math.floor(bill.pcGain * 1.5);
+        const billAligned = (bill.liberal && district.party === 'Democrat') || (!bill.liberal && district.party === 'Republican');
+        const apprDelta = withParty ? (billAligned ? 2 : -3) : (billAligned ? -2 : 3);
+        setPc(p => p + pcDelta);
+        setApproval(p => cApproval(p + apprDelta));
+        setActions(a => a - 1);
+        setVotedBills(p => [...p, bill.id]);
+        setVoteHist(p => [...p, {billId:bill.id, billName:bill.name, withParty, round}]);
+        if (bill.liberal === null) setRetroVote(p => p + 1);
+        else if (!withParty && billAligned) setRetroVote(p => p - 1);
+        if (pcDelta < -10 && !primaryThreat) {
+          setPrimaryThreat(true);
+          addLog('⚠️ Party threatens primary challenge!', 'warning');
+        }
+        pushHeadline(`Rep. votes ${withParty ? 'WITH' : 'AGAINST'} party on ${bill.name}`);
+        pushTweet(apprDelta > 0 ? 'Finally someone who votes for us!' : 'Disappointed in this vote. We deserve better.');
+        addLog(`Voted ${withParty?'WITH':'AGAINST'} party on ${bill.name}. PC ${pcDelta>=0?'+':''}${pcDelta}, Approval ${apprDelta>=0?'+':''}${apprDelta}%`, pcDelta>=0?'success':'warning');
+
+        setModal({
+          title: `Vote: ${bill.name}`,
+          body: `You voted ${withParty ? 'WITH' : 'AGAINST'} your party.\n\n` +
+            (pcDelta >= 0 ? `✅ Party leadership approves. PC +${pcDelta}\n` : `⚠️ Party leadership is displeased. PC ${pcDelta}\n`) +
+            `Constituent reaction: Approval ${apprDelta >= 0 ? '+' : ''}${apprDelta}%\n\n` +
+            `📖 Cox & McCubbins (2007): The majority party acts as a "procedural cartel" — controlling which bills reach the floor and enforcing discipline through committee assignments and campaign resources.\n\n` +
+            (primaryThreat ? `🚨 Boatright (2013): Ideological primary challenges have surged since 2010. Primary voters are far more ideological than general election voters — only 10-20% participate. Eric Cantor lost his 2014 primary despite being Majority Leader.` : '')
+        });
+      };
+
+      const handleCasework = () => {
+        if (actions <= 0) return;
+        saveState();
+        const gain = 2 + Math.floor(incBonus / 2);
+        setApproval(p => cApproval(p + gain));
+        setCasework(p => p + 1);
+        setActions(a => a - 1);
+        pushHeadline('Rep. helps constituents with federal services');
+        pushTweet('Thank you Rep for helping with my VA benefits! 🙏');
+        addLog(`Completed casework. Approval +${gain}%`, 'success');
+        setModal({
+          title: 'Constituent Service',
+          body: `You helped a constituent navigate federal bureaucracy.\nApproval +${gain}% (scales with incumbency bonus)\n\n📖 Fenno (1978): "Home Style" shows how constituent service builds a "personal vote" beyond party. Casework creates a "grateful electorate" (Yiannakis 1981) — voters remember individual help more than policy positions.\n\nReal members spend 35-50% of staff time on casework. It's your insurance policy — always safe, always helps.`
+        });
+      };
+
+      const handleFundraising = (group) => {
+        if (actions <= 0) return;
+        saveState();
+        const impact = calcImpact(group.issues[0]);
+        setMoney(p => p + group.amount);
+        setApproval(p => cApproval(p + impact));
+        setActions(a => a - 1);
+        if (impact < 0) {
+          const swing = district.lean === 'EVEN';
+          if (swing && !group.liberal && district.party === 'Democrat') setPc(p => p - 5);
+        }
+        pushHeadline(`Rep. receives support from ${group.name}`);
+        addLog(`Raised $${group.amount.toLocaleString()} from ${group.name}. Approval ${impact>=0?'+':''}${impact}%`, impact>=0?'success':'warning');
+        setModal({
+          title: `Fundraising: ${group.name}`,
+          body: `Raised $${group.amount.toLocaleString()}. Approval ${impact>=0?'+':''}${impact}%\n\n` +
+            (impact < 0 ? '⚠️ Constituents are skeptical of this group\'s influence.\n\n' : '✅ This group aligns with district values.\n\n') +
+            `📖 Hall & Wayman (1990): PACs don't buy votes — they "subsidize" natural allies. But the optics matter in swing districts.\n\nPACs are limited to $5,000 per election by FEC rules, but can spend unlimited amounts independently (Citizens United, 2010).`
+        });
+      };
+
+      const handleAd = (adType, issue) => {
+        if (actions <= 0 || money < adType.cost) return;
+        saveState();
+        if (adType.id === 'speech') {
+          const impact = calcImpact(issue);
+          const bonus = issueOwn[issue] ? 1 : 0;
+          const total = impact + bonus;
+          setApproval(p => cApproval(p + total));
+          setPc(p => p + 3);
+          setActions(a => a - 1);
+          const issName = ISSUES.find(i => i.id === issue)?.name || issue;
+          pushHeadline(`Rep. speaks on ${issName} at town hall`);
+          addLog(`Speech on ${issName}. Approval ${total>=0?'+':''}${total}%, PC +3`, total>=0?'success':'warning');
+          setModal({
+            title: `Public Speech: ${issName}`,
+            body: `Approval ${total>=0?'+':''}${total}%, Political Capital +3\n\n📖 Mayhew (1974): Position-taking is one of three key reelection activities. Speeches let you stake out positions without changing policy — it's about being seen "on the right side."\n\n📖 Kernell (1997): "Going public" — direct appeals to constituents build pressure for your agenda and bypass media filters.`
+          });
+        } else {
+          const base = calcImpact(issue);
+          const impact = Math.round(base * adType.mult);
+          setMoney(p => p - adType.cost);
+          setApproval(p => cApproval(p + impact));
+          setActions(a => a - 1);
+          if (impact > 0 && issueOwn[issue] !== undefined) {
+            setIssueOwn(p => ({...p, [issue]: Math.min(10, (p[issue]||0) + 1)}));
+          }
+          const issName = ISSUES.find(i => i.id === issue)?.name || issue;
+          pushHeadline(`Rep. launches ${adType.name.toLowerCase()} campaign on ${issName}`);
+          addLog(`${adType.name} on ${issName}. Cost $${adType.cost.toLocaleString()}, Approval ${impact>=0?'+':''}${impact}%`, impact>=0?'success':'warning');
+          setModal({
+            title: `${adType.name}: ${issName}`,
+            body: `Cost: $${adType.cost.toLocaleString()} | Approval ${impact>=0?'+':''}${impact}%\n\n📖 Petrocik (1996) — Issue Ownership Theory: Parties "own" certain issues in voters' minds. Advertising on owned issues amplifies your message; advertising on opponent-owned issues can backfire.\n\n📖 Iyengar & Kinder (1987): Ads don't change minds directly but make issues more salient. Voters then judge you based on these "primed" issues.`
+          });
+        }
+        setSelectedAd(null);
+        setSelectedIssue(null);
+      };
+
+      const handleCommittee = (comm) => {
+        if (actions <= 0 || committees.includes(comm.name)) return;
+        if (round < comm.minRound) {
+          setModal({title:'Not Yet Eligible', body:`${comm.name} requires Round ${comm.minRound}+. You're in Round ${round}.\n\n📖 Polsby (1968): Congress operates on a seniority system. New members must "pay their dues." Average member waits 2-3 terms before joining top committees.`});
+          return;
+        }
+        if (pc < comm.minPC) {
+          setModal({title:'Insufficient Political Capital', body:`${comm.name} requires PC ≥ ${comm.minPC}. You have ${pc}.\n\n📖 Rohde (1991): Party leaders use committee assignments to reward loyalty. Build PC by voting with your party and giving speeches.`});
+          return;
+        }
+        saveState();
+        setCommittees(p => [...p, comm.name]);
+        setPc(p => p + comm.pcGain);
+        setActions(a => a - 1);
+        pushHeadline(`Rep. joins ${comm.name} Committee`);
+        addLog(`Joined ${comm.name} Committee. PC +${comm.pcGain}`, 'success');
+        const tierDesc = {1:'entry-level', 2:'important — significant policy influence', 3:'PRESTIGE — enormous power'}[comm.tier];
+        setModal({
+          title: `Joined: ${comm.name}`,
+          body: `This is a Tier ${comm.tier} (${tierDesc}) committee.\nPC +${comm.pcGain}\n\n📖 Weingast (1979): The committee system enables "universalism" — everyone gets something for their district through logrolling.\n\n${comm.tier === 3 ? '⭐ Appropriations subcommittee chairs are called "Cardinals" — they control more spending than most cabinet secretaries!' : 'Committee membership builds expertise, gives credit-claiming opportunities, and enhances your influence.'}`
+        });
+      };
+
+      // ---- EVENT HANDLING ----
+      const handleEventChoice = (choice) => {
+        if (!currentEvent) return;
+        setApproval(p => cApproval(p + choice.approval));
+        setPc(p => p + choice.pc);
+        setMoney(p => p + choice.money);
+        addLog(`${currentEvent.name}: ${choice.label}. Approval ${choice.approval>=0?'+':''}${choice.approval}%, PC ${choice.pc>=0?'+':''}${choice.pc}`, choice.approval >= 0 ? 'success' : 'warning');
+        pushHeadline(currentEvent.name + ': ' + choice.label);
+        setCurrentEvent(null);
+      };
+
+      // ---- END ROUND ----
+      const endRound = () => {
+        if (round >= 12) {
+          if (primaryThreat && approval < 60) setGameState('primary');
+          else setGameState('election');
+          return;
+        }
+
+        // Record history
+        setApprovalHist(p => [...p, approval]);
+
+        // Random drift
+        const drift = Math.floor(Math.random() * 3) - 1;
+        setApproval(p => cApproval(p + drift));
+        setCongApproval(p => clamp(p + Math.floor(Math.random()*7) - 3, 10, 40));
+
+        // Midterms at round 6
+        if (round === 6) {
+          const opts = ['dem','rep','split'];
+          const newCtrl = opts[Math.floor(Math.random()*3)];
+          if (newCtrl !== congControl) {
+            setCongControl(newCtrl);
+            addLog('Midterm Elections: Congress control shifts to ' + (newCtrl==='dem'?'Democrat majority':newCtrl==='rep'?'Republican majority':'split control'), 'info');
+          }
+        }
+
+        // Incumbency bonus
+        if (round % 3 === 0) {
+          setIncBonus(p => Math.min(10, p + 2));
+          addLog(`Incumbency advantage → +${Math.min(10, incBonus + 2)}%`, 'success');
+        }
+
+        // Random event
+        const evt = RANDOM_EVENTS.find(e => Math.random() < e.chance);
+        if (evt) {
+          if (evt.choice) {
+            setCurrentEvent(evt);
           } else {
-            saves.push({ slot: i, data: null, timestamp: null });
+            setApproval(p => cApproval(p + evt.approvalChange));
+            setMoney(p => p + evt.moneyChange);
+            setPc(p => p + evt.pcChange);
+            addLog(`📰 ${evt.name}: ${evt.desc} (Approval ${evt.approvalChange >= 0 ? '+' : ''}${evt.approvalChange}%)`, evt.approvalChange >= 0 ? 'success' : 'warning');
+            pushHeadline(evt.name);
           }
         }
-        setSavedGames(saves);
-      }, []);
 
-      // Calculate approval bounds based on district
-      React.useEffect(() => {
-        if (selectedDistrict) {
-          const lean = parseInt(selectedDistrict.lean.match(/\d+/) || [0])[0];
-          const isAligned = selectedDistrict.lean.startsWith(selectedDistrict.party[0]);
-          
-          if (isAligned) {
-            if (lean > 15) {
-              setApprovalFloor(35);
-              setApprovalCeiling(80);
-            } else if (lean > 5) {
-              setApprovalFloor(30);
-              setApprovalCeiling(75);
-            } else {
-              setApprovalFloor(25);
-              setApprovalCeiling(70);
-            }
-          } else {
-            if (lean > 15) {
-              setApprovalFloor(15);
-              setApprovalCeiling(55);
-            } else if (lean > 5) {
-              setApprovalFloor(20);
-              setApprovalCeiling(60);
-            } else {
-              setApprovalFloor(25);
-              setApprovalCeiling(65);
-            }
-          }
-          
-          if (selectedDistrict.lean === 'EVEN') {
-            setApprovalFloor(20);
-            setApprovalCeiling(70);
-          }
-        }
-      }, [selectedDistrict]);
-
-      const constrainApproval = (newApproval) => {
-        return Math.max(approvalFloor, Math.min(approvalCeiling, newApproval));
+        setRound(p => p + 1);
+        setActions(3);
+        setVotedBills([]);
+        setLastState(null);
+        setSelectedAd(null);
+        setSelectedIssue(null);
+        addLog(`Round ${round + 1} begins (Months ${(round*2)+1}-${(round+1)*2})`, 'info');
       };
 
-      // Complete districts data
-      const districts = [
-        { 
-          id: 1, 
-          name: "TX-16 (El Paso)", 
-          party: "Democrat", 
-          lean: "D+17",
-          primaryLean: "D+25",
-          demographics: { hispanic: 82, white: 14, black: 3, asian: 1, medianIncome: 47000, population: 760000 },
-          industries: ["Military (Fort Bliss)", "Healthcare", "Retail", "Manufacturing"],
-          description: "Urban border district, heavily Hispanic working-class population"
-        },
-        { 
-          id: 2, 
-          name: "CA-45 (Orange County)", 
-          party: "Democrat", 
-          lean: "D+3",
-          primaryLean: "D+8",
-          demographics: { hispanic: 34, white: 32, asian: 28, black: 2, medianIncome: 93000, population: 750000 },
-          industries: ["Technology", "Finance", "Healthcare", "Professional Services"],
-          description: "Suburban swing district, diverse and affluent"
-        },
-        { 
-          id: 3, 
-          name: "MI-3 (Grand Rapids)", 
-          party: "Republican", 
-          lean: "R+6",
-          primaryLean: "R+12",
-          demographics: { white: 77, hispanic: 11, black: 6, asian: 3, medianIncome: 58000, population: 730000 },
-          industries: ["Manufacturing", "Furniture", "Healthcare", "Agriculture"],
-          description: "Mix of urban Grand Rapids and rural areas"
-        },
-        { 
-          id: 4, 
-          name: "GA-6 (North Atlanta)", 
-          party: "Democrat", 
-          lean: "EVEN",
-          primaryLean: "D+5",
-          demographics: { white: 58, black: 20, asian: 13, hispanic: 7, medianIncome: 87000, population: 765000 },
-          industries: ["Technology", "Corporate HQ", "Healthcare", "Professional Services"],
-          description: "Highly educated suburban Atlanta, true swing district"
-        },
-        { 
-          id: 5, 
-          name: "NY-14 (Bronx/Queens)", 
-          party: "Democrat", 
-          lean: "D+29",
-          primaryLean: "D+35",
-          demographics: { hispanic: 50, white: 19, asian: 16, black: 11, medianIncome: 62000, population: 720000 },
-          industries: ["Healthcare", "Retail", "Food Service", "Transportation"],
-          description: "Very liberal urban district, AOC's district"
-        },
-        { 
-          id: 6, 
-          name: "IA-4 (Northwest Iowa)", 
-          party: "Republican", 
-          lean: "R+16",
-          primaryLean: "R+22",
-          demographics: { white: 92, hispanic: 5, black: 1, asian: 1, medianIncome: 54000, population: 770000 },
-          industries: ["Agriculture", "Meat Processing", "Manufacturing", "Renewable Energy"],
-          description: "Rural conservative district, agriculture-dominated"
-        },
-        { 
-          id: 7, 
-          name: "PA-7 (Lehigh Valley)", 
-          party: "Democrat", 
-          lean: "D+2",
-          primaryLean: "D+7",
-          demographics: { white: 69, hispanic: 19, black: 7, asian: 4, medianIncome: 64000, population: 745000 },
-          industries: ["Healthcare", "Logistics", "Manufacturing", "Tourism"],
-          description: "Swing district, blue-collar communities"
-        },
-        { 
-          id: 8, 
-          name: "FL-27 (Miami)", 
-          party: "Republican", 
-          lean: "R+5",
-          primaryLean: "R+10",
-          demographics: { hispanic: 73, white: 18, black: 5, asian: 2, medianIncome: 56000, population: 770000 },
-          industries: ["Tourism", "International Trade", "Healthcare", "Finance"],
-          description: "Cuban-American dominated"
-        },
-        { 
-          id: 9, 
-          name: "WA-8 (Seattle Suburbs)", 
-          party: "Democrat", 
-          lean: "D+1",
-          primaryLean: "D+6",
-          demographics: { white: 71, asian: 12, hispanic: 11, black: 3, medianIncome: 89000, population: 755000 },
-          industries: ["Technology", "Agriculture", "Tourism", "Aerospace"],
-          description: "Mix of suburbs and rural areas"
-        },
-        { 
-          id: 10, 
-          name: "AL-7 (Birmingham)", 
-          party: "Democrat", 
-          lean: "D+35",
-          primaryLean: "D+40",
-          demographics: { black: 63, white: 33, hispanic: 2, asian: 1, medianIncome: 41000, population: 680000 },
-          industries: ["Healthcare", "Education", "Manufacturing", "Government"],
-          description: "Majority-Black district, urban and rural"
-        }
-      ];
-
-      const interestGroups = [
-        { name: "Tech Industry PAC", amount: 5000, issues: ["tech"], liberal: true, description: "Silicon Valley interests" },
-        { name: "NRA", amount: 5000, issues: ["guns"], liberal: false, description: "Gun rights advocacy" },
-        { name: "Environmental Defense", amount: 5000, issues: ["environment"], liberal: true, description: "Climate action" },
-        { name: "Chamber of Commerce", amount: 5000, issues: ["business"], liberal: false, description: "Business interests" },
-        { name: "Teachers Union", amount: 5000, issues: ["education"], liberal: true, description: "Education advocacy" },
-        { name: "AFL-CIO", amount: 5000, issues: ["labor"], liberal: true, description: "Labor unions" },
-        { name: "Energy Companies PAC", amount: 5000, issues: ["energy"], liberal: false, description: "Oil & gas" },
-        { name: "Healthcare PAC", amount: 5000, issues: ["healthcare"], liberal: false, description: "Insurance & pharma" },
-        { name: "Trial Lawyers", amount: 5000, issues: ["legal"], liberal: true, description: "Legal reform" },
-        { name: "Small Business PAC", amount: 5000, issues: ["business"], liberal: false, description: "Main street" },
-        { name: "Progressive Action", amount: 5000, issues: ["social"], liberal: true, description: "Social justice" },
-        { name: "Defense Industry", amount: 5000, issues: ["defense"], liberal: false, description: "Military contractors" }
-      ];
-
-      const bills = [
-        { 
-          id: 1, 
-          name: "Medicare for All Act", 
-          issue: "healthcare", 
-          liberal: true, 
-          pcGain: 15,
-          description: "Single-payer healthcare covering all Americans. Eliminates most private insurance.",
-          democratSupport: "Strong Support (+85%)",
-          republicanSupport: "Unified Opposition (-95%)",
-          controlRequired: 'dem'
-        },
-        { 
-          id: 2, 
-          name: "Tax Cuts and Jobs Act 2.0", 
-          issue: "taxes", 
-          liberal: false, 
-          pcGain: 13,
-          description: "Extends 2017 tax cuts permanently. Reduces corporate rate to 15%. $3 trillion cost.",
-          democratSupport: "Mostly Oppose (-75%)",
-          republicanSupport: "Strong Support (+90%)",
-          controlRequired: 'rep'
-        },
-        { 
-          id: 3, 
-          name: "Clean Energy Investment Act", 
-          issue: "environment", 
-          liberal: true, 
-          pcGain: 10,
-          description: "Tax credits for renewable energy. $500 billion over 10 years. Carbon pricing.",
-          democratSupport: "Broad Support (+75%)",
-          republicanSupport: "Mixed Opposition (-60%)",
-          controlRequired: null
-        },
-        { 
-          id: 4, 
-          name: "Second Amendment Protection Act", 
-          issue: "guns", 
-          liberal: false, 
-          pcGain: 9,
-          description: "Protects gun manufacturers from lawsuits. Blocks federal red flag laws.",
-          democratSupport: "Strong Opposition (-75%)",
-          republicanSupport: "Strong Support (+80%)",
-          controlRequired: 'rep'
-        },
-        { 
-          id: 5, 
-          name: "Infrastructure Investment Act", 
-          issue: "infrastructure", 
-          liberal: null,
-          pcGain: 8,
-          description: "Bipartisan $1.2 trillion infrastructure package. Roads, bridges, broadband.",
-          democratSupport: "Broad Support (+70%)",
-          republicanSupport: "Mixed Support (+40%)",
-          controlRequired: null
-        },
-        { 
-          id: 6, 
-          name: "Defense Authorization Act", 
-          issue: "defense", 
-          liberal: null,
-          pcGain: 5,
-          description: "Annual defense budget $850 billion. Must-pass legislation.",
-          democratSupport: "Divided (+45%)",
-          republicanSupport: "Strong Support (+85%)",
-          controlRequired: null
-        },
-        { 
-          id: 7, 
-          name: "Worker Freedom Act", 
-          issue: "labor", 
-          liberal: true, 
-          pcGain: 9,
-          description: "$15 minimum wage. Paid family leave. Strengthens OSHA protections.",
-          democratSupport: "Strong Support (+75%)",
-          republicanSupport: "Strong Opposition (-80%)",
-          controlRequired: 'dem'
-        },
-        { 
-          id: 8, 
-          name: "Border Security Enhancement Act", 
-          issue: "immigration", 
-          liberal: false, 
-          pcGain: 8,
-          description: "Increases Border Patrol funding 25%. Enhanced surveillance technology.",
-          democratSupport: "Mixed Opposition (-45%)",
-          republicanSupport: "Strong Support (+75%)",
-          controlRequired: null
-        }
-      ];
-
-      const issues = [
-        { id: "healthcare", name: "Healthcare", liberal: true, owner: "Democrat", icon: "🏥" },
-        { id: "environment", name: "Environment", liberal: true, owner: "Democrat", icon: "🌱" },
-        { id: "guns", name: "Gun Rights", liberal: false, owner: "Republican", icon: "🔫" },
-        { id: "taxes", name: "Tax Cuts", liberal: false, owner: "Republican", icon: "💰" },
-        { id: "education", name: "Education", liberal: true, owner: "Democrat", icon: "📚" },
-        { id: "defense", name: "Defense", liberal: false, owner: "Republican", icon: "🛡️" },
-        { id: "labor", name: "Workers' Rights", liberal: true, owner: "Democrat", icon: "👷" },
-        { id: "business", name: "Business", liberal: false, owner: "Republican", icon: "💼" },
-        { id: "immigration", name: "Immigration", liberal: false, owner: "Republican", icon: "🗽" },
-        { id: "social", name: "Social Issues", liberal: true, owner: "Democrat", icon: "👥" },
-        { id: "infrastructure", name: "Infrastructure", liberal: null, owner: "Bipartisan", icon: "🏗️" },
-        { id: "entitlements", name: "Entitlements", liberal: false, owner: "Republican", icon: "💳" },
-        { id: "crime", name: "Crime & Justice", liberal: false, owner: "Republican", icon: "⚖️" }
-      ];
-
-      const committeesList = [
-        { name: "Agriculture", tier: 1, pcGain: 8, minRound: 3, minPC: 0 },
-        { name: "Financial Services", tier: 1, pcGain: 8, minRound: 3, minPC: 0 },
-        { name: "Transportation", tier: 1, pcGain: 8, minRound: 3, minPC: 0 },
-        { name: "Veterans Affairs", tier: 1, pcGain: 8, minRound: 3, minPC: 0 },
-        { name: "Small Business", tier: 1, pcGain: 8, minRound: 3, minPC: 0 },
-        { name: "Science & Tech", tier: 1, pcGain: 8, minRound: 3, minPC: 0 },
-        { name: "Armed Services", tier: 2, pcGain: 12, minRound: 6, minPC: 5 },
-        { name: "Judiciary", tier: 2, pcGain: 12, minRound: 6, minPC: 5 },
-        { name: "Foreign Affairs", tier: 2, pcGain: 12, minRound: 6, minPC: 5 },
-        { name: "Education & Labor", tier: 2, pcGain: 12, minRound: 6, minPC: 5 },
-        { name: "Energy & Commerce", tier: 3, pcGain: 20, minRound: 9, minPC: 15 },
-        { name: "Rules", tier: 3, pcGain: 25, minRound: 9, minPC: 20 },
-        { name: "Ways & Means", tier: 3, pcGain: 25, minRound: 9, minPC: 20 },
-        { name: "Appropriations", tier: 3, pcGain: 30, minRound: 9, minPC: 25 }
-      ];
-
-      // Helper functions
-      const addLog = (message, type = 'info') => {
-        setGameLog(prev => [...prev, { message, type, round }].slice(-8));
+      const getAvailableBills = () => {
+        return BILLS.filter(b => {
+          if (!b.controlReq) return true;
+          if (congControl === 'split') return b.liberal === null || !b.controlReq;
+          return b.controlReq === congControl;
+        });
       };
 
-      const showExplanation = (title, message) => {
-        setModalContent({ title, message });
-        setShowModal(true);
-      };
-
-      const generateHeadline = (action, details = {}) => {
-        const { bill, issue, group, committee } = details;
-        
-        if (action === 'vote') {
-          return `Rep. Votes ${details.withParty ? 'With' : 'Against'} Party on ${bill}`;
-        } else if (action === 'ad') {
-          const issueData = issues.find(i => i.id === issue);
-          return `Rep. Launches ${details.medium} Campaign on ${issueData?.name || 'Key Issues'}`;
-        } else if (action === 'fundraising') {
-          return `Rep. Receives Support from ${group}`;
-        } else if (action === 'casework') {
-          return 'Rep. Helps Constituents with Federal Services';
-        } else if (action === 'committee') {
-          return `Rep. Joins ${committee} Committee`;
-        } else if (action === 'speech') {
-          const issueData = issues.find(i => i.id === issue);
-          return `Rep. Speaks on ${issueData?.name || 'Key Issues'} at Town Hall`;
-        }
-        
-        const positive = ["Rep Shows Leadership", "Constituents React to Recent Actions", "Congressional Update"];
-        return positive[Math.floor(Math.random() * 3)];
-      };
-
-      const generateTweet = (action, impact) => {
-        if (action === 'casework') {
-          return "Thank you Rep for helping with my VA benefits! 🙏";
-        } else if (action === 'vote' && impact > 0) {
-          return "Finally someone who votes for us! #KeepFighting";
-        } else if (action === 'vote' && impact < 0) {
-          return "Disappointed in this vote. We deserve better.";
-        } else if (action === 'speech') {
-          return impact > 0 ? "Great speech! This is what we need to hear!" : "Not convinced by that speech...";
-        }
-        
-        const positive = ["Great job Rep!", "This is leadership!", "Keep up the good work!"];
-        const negative = ["Not what we voted for...", "Time for change!", "We're watching..."];
-        return approval > 50 ? positive[Math.floor(Math.random() * 3)] : negative[Math.floor(Math.random() * 3)];
+      const getPCStatus = () => {
+        if (pc >= 20) return { label:'Party Star', emoji:'⭐', cls:'pc-positive', msg:'Leadership loves you' };
+        if (pc >= 10) return { label:'Loyal', emoji:'👍', cls:'pc-positive', msg:'Good standing' };
+        if (pc >= 0) return { label:'Neutral', emoji:'😐', cls:'pc-neutral', msg:'Room to improve' };
+        if (pc >= -10) return { label:'Thin Ice', emoji:'⚠️', cls:'pc-negative', msg:'Party is watching' };
+        return { label:'Outcast', emoji:'🚨', cls:'pc-negative', msg:'Primary likely!' };
       };
 
       const generateCertificate = () => {
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'letter');
-        
-        const totalVotes = voteHistory.length;
-        const partyVotes = voteHistory.filter(v => v.withParty).length;
-        const partyLoyalty = totalVotes > 0 ? Math.round((partyVotes / totalVotes) * 100) : 0;
-        const finalApproval = approval + incumbencyBonus;
-        const won = finalApproval >= 50;
-        
-        let strategyType = "Balanced";
-        if (partyLoyalty > 80) strategyType = "Party Loyalist";
-        else if (partyLoyalty < 40) strategyType = "Independent Maverick";
-        else if (committees.length >= 3) strategyType = "Committee Power Broker";
-        else if (caseworkCount > 15) strategyType = "Constituent Service Champion";
-        
-        pdf.setFontSize(24);
-        pdf.setFont(undefined, 'bold');
-        pdf.text('Certificate of Congressional Service', 105, 30, { align: 'center' });
-        
-        pdf.setFontSize(16);
-        pdf.setFont(undefined, 'normal');
-        pdf.text(won ? 'Successfully Reelected!' : 'Electoral Challenge Attempted', 105, 40, { align: 'center' });
-        
+        const pdf = new jsPDF('p','mm','letter');
+        const totalVotes = voteHist.length;
+        const partyVotes = voteHist.filter(v => v.withParty).length;
+        const loyalty = totalVotes > 0 ? Math.round((partyVotes/totalVotes)*100) : 0;
+        const finalAppr = approval + incBonus;
+        const won = finalAppr >= 50;
+        let strategy = "Balanced";
+        if (loyalty > 80) strategy = "Party Loyalist";
+        else if (loyalty < 40) strategy = "Independent Maverick";
+        else if (committees.length >= 3) strategy = "Committee Power Broker";
+        else if (casework > 15) strategy = "Constituent Service Champion";
+
+        pdf.setFontSize(24); pdf.setFont(undefined,'bold');
+        pdf.text('Certificate of Congressional Service', 105, 30, {align:'center'});
+        pdf.setFontSize(16); pdf.setFont(undefined,'normal');
+        pdf.text(won ? 'Successfully Reelected!' : 'Electoral Challenge Attempted', 105, 40, {align:'center'});
         pdf.setFontSize(12);
-        pdf.text(`Representative for: ${selectedDistrict?.name || 'Unknown District'}`, 105, 50, { align: 'center' });
-        pdf.text(`Party: ${selectedDistrict?.party || 'Independent'}`, 105, 57, { align: 'center' });
-        
-        pdf.setFontSize(14);
-        pdf.setFont(undefined, 'bold');
+        pdf.text(`Representative for: ${district?.name}`, 105, 50, {align:'center'});
+        pdf.text(`Party: ${district?.party}`, 105, 57, {align:'center'});
+        pdf.setFontSize(14); pdf.setFont(undefined,'bold');
         pdf.text('Performance Metrics', 20, 75);
-        
-        pdf.setFontSize(11);
-        pdf.setFont(undefined, 'normal');
-        pdf.text(`Final Approval Rating: ${approval}% (+ ${incumbencyBonus}% incumbency) = ${finalApproval}%`, 25, 85);
-        pdf.text(`Political Capital: ${politicalCapital}`, 25, 92);
-        pdf.text(`Campaign Funds Remaining: $${money.toLocaleString()}`, 25, 99);
-        pdf.text(`Committees Joined: ${committees.length} (${committees.join(', ') || 'None'})`, 25, 106);
-        pdf.text(`Constituent Cases Completed: ${caseworkCount}`, 25, 113);
-        pdf.text(`Party Loyalty: ${partyLoyalty}%`, 25, 120);
-        
+        pdf.setFontSize(11); pdf.setFont(undefined,'normal');
+        pdf.text(`Final Approval: ${approval}% (+${incBonus}% incumbency) = ${finalAppr}%`, 25, 85);
+        pdf.text(`Political Capital: ${pc}`, 25, 92);
+        pdf.text(`Funds Remaining: $${money.toLocaleString()}`, 25, 99);
+        pdf.text(`Committees: ${committees.length} (${committees.join(', ')||'None'})`, 25, 106);
+        pdf.text(`Casework Cases: ${casework}`, 25, 113);
+        pdf.text(`Party Loyalty: ${loyalty}%`, 25, 120);
+        pdf.text(`Strategy: ${strategy}`, 25, 127);
+        pdf.setFontSize(14); pdf.setFont(undefined,'bold');
+        pdf.text('Political Science Concepts Demonstrated', 20, 145);
+        pdf.setFontSize(11); pdf.setFont(undefined,'normal');
+        ['Electoral Connection (Mayhew 1974)','Home Style (Fenno 1978)','Party Cartel Theory (Cox & McCubbins 2007)',
+         'Issue Ownership (Petrocik 1996)','Retrospective Voting (Fiorina 1981)','Seniority System (Polsby 1968)'].forEach((l,i) => {
+          pdf.text(`✓ ${l}`, 25, 155 + i*7);
+        });
+        let grade = 'C';
+        if (won && pc > 10) grade = 'A';
+        else if (won) grade = 'B';
+        else if (finalAppr > 45) grade = 'C+';
+        else if (finalAppr > 40) grade = 'C';
+        else grade = 'D';
+        pdf.setFontSize(18); pdf.setFont(undefined,'bold');
+        pdf.text(`Final Grade: ${grade}`, 105, 210, {align:'center'});
+        pdf.setFontSize(10); pdf.setFont(undefined,'normal');
+        pdf.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 220, {align:'center'});
         pdf.save('Congressional_Service_Certificate.pdf');
       };
 
-      const BillTooltip = ({ bill, district }) => {
-        if (!bill || !district) return null;
-        
-        const getDistrictStance = () => {
-          const isLiberal = bill.liberal;
-          const isDemDistrict = district.party === 'Democrat';
-          const lean = district.lean;
-          
-          if (lean.includes('EVEN')) {
-            return 'Split Opinion (50/50)';
-          } else if ((isLiberal && isDemDistrict) || (!isLiberal && !isDemDistrict)) {
-            const strength = parseInt(lean.match(/\d+/) || [0])[0];
-            if (strength > 15) return 'Strong Support (75%+)';
-            if (strength > 5) return 'Moderate Support (60-75%)';
-            return 'Lean Support (55-60%)';
-          } else {
-            const strength = parseInt(lean.match(/\d+/) || [0])[0];
-            if (strength > 15) return 'Strong Opposition (75%+)';
-            if (strength > 5) return 'Moderate Opposition (60-75%)';
-            return 'Lean Opposition (55-60%)';
-          }
-        };
-        
-        const getCongressEffect = () => {
-          if (!bill.controlRequired) return "Can pass under any control";
-          if (bill.controlRequired === congressControl) return "✔ Party controls agenda";
-          return "✗ Unlikely to reach floor";
-        };
-        
-        return (
-          <div className="bill-tooltip">
-            <div className="tooltip-section">
-              <div className="tooltip-label">Bill Summary</div>
-              <div>{bill.description}</div>
-            </div>
-            <div className="tooltip-section">
-              <div className="tooltip-label">Your Party ({district.party})</div>
-              <div>{district.party === 'Democrat' ? bill.democratSupport : bill.republicanSupport}</div>
-            </div>
-            <div className="tooltip-section">
-              <div className="tooltip-label">Your District</div>
-              <div>{getDistrictStance()}</div>
-            </div>
-            <div className="tooltip-section">
-              <div className="tooltip-label">Congressional Control</div>
-              <div>{getCongressEffect()}</div>
-            </div>
-          </div>
-        );
-      };
-
-      const saveGame = (slot) => {
-        const gameData = {
-          gameState,
-          selectedDistrict,
-          round,
-          actionsLeft,
-          money,
-          approval,
-          congressApproval,
-          politicalCapital,
-          incumbencyBonus,
-          location,
-          gameLog,
-          committees,
-          primaryChallenge,
-          headlines,
-          tweets,
-          approvalHistory,
-          moneyHistory,
-          caseworkCount,
-          issueOwnership,
-          votedBills,
-          voteHistory,
-          congressControl,
-          retrospectiveVoting,
-          timestamp: new Date().toISOString()
-        };
-        
-        localStorage.setItem(`congressGame_slot${slot}`, JSON.stringify(gameData));
-        
-        setSavedGames(prev => prev.map(save => 
-          save.slot === slot ? { slot, data: gameData, timestamp: gameData.timestamp } : save
-        ));
-        
-        addLog(`Game saved to slot ${slot}`, 'success');
-      };
-
-      const loadGame = (slot) => {
-        const savedGame = savedGames.find(save => save.slot === slot);
-        if (savedGame && savedGame.data) {
-          const data = savedGame.data;
-          setGameState(data.gameState);
-          setSelectedDistrict(data.selectedDistrict);
-          setRound(data.round);
-          setActionsLeft(data.actionsLeft);
-          setMoney(data.money);
-          setApproval(data.approval);
-          setCongressApproval(data.congressApproval);
-          setPoliticalCapital(data.politicalCapital);
-          setIncumbencyBonus(data.incumbencyBonus);
-          setLocation(data.location);
-          setGameLog(data.gameLog);
-          setCommittees(data.committees);
-          setPrimaryChallenge(data.primaryChallenge);
-          setHeadlines(data.headlines);
-          setTweets(data.tweets);
-          setApprovalHistory(data.approvalHistory);
-          setMoneyHistory(data.moneyHistory);
-          setCaseworkCount(data.caseworkCount);
-          setIssueOwnership(data.issueOwnership);
-          setVotedBills(data.votedBills);
-          setVoteHistory(data.voteHistory || []);
-          setCongressControl(data.congressControl || 'split');
-          setRetrospectiveVoting(data.retrospectiveVoting || 0);
-          
-          addLog(`Game loaded from slot ${slot}`, 'success');
-          setShowSaveLoad(false);
-        }
-      };
-
-      const deleteGame = (slot) => {
-        if (window.confirm(`Delete save in slot ${slot}?`)) {
-          localStorage.removeItem(`congressGame_slot${slot}`);
-          setSavedGames(prev => prev.map(save => 
-            save.slot === slot ? { slot, data: null, timestamp: null } : save
-          ));
-        }
-      };
-
-      // Function to reset the entire game
-      const resetGame = () => {
-        if (window.confirm('Reset entire game and start over? All progress will be lost.')) {
-          window.location.reload();
-        }
-      };
-
-      const saveActionState = () => {
-        const currentState = {
-          money,
-          approval,
-          politicalCapital,
-          committees: [...committees],
-          votedBills: [...votedBills],
-          caseworkCount,
-          issueOwnership: {...issueOwnership},
-          primaryChallenge,
-          actionsLeft,
-          voteHistory: [...voteHistory]
-        };
-        setLastAction(currentState);
-      };
-
-      const undoLastAction = () => {
-        if (lastAction && actionsLeft < 3) {
-          setMoney(lastAction.money);
-          setApproval(lastAction.approval);
-          setPoliticalCapital(lastAction.politicalCapital);
-          setCommittees(lastAction.committees);
-          setVotedBills(lastAction.votedBills);
-          setCaseworkCount(lastAction.caseworkCount);
-          setIssueOwnership(lastAction.issueOwnership);
-          setPrimaryChallenge(lastAction.primaryChallenge);
-          setActionsLeft(lastAction.actionsLeft);
-          setVoteHistory(lastAction.voteHistory);
-          setLastAction(null);
-          addLog('Action undone', 'info');
-        }
-      };
-
-      const resetRound = () => {
-        const confirmReset = window.confirm('Reset this round? You will lose all progress from this round.');
-        if (confirmReset) {
-          setActionsLeft(3);
-          setVotedBills([]);
-          setGameLog(prev => prev.filter(log => log.round !== round));
-          addLog('Round reset', 'info');
-        }
-      };
-
-      const PCStatusIndicator = () => {
-        let status, className, message;
-        
-        if (politicalCapital >= 20) {
-          status = "Party Star ⭐";
-          className = "pc-positive";
-          message = "Leadership loves you!";
-        } else if (politicalCapital >= 10) {
-          status = "Party Loyal 👍";
-          className = "pc-positive";
-          message = "Good standing with party";
-        } else if (politicalCapital >= 0) {
-          status = "Neutral 😐";
-          className = "pc-neutral";
-          message = "Room to improve";
-        } else if (politicalCapital >= -10) {
-          status = "On Thin Ice ⚠️";
-          className = "pc-negative";
-          message = "Party is watching you";
-        } else {
-          status = "Party Outcast 🚨";
-          className = "pc-negative";
-          message = "Primary challenge likely!";
-        }
-        
-        return (
-          <div className={`pc-status-indicator ${className}`}>
-            <span>{status}</span>
-            <span style={{ fontSize: '14px', fontWeight: 'normal' }}>({message})</span>
-          </div>
-        );
-      };
-
-      const selectDistrict = (district) => {
-        setSelectedDistrict(district);
-        setGameState('playing');
-        const startApproval = district.lean.startsWith(district.party[0]) ? 60 : 45;
-        setApproval(constrainApproval(startApproval));
-        setApprovalHistory([startApproval]);
-        addLog("You now represent " + district.name + "!", 'success');
-        
-        const ownership = {};
-        issues.forEach(issue => {
-          if (issue.owner === district.party) {
-            ownership[issue.id] = 5;
-          }
-        });
-        setIssueOwnership(ownership);
-        
-        const controlOptions = ['dem', 'rep', 'split'];
-        setCongressControl(controlOptions[Math.floor(Math.random() * 3)]);
-      };
-
-      const calculateImpact = (issue) => {
-        if (!selectedDistrict) return 0;
-        const issueData = issues.find(i => i.id === issue);
-        const isAligned = (issueData?.liberal && selectedDistrict.party === 'Democrat') ||
-                         (!issueData?.liberal && selectedDistrict.party === 'Republican');
-        const isSwing = selectedDistrict.lean.includes('EVEN');
-        let impact = isAligned ? (isSwing ? 2 : 3) : (isSwing ? -3 : -1);
-        
-        if (issueOwnership[issue]) {
-          impact += Math.floor(issueOwnership[issue] / 3);
-        }
-        
-        impact += retrospectiveVoting;
-        
-        return impact;
-      };
-
-      const handleFundraising = (group) => {
-        if (actionsLeft <= 0) return;
-        
-        saveActionState();
-        
-        const impact = calculateImpact(group.issues[0]);
-        setMoney(prev => prev + group.amount);
-        setApproval(prev => constrainApproval(prev + impact));
-        setActionsLeft(prev => prev - 1);
-        
-        let reactions = '';
-        if (impact < 0) {
-          reactions = 'CONSTITUENTS: "Taking money from them? Really?"\n\n';
-        } else {
-          reactions = 'CONSTITUENTS: "Good to see support from aligned groups."\n\n';
-        }
-        
-        const headline = generateHeadline('fundraising', { group: group.name });
-        setHeadlines(prev => [...prev, headline].slice(-5));
-        setTweets(prev => [...prev, generateTweet('fundraising', impact)].slice(-5));
-        
-        const explanation = 'Political Science Research:\n\n' + reactions +
-          'You raised $' + group.amount.toLocaleString() + ' from ' + group.name + '.\n\n' +
-          'Approval ' + (impact >= 0 ? '+' : '') + impact + '%';
-        
-        showExplanation('Fundraising Impact', explanation);
-        addLog('Raised $' + group.amount + ' from ' + group.name + '. Approval ' + (impact >= 0 ? '+' : '') + impact + '%', 
-               impact >= 0 ? 'success' : 'warning');
-      };
-
-      const handleVote = (bill, withParty) => {
-        if (actionsLeft <= 0) return;
-        if (votedBills.includes(bill.id)) {
-          showExplanation('Already Voted', 'You have already voted on this bill. Each member only gets one vote per bill.');
-          return;
-        }
-        
-        saveActionState();
-        
-        const pcChange = withParty ? bill.pcGain : -Math.floor(bill.pcGain * 1.5);
-        const billAligned = (bill.liberal && selectedDistrict.party === 'Democrat') ||
-                           (!bill.liberal && selectedDistrict.party === 'Republican');
-        const approvalChange = withParty ? 
-          (billAligned ? 2 : -3) : 
-          (billAligned ? -2 : 3);
-        
-        setPoliticalCapital(prev => prev + pcChange);
-        setApproval(prev => constrainApproval(prev + approvalChange));
-        setActionsLeft(prev => prev - 1);
-        setVotedBills(prev => [...prev, bill.id]);
-        setVoteHistory(prev => [...prev, { billId: bill.id, billName: bill.name, withParty, round }]);
-        
-        if (bill.liberal === null) {
-          setRetrospectiveVoting(prev => prev + 1);
-        } else if (!withParty && billAligned) {
-          setRetrospectiveVoting(prev => prev - 1);
-        }
-        
-        let leaderReaction = '';
-        if (pcChange < -10 && !primaryChallenge) {
-          setPrimaryChallenge(true);
-          leaderReaction = 'PARTY LEADER WARNING: "You\'re on thin ice! Vote with us or face a primary challenge!"\n\n';
-          addLog('Party threatens primary challenge!', 'warning');
-        } else if (pcChange > 10) {
-          leaderReaction = 'PARTY LEADER: "Excellent loyalty! You have a bright future in this party."\n\n';
-        } else if (pcChange < 0) {
-          leaderReaction = 'PARTY LEADER: "Disappointed in your lack of party discipline."\n\n';
-        }
-        
-        let constituentReaction = '';
-        if (approvalChange > 0) {
-          constituentReaction = 'CONSTITUENTS: "This is why we elected you!"\n\n';
-        } else if (approvalChange < -2) {
-          constituentReaction = 'CONSTITUENTS: "This isn\'t what we voted for! We\'re watching you."\n\n';
-        }
-        
-        const headline = generateHeadline('vote', { bill: bill.name, withParty });
-        setHeadlines(prev => [...prev, headline].slice(-5));
-        setTweets(prev => [...prev, generateTweet('vote', approvalChange)].slice(-5));
-        
-        const explanation = 'You voted ' + (withParty ? 'WITH' : 'AGAINST') + ' party on ' + bill.name + '.\n\n' +
-          leaderReaction + constituentReaction +
-          'Political Capital: ' + (pcChange >= 0 ? '+' : '') + pcChange + '\n' +
-          'Approval: ' + (approvalChange >= 0 ? '+' : '') + approvalChange + '%';
-        
-        showExplanation('Vote Impact', explanation);
-        addLog('Voted on ' + bill.name + '. PC ' + (pcChange >= 0 ? '+' : '') + pcChange + ', Approval ' + (approvalChange >= 0 ? '+' : '') + approvalChange + '%', 
-               pcChange >= 0 ? 'success' : 'warning');
-      };
-
-      const handleCasework = () => {
-        if (actionsLeft <= 0) return;
-        
-        saveActionState();
-        
-        const approvalGain = 2 + Math.floor(incumbencyBonus / 2);
-        setApproval(prev => constrainApproval(prev + approvalGain));
-        setCaseworkCount(prev => prev + 1);
-        setActionsLeft(prev => prev - 1);
-        
-        const headline = generateHeadline('casework');
-        setHeadlines(prev => [...prev, headline].slice(-5));
-        setTweets(prev => [...prev, generateTweet('casework', approvalGain)].slice(-5));
-        
-        const explanation = 'CONSTITUENT: "You really helped me! I\'ll remember this at election time."\n\n' +
-          'Approval +' + approvalGain + '% (bonus increases with incumbency!)';
-        
-        showExplanation('Casework Impact', explanation);
-        addLog('Completed casework. Approval +' + approvalGain + '%', 'success');
-      };
-
-      const handleAdvertising = () => {
-        if (actionsLeft <= 0 || money < selectedAdType.cost || !selectedAdIssue) return;
-        
-        saveActionState();
-        
-        const effectiveness = selectedAdType.multiplier;
-        const baseImpact = calculateImpact(selectedAdIssue);
-        const impact = Math.round(baseImpact * effectiveness);
-        
-        setMoney(prev => prev - selectedAdType.cost);
-        setApproval(prev => constrainApproval(prev + impact));
-        setActionsLeft(prev => prev - 1);
-        
-        if (impact > 0 && issueOwnership[selectedAdIssue] !== undefined) {
-          setIssueOwnership(prev => ({
-            ...prev,
-            [selectedAdIssue]: Math.min(10, prev[selectedAdIssue] + 1)
-          }));
-        }
-        
-        const issueData = issues.find(i => i.id === selectedAdIssue);
-        const headline = generateHeadline('ad', { medium: selectedAdType.name, issue: selectedAdIssue });
-        setHeadlines(prev => [...prev, headline].slice(-5));
-        setTweets(prev => [...prev, generateTweet('ad', impact)].slice(-5));
-        
-        const explanation = 'You ran ' + selectedAdType.name + ' ads on ' + issueData.name + ' for $' + selectedAdType.cost.toLocaleString() + '.\n\n' +
-          'Approval ' + (impact >= 0 ? '+' : '') + impact + '%';
-        
-        showExplanation('Advertising Impact', explanation);
-        addLog('Ran ' + selectedAdType.name + ' ads on ' + issueData.name + '. Cost $' + selectedAdType.cost + ', Approval ' + (impact >= 0 ? '+' : '') + impact + '%', 
-               impact >= 0 ? 'success' : 'warning');
-        
-        setSelectedAdType(null);
-        setSelectedAdIssue(null);
-      };
-
-      const handleSpeech = () => {
-        if (actionsLeft <= 0 || !selectedSpeechIssue) return;
-        
-        saveActionState();
-        
-        const impact = calculateImpact(selectedSpeechIssue);
-        const issueBonus = issueOwnership[selectedSpeechIssue] ? 1 : 0;
-        const totalImpact = impact + issueBonus;
-        
-        setApproval(prev => constrainApproval(prev + totalImpact));
-        setPoliticalCapital(prev => prev + 3);
-        setActionsLeft(prev => prev - 1);
-        
-        const issueData = issues.find(i => i.id === selectedSpeechIssue);
-        const headline = generateHeadline('speech', { issue: selectedSpeechIssue });
-        setHeadlines(prev => [...prev, headline].slice(-5));
-        setTweets(prev => [...prev, generateTweet('speech', totalImpact)].slice(-5));
-        
-        const explanation = 'You gave a public speech on ' + issueData.name + '!\n\n' +
-          'Speech Impact:\n' +
-          '• Approval ' + (totalImpact >= 0 ? '+' : '') + totalImpact + '%\n' +
-          '• Political Capital +3 (showing leadership)\n';
-        
-        showExplanation('Speech Impact', explanation);
-        addLog('Gave speech on ' + issueData.name + '. Approval ' + (totalImpact >= 0 ? '+' : '') + totalImpact + '%, PC +3', 
-               totalImpact >= 0 ? 'success' : 'warning');
-        
-        setSelectedSpeechIssue(null);
-        setShowSpeechPanel(false);
-      };
-
-      const handleCommittee = (committeeData) => {
-        if (actionsLeft <= 0 || committees.includes(committeeData.name)) return;
-        
-        if (round < committeeData.minRound) {
-          showExplanation('Too Early in Term - Need More Experience', 
-            `You cannot join the ${committeeData.name} Committee yet.\n\n` +
-            `Current Round: ${round}\n` +
-            `Required Round: ${committeeData.minRound}\n\n` +
-            'Build seniority and try again!');
-          return;
-        }
-        
-        if (politicalCapital < committeeData.minPC) {
-          showExplanation('Insufficient Political Capital - Build Party Trust', 
-            `The ${committeeData.name} Committee requires more political capital.\n\n` +
-            `Your PC: ${politicalCapital}\n` +
-            `Required PC: ${committeeData.minPC}\n\n` +
-            'Vote with your party to build PC!');
-          return;
-        }
-        
-        saveActionState();
-        
-        setCommittees(prev => [...prev, committeeData.name]);
-        setPoliticalCapital(prev => prev + committeeData.pcGain);
-        setActionsLeft(prev => prev - 1);
-        
-        const headline = generateHeadline('committee', { committee: committeeData.name });
-        setHeadlines(prev => [...prev, headline].slice(-5));
-        
-        const explanation = `You joined the ${committeeData.name} Committee!\n\n` +
-          'Political Capital +' + committeeData.pcGain;
-        
-        showExplanation('Committee Joined', explanation);
-        addLog('Joined ' + committeeData.name + ' Committee. PC +' + committeeData.pcGain, 'success');
-      };
-
-      const endRound = () => {
-        if (round >= 12) {
-          if (primaryChallenge && approval < 60) {
-            setGameState('primary');
-          } else {
-            setGameState('election');
-          }
-          return;
-        }
-        
-        setApprovalHistory(prev => [...prev, approval].slice(-12));
-        setMoneyHistory(prev => [...prev, money].slice(-12));
-        
-        const drift = Math.floor(Math.random() * 3) - 1;
-        setApproval(prev => constrainApproval(prev + drift));
-        setCongressApproval(prev => Math.max(10, Math.min(40, prev + Math.floor(Math.random() * 7) - 3)));
-        
-        if (round === 6) {
-          const midtermOptions = ['dem', 'rep', 'split'];
-          const newControl = midtermOptions[Math.floor(Math.random() * 3)];
-          if (newControl !== congressControl) {
-            setCongressControl(newControl);
-            addLog('Midterm Elections: Congress is now ' + 
-              (newControl === 'dem' ? 'Democrat-controlled' : 
-               newControl === 'rep' ? 'Republican-controlled' : 
-               'split control'), 'info');
-          }
-        }
-        
-        if (round % 3 === 0) {
-          setIncumbencyBonus(prev => Math.min(10, prev + 2));
-          addLog('Incumbency advantage increased to +' + Math.min(10, incumbencyBonus + 2) + '%', 'success');
-        }
-        
-        setRound(prev => prev + 1);
-        setActionsLeft(3);
-        setVotedBills([]);
-        setLastAction(null);
-        addLog('Round ' + (round + 1) + ' begins (Months ' + ((round * 2) + 1) + '-' + ((round + 1) * 2) + ')', 'info');
-      };
-
-      const adTypes = [
-        { id: 'tv', name: 'TV', cost: 50000, multiplier: 1.8, icon: '📺', description: 'Broad reach' },
-        { id: 'digital', name: 'Digital', cost: 15000, multiplier: 1.4, icon: '💻', description: 'Targeted' },
-        { id: 'radio', name: 'Radio', cost: 8000, multiplier: 1.2, icon: '📻', description: 'Cost effective' }
-      ];
-
-      const getAvailableBills = () => {
-        return bills.filter(bill => {
-          if (!bill.controlRequired) return true;
-          if (congressControl === 'split') {
-            return bill.controlRequired === null || bill.liberal === null;
-          }
-          return bill.controlRequired === congressControl;
-        });
-      };
-
-      const CharacterPanel = () => (
-        <div className="card">
-          <h3>Key Characters</h3>
-          <div className="character-avatar">
-            <div className="avatar-icon" style={{ 
-              background: selectedDistrict?.party === 'Democrat' ? '#2563eb' : '#dc2626'
-            }}>
-              PL
-            </div>
-            <div>
-              <div className="font-bold" style={{ fontSize: '16px' }}>Party Leader</div>
-              <div className="text-xs text-gray">
-                {politicalCapital > 10 ? '"Keep up the good work!"' :
-                 politicalCapital < -10 ? '"Fall in line!"' :
-                 '"Stay loyal to the party."'}
-              </div>
-            </div>
-          </div>
-          
-          <div className="character-avatar">
-            <div className="avatar-icon" style={{ background: '#f59e0b' }}>
-              OPP
-            </div>
-            <div>
-              <div className="font-bold" style={{ fontSize: '16px' }}>Your Opponent</div>
-              <div className="text-xs text-gray">
-                {approval < 45 ? '"I can win this!"' : '"The incumbent is strong..."'}
-              </div>
-            </div>
-          </div>
-          
-          <div className="character-avatar">
-            <div className="avatar-icon" style={{ background: '#6b7280' }}>
-              CON
-            </div>
-            <div>
-              <div className="font-bold" style={{ fontSize: '16px' }}>Constituents</div>
-              <div className="text-xs text-gray">
-                {approval > 60 ? '"We support you!"' :
-                 approval > 40 ? '"Could be better..."' :
-                 '"Time for change!"'}
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-
-      const MediaDashboard = () => (
-        <div className="card">
-          <h3>Media Coverage</h3>
-          <div className="media-panel" style={{ background: '#fee2e2' }}>
-            <div className="text-xs font-bold text-gray mb-2">LATEST HEADLINE</div>
-            <div className="font-bold" style={{ fontSize: '16px' }}>{headlines[headlines.length - 1]}</div>
-          </div>
-          <div className="media-panel" style={{ background: '#dbeafe' }}>
-            <div className="text-xs font-bold text-gray mb-2">SOCIAL MEDIA</div>
-            {tweets.slice(-3).map((tweet, i) => (
-              <div key={i} className="text-sm mb-2">@voter{Math.floor(Math.random() * 1000)}: {tweet}</div>
-            ))}
-          </div>
-        </div>
-      );
-
-      const DataDashboard = () => {
-        const chartRef = React.useRef(null);
-        const chartInstance = React.useRef(null);
-
-        React.useEffect(() => {
-          if (chartRef.current && window.Chart) {
-            if (chartInstance.current) {
-              chartInstance.current.destroy();
-            }
-            
-            const ctx = chartRef.current.getContext('2d');
-            chartInstance.current = new window.Chart(ctx, {
-              type: 'line',
-              data: {
-                labels: approvalHistory.map((_, i) => 'R' + (i + 1)),
-                datasets: [{
-                  label: 'Approval Rating',
-                  data: approvalHistory,
-                  borderColor: '#2563eb',
-                  backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                  tension: 0.3
-                }, {
-                  label: 'Target (50%)',
-                  data: Array(approvalHistory.length).fill(50),
-                  borderColor: '#dc2626',
-                  borderDash: [5, 5],
-                  pointRadius: 0
-                }, {
-                  label: 'Ceiling',
-                  data: Array(approvalHistory.length).fill(approvalCeiling),
-                  borderColor: '#10b981',
-                  borderDash: [3, 3],
-                  pointRadius: 0
-                }, {
-                  label: 'Floor',
-                  data: Array(approvalHistory.length).fill(approvalFloor),
-                  borderColor: '#f59e0b',
-                  borderDash: [3, 3],
-                  pointRadius: 0
-                }]
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { position: 'top' }
-                },
-                scales: {
-                  y: { beginAtZero: true, max: 100 }
-                }
-              }
-            });
-          }
-          
-          return () => {
-            if (chartInstance.current) {
-              chartInstance.current.destroy();
-            }
-          };
-        }, [approvalHistory, approvalCeiling, approvalFloor]);
-
-        return (
-          <div className="card">
-            <h3>Performance Dashboard</h3>
-            <div className="chart-container">
-              <canvas ref={chartRef}></canvas>
-            </div>
-            <div className="grid grid-4 mb-4" style={{ marginTop: '20px' }}>
-              <div className="stat-box">
-                <div className="stat-label">Approval</div>
-                <div className="stat-value" style={{ color: approval >= 50 ? '#10b981' : '#ef4444' }}>
-                  {approval}%
-                </div>
-                <div className="approval-floor-ceiling">
-                  <span>Floor: {approvalFloor}%</span>
-                  <span>Ceiling: {approvalCeiling}%</span>
-                </div>
-              </div>
-              <div className="stat-box">
-                <div className="stat-label">Funds</div>
-                <div className="stat-value" style={{ color: '#059669' }}>
-                  ${(money/1000).toFixed(0)}K
-                </div>
-              </div>
-              <div className="stat-box">
-                <div className="stat-label">PC</div>
-                <div className="stat-value" style={{ color: politicalCapital >= 0 ? '#8b5cf6' : '#ef4444' }}>
-                  {politicalCapital}
-                </div>
-              </div>
-              <div className="stat-box">
-                <div className="stat-label">Committees</div>
-                <div className="stat-value">{committees.length}</div>
-              </div>
-            </div>
-          </div>
-        );
-      };
-
-      // Render game states
+      // ============================================================
+      // RENDER: MENU
+      // ============================================================
       if (gameState === 'menu') {
         return (
-          <div className="container">
-            <h1>Keep Your Job</h1>
-            <div className="card">
-              <h2>Congressional Simulation Game</h2>
-              <p className="mb-4" style={{ fontSize: '18px' }}>Based on Contemporary Political Science Research</p>
-              <p className="mb-6 text-gray">You're a newly elected member of Congress. Survive 2 years (12 rounds) and win reelection by maintaining 50% approval.</p>
-              
-              <div className="pc-warning-box mb-6">
-                <h3 style={{ color: '#dc2626', marginBottom: '16px' }}>⚡ Political Capital & Seniority System</h3>
-                <p className="mb-4"><strong>Power in Congress is earned through time and loyalty!</strong></p>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px' }}>
-                  <div>
-                    <p className="font-bold mb-2" style={{ color: '#059669' }}>✅ Committee Progression:</p>
-                    <ul className="text-sm">
-                      <li className="mb-2"><strong>Tier 1</strong> (Round 3+): Basic committees</li>
-                      <li className="mb-2"><strong>Tier 2</strong> (Round 6+, PC≥5): Important committees</li>
-                      <li className="mb-2"><strong>Tier 3</strong> (Round 9+, PC≥15-25): Prestige committees</li>
-                      <li>Build power through seniority and party loyalty!</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <p className="font-bold mb-2" style={{ color: '#dc2626' }}>⚠️ Reality Check:</p>
-                    <ul className="text-sm">
-                      <li className="mb-2">No freshman gets on Appropriations!</li>
-                      <li className="mb-2">Party loyalty determines advancement</li>
-                      <li className="mb-2">Low PC = Primary challenge risk</li>
-                      <li>Committees = Power in Congress</li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <div style={{ background: 'white', padding: '12px', borderRadius: '6px' }}>
-                  <p className="font-bold mb-2">How to Manage PC:</p>
-                  <p className="text-sm"><strong>Gain PC:</strong> Vote with party (+8 to +15), join committees (+8 to +30), give speeches (+3)</p>
-                  <p className="text-sm"><strong>Lose PC:</strong> Vote against party (-12 to -22), especially on key bills</p>
-                </div>
-              </div>
-              
-              <div className="explanation-box mb-6">
-                <p className="font-bold mb-2">📚 Key Research Integrated:</p>
-                <ul className="text-sm">
-                  <li className="mb-2">Mayhew (1974): Electoral connection drives behavior</li>
-                  <li className="mb-2">Fenno (1978): "Home Style" constituent service</li>
-                  <li className="mb-2">Cox & McCubbins (2007): Party as procedural cartel</li>
-                  <li className="mb-2">Polsby (1968): Congressional seniority system</li>
-                  <li className="mb-2">Petrocik (1996): Issue Ownership Theory</li>
-                  <li className="mb-2">Fiorina (1981): Retrospective voting</li>
-                  <li className="mb-2">Iyengar & Kinder (1987): Media priming effects</li>
-                  <li className="mb-2">Hall & Wayman (1990): Interest group subsidy model</li>
-                  <li>Weingast (1979): Distributive politics theory</li>
-                </ul>
-              </div>
-              
-              <div className="explanation-box mb-6" style={{ background: '#dcfce7', borderColor: '#16a34a' }}>
-                <p className="font-bold mb-2">🎮 Game Features:</p>
-                <ul className="text-sm">
-                  <li className="mb-2"><strong>Congressional Control:</strong> Party control affects which bills come to floor</li>
-                  <li className="mb-2"><strong>Realistic Approval Bounds:</strong> No more 99% approval in hostile districts!</li>
-                  <li className="mb-2"><strong>Committee Seniority:</strong> Can't join prestige committees as a freshman</li>
-                  <li className="mb-2"><strong>Cross-Pressure:</strong> Balance party loyalty with constituent preferences</li>
-                  <li className="mb-2"><strong>Primary vs. General:</strong> Balance ideological base vs. median voter</li>
-                  <li className="mb-2"><strong>Issue Ownership:</strong> Build credibility on specific issues</li>
-                  <li className="mb-2"><strong>Save/Load System:</strong> Save progress across 3 slots</li>
-                  <li><strong>PDF Certificate:</strong> Download performance analysis for submission</li>
-                </ul>
-              </div>
-              
-              <button className="btn btn-primary" onClick={() => setGameState('select')} style={{ width: '100%', fontSize: '18px' }}>
-                Start Game →
-              </button>
+          <div className="container" style={{maxWidth:900, paddingTop:60}}>
+            <div className="hero-title">Keep Your Seat</div>
+            <div className="hero-sub">A Congressional Simulation</div>
+
+            <div className="card" style={{textAlign:'center', marginBottom:32}}>
+              <p style={{fontSize:17, color:'var(--text-secondary)', maxWidth:600, margin:'0 auto 24px'}}>
+                You're a newly elected member of Congress. Survive 2 years (12 rounds) and win reelection by maintaining 50% approval. Every action has trade-offs between party loyalty, district preferences, and political survival.
+              </p>
             </div>
+
+            <div className="grid grid-2 mb-4">
+              <div className="card">
+                <h3 style={{fontSize:18, color:'var(--accent-green)', marginBottom:12}}>⚡ Political Capital System</h3>
+                <p className="text-sm text-secondary mb-2"><strong>Power is earned through time and loyalty.</strong></p>
+                <p className="text-sm text-muted mb-1">• Tier 1 committees unlock at Round 3</p>
+                <p className="text-sm text-muted mb-1">• Tier 2 (Important) at Round 6 with PC ≥ 5</p>
+                <p className="text-sm text-muted mb-1">• Tier 3 (Prestige) at Round 9 with high PC</p>
+                <p className="text-sm text-muted">• Vote with party to gain PC; vote against to lose it</p>
+              </div>
+              <div className="card">
+                <h3 style={{fontSize:18, color:'var(--accent-red)', marginBottom:12}}>⚠️ Reality Check</h3>
+                <p className="text-sm text-muted mb-1">• No freshman gets on Appropriations!</p>
+                <p className="text-sm text-muted mb-1">• Low PC = primary challenge risk</p>
+                <p className="text-sm text-muted mb-1">• Random events test your judgment</p>
+                <p className="text-sm text-muted">• Committees = real power in Congress</p>
+              </div>
+            </div>
+
+            <div className="cite-box">
+              <h4>📖 Research Integrated</h4>
+              <p>Mayhew (1974) • Fenno (1978) • Cox & McCubbins (2007) • Polsby (1968) • Petrocik (1996) • Fiorina (1981) • Rohde (1991) • Weingast (1979) • Kernell (1997) • Boatright (2013)</p>
+            </div>
+
+            <button className="btn btn-primary w-full" style={{fontSize:18, padding:'16px 32px'}} onClick={() => setGameState('select')}>
+              Choose Your District →
+            </button>
           </div>
         );
       }
 
+      // ============================================================
+      // RENDER: DISTRICT SELECT
+      // ============================================================
       if (gameState === 'select') {
         return (
-          <div className="container">
-            <h1>Select Your District</h1>
+          <div className="container" style={{maxWidth:1000, paddingTop:32}}>
+            <h1 style={{fontSize:40, textAlign:'center', marginBottom:8}}>Select Your District</h1>
+            <p className="text-center text-muted mb-4">Each district offers a unique strategic challenge.</p>
             <div className="grid grid-2">
-              {districts.map(district => (
-                <div key={district.id} className="district-card" onClick={() => selectDistrict(district)}>
-                  <h3>{district.name}</h3>
-                  <p className="text-sm text-gray mb-2">{district.description}</p>
-                  <div className="grid grid-2 text-sm mb-4">
-                    <div><strong>Population:</strong> {(district.demographics.population/1000).toFixed(0)}K</div>
-                    <div><strong>Median Income:</strong> ${(district.demographics.medianIncome/1000).toFixed(0)}K</div>
-                    <div><strong>General Lean:</strong> {district.lean}</div>
-                    <div><strong>Primary Lean:</strong> {district.primaryLean}</div>
+              {DISTRICTS.map(d => {
+                const diffCls = d.difficulty === 'easy' ? 'diff-easy' : d.difficulty === 'medium' ? 'diff-medium' : 'diff-hard';
+                return (
+                  <div key={d.id} className="district-select-card" onClick={() => selectDistrict(d)}>
+                    <div className="party-stripe" style={{background: d.party === 'Democrat' ? 'var(--dem-blue)' : 'var(--rep-red)'}} />
+                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:4}}>
+                      <h3 style={{fontSize:19}}>{d.name}</h3>
+                      <span className={`diff-badge ${diffCls}`}>{d.difficulty}</span>
+                    </div>
+                    <p className="text-sm text-muted mb-2">{d.description}</p>
+                    <div style={{display:'flex', gap:8, flexWrap:'wrap', marginBottom:8}}>
+                      <span className={d.party === 'Democrat' ? 'badge badge-dem' : 'badge badge-rep'}>{d.party}</span>
+                      <span className="badge" style={{background:'rgba(255,255,255,0.05)', color:'var(--text-muted)'}}>{d.lean}</span>
+                    </div>
+                    <div className="text-xs text-muted">
+                      Pop: {(d.demographics.population/1000).toFixed(0)}K · Income: ${(d.demographics.medianIncome/1000).toFixed(0)}K · {d.industries.slice(0,2).join(', ')}
+                    </div>
                   </div>
-                  <span className={district.party === 'Democrat' ? 'badge badge-dem' : 'badge badge-rep'}>
-                    {district.party}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         );
       }
 
+      // ============================================================
+      // RENDER: PRIMARY
+      // ============================================================
       if (gameState === 'primary') {
-        const survived = approval + incumbencyBonus >= 55;
+        const survived = approval + incBonus >= 55;
         return (
-          <div className="container">
-            <div className="card text-center">
-              <h1>⚔️ Primary Challenge!</h1>
-              <h2>{survived ? 'You Survived!' : 'You Lost Your Primary'}</h2>
-              <p className="mb-6 text-gray" style={{ fontSize: '18px' }}>
-                {survived ? 
-                  'Your incumbency advantage helped you survive the primary.' :
-                  'You broke with your party too often and lost.'}
+          <div className="container" style={{maxWidth:700, paddingTop:60}}>
+            <div className="card election-result" style={!survived ? {className:'lost'} : {}}>
+              <div style={{fontSize:64, marginBottom:16}}>⚔️</div>
+              <h1 style={{fontSize:44, color: survived ? 'var(--accent-green)' : 'var(--accent-red)'}}>
+                {survived ? 'Primary Survived!' : 'Primaried Out'}
+              </h1>
+              <p className="text-secondary mb-4" style={{fontSize:18}}>
+                {survived ? 'Your incumbency advantage saved you — barely.' : 'You broke with your party too often. A more loyal candidate replaced you.'}
               </p>
-              <button className="btn btn-primary" onClick={() => survived ? setGameState('election') : window.location.reload()}>
-                {survived ? 'Continue to General Election' : 'Try Again'}
+              <div className="grid grid-2 mb-4">
+                <div className="stat-box"><div className="stat-label">Your Approval</div><div className="stat-value">{approval}%</div></div>
+                <div className="stat-box"><div className="stat-label">Incumbency Bonus</div><div className="stat-value">+{incBonus}%</div></div>
+              </div>
+              <button className="btn btn-primary w-full" style={{fontSize:16, padding:14}} onClick={() => survived ? setGameState('election') : window.location.reload()}>
+                {survived ? 'Continue to General Election →' : 'Play Again'}
               </button>
             </div>
           </div>
         );
       }
 
+      // ============================================================
+      // RENDER: ELECTION
+      // ============================================================
       if (gameState === 'election') {
-        const totalApproval = approval + incumbencyBonus;
-        const won = totalApproval >= 50;
+        const total = approval + incBonus;
+        const won = total >= 50;
+        const loyalty = voteHist.length > 0 ? Math.round((voteHist.filter(v=>v.withParty).length/voteHist.length)*100) : 0;
         return (
-          <div className="container">
-            <div className="card text-center">
-              <h1>{won ? '🎉 Victory!' : '😔 Defeated'}</h1>
-              <p className="mb-6" style={{ fontSize: '20px' }}>{won ? 'You kept your job!' : 'You lost reelection.'}</p>
-              <button className="btn btn-success mb-4" 
-                      onClick={generateCertificate} 
-                      style={{ width: '100%', fontSize: '18px' }}>
-                📄 Download Performance Certificate (PDF)
+          <div className="container" style={{maxWidth:700, paddingTop:48}}>
+            <div className={`card election-result ${won ? '' : 'lost'}`}>
+              <div style={{fontSize:64, marginBottom:8}}>{won ? '🎉' : '📉'}</div>
+              <h1>{won ? 'Victory!' : 'Defeated'}</h1>
+              <p className="text-secondary mb-4" style={{fontSize:18}}>
+                {won ? 'Congratulations — you kept your seat!' : 'The voters chose a different direction.'}
+              </p>
+              <div className="grid grid-3 mb-4">
+                <div className="stat-box"><div className="stat-label">Approval</div><div className="stat-value">{approval}%</div></div>
+                <div className="stat-box"><div className="stat-label">Incumbency</div><div className="stat-value">+{incBonus}%</div></div>
+                <div className="stat-box"><div className="stat-label">Final</div><div className="stat-value" style={{color: won ? 'var(--accent-green)' : 'var(--accent-red)'}}>{total}%</div></div>
+              </div>
+              <div className="grid grid-3 mb-4">
+                <div className="stat-box"><div className="stat-label">PC</div><div className="stat-value" style={{color:'var(--accent-purple)'}}>{pc}</div></div>
+                <div className="stat-box"><div className="stat-label">Party Loyalty</div><div className="stat-value">{loyalty}%</div></div>
+                <div className="stat-box"><div className="stat-label">Committees</div><div className="stat-value">{committees.length}</div></div>
+              </div>
+              <button className="btn btn-gold w-full mb-2" style={{fontSize:16, padding:14}} onClick={generateCertificate}>
+                📄 Download Certificate (PDF)
               </button>
-              <button className="btn btn-primary" onClick={() => window.location.reload()}>
+              <button className="btn btn-ghost w-full" style={{padding:12}} onClick={() => window.location.reload()}>
                 Play Again
               </button>
             </div>
@@ -1865,341 +1270,244 @@
         );
       }
 
-      // Main game interface
+      // ============================================================
+      // RENDER: MAIN GAME
+      // ============================================================
+      const pcStatus = getPCStatus();
+      const availBills = getAvailableBills();
+      const congressLabel = congControl === 'dem' ? 'Democrat Majority' : congControl === 'rep' ? 'Republican Majority' : 'Split Control';
+      const congressCls = congControl === 'dem' ? 'congress-dem' : congControl === 'rep' ? 'congress-rep' : 'congress-split';
+      const congressEmoji = congControl === 'dem' ? '🔵' : congControl === 'rep' ? '🔴' : '🟣';
+
       return (
         <div className="container">
-          {/* News Ticker */}
-          <div className="news-ticker">
+          {/* NEWS TICKER */}
+          <div className="ticker-wrap" style={{borderRadius:'var(--radius-sm)', marginBottom:16}}>
             <span className="ticker">
-              BREAKING NEWS • Congressional approval at {congressApproval}% • 
-              {headlines[headlines.length - 1]} • 
-              Campaign spending reaches record highs •
+              {`BREAKING NEWS • Congressional approval at ${congApproval}% • ${headlines[headlines.length-1]} • Campaign spending reaches record highs • `.repeat(2)}
             </span>
           </div>
 
-          {/* Header */}
-          <div className="card">
-            <h2>{selectedDistrict?.name}</h2>
-            <p className="mb-4" style={{ fontSize: '17px' }}>
-              Round {round} of 12 • Months {(round - 1) * 2 + 1}-{round * 2} • Actions: {actionsLeft}
-              {primaryChallenge && <span style={{ color: '#ef4444', fontWeight: 'bold' }}> • ⚠️ Primary Challenge Threatened!</span>}
-            </p>
-            
-            {/* Congressional Control Banner */}
-            <div className="congress-control-banner">
-              Congress Control: {
-                congressControl === 'dem' ? '🔵 Democrat Majority' :
-                congressControl === 'rep' ? '🔴 Republican Majority' :
-                '🟣 Split Control'
-              }
-              {round === 6 && ' (Midterms this round!)'}
+          {/* HEADER */}
+          <div className="card" style={{padding:'20px 24px'}}>
+            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:12}}>
+              <div>
+                <h2 style={{fontSize:24, marginBottom:2}}>{district?.name}</h2>
+                <span className="text-sm text-muted font-mono">Round {round} of 12 · Months {(round-1)*2+1}-{round*2} · Actions: {actions}</span>
+              </div>
+              <div className={`pc-badge ${pcStatus.cls}`}>
+                {pcStatus.emoji} {pcStatus.label} <span style={{opacity:0.7}}>({pcStatus.msg})</span>
+              </div>
             </div>
-            
-            {/* Political Capital Status */}
-            <div className="mb-4">
-              <PCStatusIndicator />
+
+            <div className={`congress-banner ${congressCls}`} style={{marginTop:12}}>
+              Congress Control: {congressEmoji} {congressLabel}
             </div>
-            
-            {/* Stats */}
-            <div className="grid grid-3 mb-4" style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}>
+
+            {/* STATS */}
+            <div className="grid grid-6" style={{marginTop:4}}>
               <div className="stat-box">
                 <div className="stat-label">Funds</div>
-                <div className="stat-value" style={{ color: '#059669' }}>${(money/1000).toFixed(0)}K</div>
+                <div className="stat-value" style={{color:'var(--accent-gold)', fontSize:22}}>${(money/1000).toFixed(0)}K</div>
               </div>
-              <div className="stat-box">
+              <div className="stat-box" style={approval < 50 ? {animation:'pulse-red 2s infinite'} : {}}>
                 <div className="stat-label">Approval</div>
-                <div className="stat-value" style={{ color: approval >= 50 ? '#2563eb' : '#ef4444' }}>{approval}%</div>
-                <div className="approval-floor-ceiling">
-                  <span>{approvalFloor}%</span>
-                  <span>{approvalCeiling}%</span>
+                <div className="stat-value" style={{color: approval >= 50 ? 'var(--accent-green)' : 'var(--accent-red)', fontSize:22}}>{approval}%</div>
+                <div className="approval-bar-container">
+                  <div className="approval-bar-fill" style={{width: `${approval}%`, background: approval >= 50 ? 'var(--accent-green)' : 'var(--accent-red)'}} />
+                  <div className="approval-bar-marker" style={{left:'50%'}} />
+                </div>
+                <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:'var(--text-muted)', marginTop:2}}>
+                  <span>{approvalFloor}%</span><span>{approvalCeil}%</span>
                 </div>
               </div>
               <div className="stat-box">
                 <div className="stat-label">Congress</div>
-                <div className="stat-value" style={{ color: '#dc2626' }}>{congressApproval}%</div>
+                <div className="stat-value" style={{fontSize:22, color:'var(--text-muted)'}}>{congApproval}%</div>
               </div>
               <div className="stat-box">
                 <div className="stat-label">PC</div>
-                <div className="stat-value" style={{ color: politicalCapital >= 0 ? '#8b5cf6' : '#ef4444' }}>{politicalCapital}</div>
+                <div className="stat-value" style={{color: pc >= 0 ? 'var(--accent-purple)' : 'var(--accent-red)', fontSize:22}}>{pc}</div>
               </div>
               <div className="stat-box">
                 <div className="stat-label">Incumbency</div>
-                <div className="stat-value" style={{ color: '#f59e0b' }}>+{incumbencyBonus}%</div>
+                <div className="stat-value" style={{fontSize:22, color:'var(--accent-blue)'}}>+{incBonus}%</div>
               </div>
               <div className="stat-box">
                 <div className="stat-label">Casework</div>
-                <div className="stat-value">{caseworkCount}</div>
+                <div className="stat-value" style={{fontSize:22}}>{casework}</div>
               </div>
-            </div>
-
-            {/* Location buttons */}
-            <div className="mb-4">
-              <button className={'location-btn' + (location === 'district' ? ' active' : '')} 
-                      onClick={() => setLocation('district')}>
-                🏘️ District
-              </button>
-              <button className={'location-btn' + (location === 'dc' ? ' active' : '')} 
-                      onClick={() => setLocation('dc')}>
-                🏛️ Washington DC
-              </button>
-              <button className={'location-btn' + (showDistrictInfo ? ' active' : '')} 
-                      onClick={() => setShowDistrictInfo(!showDistrictInfo)}>
-                📋 District Info
-              </button>
-              <button className={'location-btn' + (showDashboard ? ' active' : '')} 
-                      onClick={() => setShowDashboard(!showDashboard)}>
-                📊 Dashboard
-              </button>
-              <button className={'location-btn' + (showCharacters ? ' active' : '')} 
-                      onClick={() => setShowCharacters(!showCharacters)}>
-                👥 Characters
-              </button>
             </div>
           </div>
 
-          {/* District Info Panel */}
-          {showDistrictInfo && selectedDistrict && (
-            <div className="card">
-              <h3>District Information - {selectedDistrict.name}</h3>
-              <div style={{ 
-                background: selectedDistrict.party === 'Democrat' ? '#dbeafe' : '#fee2e2',
-                padding: '16px',
-                borderRadius: '8px',
-                marginBottom: '16px'
-              }}>
-                <h4 style={{ 
-                  color: selectedDistrict.party === 'Democrat' ? '#1e40af' : '#991b1b',
-                  marginBottom: '12px'
-                }}>
-                  You are a {selectedDistrict.party} Representative
-                </h4>
-                <p className="text-sm">{selectedDistrict.description}</p>
-              </div>
-              
-              <div className="grid grid-2 mb-4">
-                <div>
-                  <h4 className="mb-2">Political Lean</h4>
-                  <div className="stat-box">
-                    <div className="text-sm mb-2">General Election: <strong>{selectedDistrict.lean}</strong></div>
-                    <div className="text-sm">Primary: <strong>{selectedDistrict.primaryLean}</strong></div>
-                  </div>
+          {/* TABS */}
+          <div className="tab-bar mb-3">
+            {[
+              {id:'district', label:'🏠 District', },
+              {id:'dc', label:'🏛️ Washington DC'},
+              {id:'info', label:'📊 District Info'},
+              {id:'characters', label:'👥 Characters'},
+            ].map(tab => (
+              <button key={tab.id} className={`tab-btn ${location===tab.id?'active':''}`} onClick={() => setLocation(tab.id)}>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* RANDOM EVENT */}
+          {currentEvent && (
+            <div className="event-banner">
+              <h4>📰 {currentEvent.name}</h4>
+              <p className="text-sm text-secondary mb-3">{currentEvent.desc}</p>
+              {currentEvent.choice ? (
+                <div style={{display:'flex', gap:10}}>
+                  <button className="btn btn-primary" style={{flex:1}} onClick={() => handleEventChoice(currentEvent.choiceA)}>
+                    {currentEvent.choiceA.label}
+                  </button>
+                  <button className="btn btn-ghost" style={{flex:1}} onClick={() => handleEventChoice(currentEvent.choiceB)}>
+                    {currentEvent.choiceB.label}
+                  </button>
                 </div>
-                <div>
-                  <h4 className="mb-2">Key Industries</h4>
-                  <div className="stat-box">
-                    <div className="text-sm">{selectedDistrict.industries.join(', ')}</div>
-                  </div>
-                </div>
-              </div>
+              ) : null}
             </div>
           )}
 
-          {/* Show dashboard and characters if toggled */}
-          {showDashboard && <DataDashboard />}
-          {showCharacters && <CharacterPanel />}
-          <MediaDashboard />
+          {/* MEDIA */}
+          <div className="card" style={{padding:16}}>
+            <div style={{display:'flex', gap:12}}>
+              <div style={{flex:1}}>
+                <div className="media-box" style={{background:'rgba(255,74,94,0.06)', borderColor:'rgba(255,74,94,0.15)'}}>
+                  <div className="source" style={{color:'var(--accent-red)'}}>Latest Headline</div>
+                  <div className="media-headline">{headlines[headlines.length-1]}</div>
+                </div>
+              </div>
+              <div style={{flex:1}}>
+                <div className="media-box" style={{background:'rgba(74,125,255,0.06)', borderColor:'rgba(74,125,255,0.15)'}}>
+                  <div className="source" style={{color:'var(--accent-blue)'}}>Social Media</div>
+                  {tweets.slice(-2).map((t,i) => (
+                    <div key={i} className="tweet">@voter{Math.floor(Math.random()*999)}: {t}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
 
-          {/* District Actions */}
-          {location === 'district' ? (
+          {/* DISTRICT TAB */}
+          {location === 'district' && (
             <>
+              {/* Campaign & Outreach */}
               <div className="card">
-                <h3>District Actions - Campaign & Outreach</h3>
-                
-                {/* Campaign Options */}
-                {!selectedAdType && !showSpeechPanel && (
-                  <div style={{ marginBottom: '20px', padding: '16px', background: '#f0f9ff', borderRadius: '8px', border: '2px solid #0ea5e9' }}>
-                    <h4 style={{ marginBottom: '12px' }}>Campaign & Outreach Options</h4>
-                    <div className="grid grid-4">
-                      {adTypes.map(adType => (
-                        <button 
-                          key={adType.id}
-                          className="action-btn"
-                          disabled={actionsLeft <= 0 || money < adType.cost}
-                          onClick={() => setSelectedAdType(adType)}
-                        >
-                          <div style={{ fontSize: '48px', marginBottom: '8px' }}>{adType.icon}</div>
-                          <div className="font-bold">{adType.name} Ads</div>
-                          <div className="text-sm text-gray">${(adType.cost/1000).toFixed(0)}K</div>
-                          <div className="text-xs text-gray">{adType.description} ({adType.multiplier}x)</div>
-                        </button>
-                      ))}
-                      <button className="action-btn" 
-                              disabled={actionsLeft <= 0}
-                              onClick={() => setShowSpeechPanel(true)}>
-                        <div style={{ fontSize: '48px', marginBottom: '8px' }}>🎤</div>
-                        <div className="font-bold">Public Speech</div>
-                        <div className="text-sm text-gray">Free</div>
-                        <div className="text-xs text-gray">Choose issue (+3 PC)</div>
-                      </button>
+                <h3 style={{fontSize:20, marginBottom:16}}>Campaign & Outreach</h3>
+
+                {/* Ad type selection */}
+                <div className="grid grid-4 mb-3">
+                  {AD_TYPES.map(ad => (
+                    <div key={ad.id}
+                      className={`action-card ${selectedAd?.id === ad.id ? 'ad-card selected' : ''} ${(actions <= 0 || (ad.cost > 0 && money < ad.cost)) ? 'disabled' : ''}`}
+                      onClick={() => { if (actions > 0 && (ad.cost === 0 || money >= ad.cost)) setSelectedAd(ad); }}>
+                      <span className="icon">{ad.icon}</span>
+                      <div className="label">{ad.name}</div>
+                      {ad.cost > 0 ? <div className="cost">${(ad.cost/1000).toFixed(0)}K</div> : <div style={{color:'#15803d', fontWeight:700, fontSize:14}}>Free</div>}
+                      <div className="meta">{ad.desc}</div>
                     </div>
-                  </div>
-                )}
-                
-                {/* Ad Issue Selection */}
-                {selectedAdType && (
-                  <div className="issue-select-panel">
-                    <h4 style={{ marginBottom: '12px' }}>Select Issue for {selectedAdType.name} Campaign (${(selectedAdType.cost/1000).toFixed(0)}K)</h4>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '16px' }}>
-                      {issues.map(issue => (
-                        <button 
-                          key={issue.id}
-                          className={`issue-btn ${selectedAdIssue === issue.id ? 'selected' : ''}`}
-                          onClick={() => setSelectedAdIssue(issue.id)}
-                        >
-                          {issue.icon} {issue.name}
+                  ))}
+                </div>
+
+                {/* Issue selection */}
+                {selectedAd && (
+                  <div style={{background:'var(--bg-surface)', border:'1px solid var(--border)', borderRadius:'var(--radius-sm)', padding:16, marginBottom:16}}>
+                    <p className="text-sm font-bold mb-2">Choose an issue for your {selectedAd.name.toLowerCase()}:</p>
+                    <div style={{display:'flex', flexWrap:'wrap', gap:6}}>
+                      {ISSUES.map(iss => (
+                        <button key={iss.id} className={`issue-pill ${selectedIssue === iss.id ? 'selected' : ''}`}
+                          onClick={() => setSelectedIssue(iss.id)}>
+                          {iss.icon} {iss.name}
                         </button>
                       ))}
                     </div>
-                    <div style={{ display: 'flex', gap: '12px' }}>
-                      <button className="btn btn-primary" 
-                              disabled={!selectedAdIssue}
-                              onClick={handleAdvertising}>
-                        Launch {selectedAdType.name} Campaign
+                    {selectedIssue && (
+                      <button className="btn btn-primary mt-2" disabled={actions <= 0}
+                        onClick={() => handleAd(selectedAd, selectedIssue)}>
+                        {selectedAd.id === 'speech' ? `Give Speech on ${ISSUES.find(i=>i.id===selectedIssue)?.name}` : `Run ${selectedAd.name}`} →
                       </button>
-                      <button className="btn btn-secondary" 
-                              onClick={() => {
-                                setSelectedAdType(null);
-                                setSelectedAdIssue(null);
-                              }}>
-                        Cancel
-                      </button>
-                    </div>
+                    )}
                   </div>
                 )}
-                
-                {/* Speech Issue Selection */}
-                {showSpeechPanel && (
-                  <div className="issue-select-panel">
-                    <h4 style={{ marginBottom: '12px' }}>Select Issue for Public Speech</h4>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '16px' }}>
-                      {issues.map(issue => (
-                        <button 
-                          key={issue.id}
-                          className={`issue-btn ${selectedSpeechIssue === issue.id ? 'selected' : ''}`}
-                          onClick={() => setSelectedSpeechIssue(issue.id)}
-                        >
-                          {issue.icon} {issue.name}
-                        </button>
-                      ))}
-                    </div>
-                    <div style={{ display: 'flex', gap: '12px' }}>
-                      <button className="btn btn-primary" 
-                              disabled={!selectedSpeechIssue}
-                              onClick={handleSpeech}>
-                        Give Speech
-                      </button>
-                      <button className="btn btn-secondary" 
-                              onClick={() => {
-                                setShowSpeechPanel(false);
-                                setSelectedSpeechIssue(null);
-                              }}>
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-                
+
                 {/* Casework */}
-                {!selectedAdType && !showSpeechPanel && (
-                  <button className="btn btn-warning" disabled={actionsLeft <= 0}
-                          onClick={handleCasework} style={{ width: '100%', padding: '24px', fontSize: '20px' }}>
-                    <span style={{ fontSize: '36px', marginRight: '12px' }}>🤝</span>
-                    <span>
-                      <strong>Constituent Service (Casework)</strong> - Most reliable way to gain approval!<br/>
-                      <span style={{ fontSize: '16px' }}>Approval +{2 + Math.floor(incumbencyBonus / 2)}%</span>
-                    </span>
-                  </button>
-                )}
+                <button className="casework-btn" disabled={actions <= 0} onClick={handleCasework}>
+                  📋 Constituent Service (Casework) — Most reliable way to gain approval! (+{2+Math.floor(incBonus/2)}%)
+                </button>
               </div>
 
+              {/* Fundraising */}
               <div className="card">
-                <h3>Fundraising (PACs Limited to $5,000 by FEC)</h3>
+                <h3 style={{fontSize:20, marginBottom:4}}>Fundraising</h3>
+                <p className="text-sm text-muted mb-3">PACs limited to $5,000 by FEC · Alignment with district matters</p>
                 <div className="grid grid-3">
-                  {interestGroups.map(group => (
-                    <button key={group.name} className="action-btn"
-                            disabled={actionsLeft <= 0}
-                            onClick={() => handleFundraising(group)}
-                            style={{ padding: '24px' }}>
-                      <div style={{ fontSize: '40px', marginBottom: '10px' }}>💰</div>
-                      <div className="font-bold" style={{ fontSize: '16px' }}>{group.name}</div>
-                      <div className="text-sm" style={{ color: '#059669', fontSize: '20px', fontWeight: 'bold' }}>${group.amount.toLocaleString()}</div>
-                      <div className="text-xs text-gray">{group.description}</div>
-                    </button>
+                  {INTEREST_GROUPS.map(g => (
+                    <div key={g.name} className={`pac-card ${actions <= 0 ? 'disabled' : ''}`}
+                      onClick={() => actions > 0 && handleFundraising(g)}>
+                      <div style={{fontSize:28, marginBottom:4}}>{g.emoji}</div>
+                      <div className="font-bold text-sm" style={{marginBottom:2}}>{g.name}</div>
+                      <div className="pac-amount">${g.amount.toLocaleString()}</div>
+                      <div className="text-xs text-muted">{g.desc}</div>
+                    </div>
                   ))}
                 </div>
               </div>
             </>
-          ) : (
+          )}
+
+          {/* WASHINGTON DC TAB */}
+          {location === 'dc' && (
             <>
+              {/* Bills */}
               <div className="card">
-                <h3>Vote on Bills (Party Control Affects Agenda)</h3>
-                
-                {/* Voting Logic Explainer Box */}
-                <div style={{ 
-                  background: '#f0fdf4',
-                  border: '2px solid #10b981',
-                  borderRadius: '8px',
-                  padding: '16px',
-                  marginBottom: '16px'
-                }}>
-                  <h4 style={{ color: '#065f46', marginBottom: '12px' }}>
-                    🗳️ Voting Logic Explained
-                  </h4>
-                  <div className="text-sm">
-                    <div className="mb-2">
-                      <strong>Your Party:</strong> {selectedDistrict?.party} | 
-                      <strong> Congress Control:</strong> {
-                        congressControl === 'dem' ? ' Democrat Majority' :
-                        congressControl === 'rep' ? ' Republican Majority' :
-                        ' Split Control'
-                      }
-                    </div>
-                    <div className="mb-2">
-                      <strong>When you vote WITH your party:</strong> Gain PC (+8 to +15), but may hurt approval if district disagrees
-                    </div>
-                    <div className="mb-2">
-                      <strong>When you vote AGAINST your party:</strong> Lose PC (-12 to -22), but may help approval if district wants it
-                    </div>
-                    <div>
-                      <strong>Hover over each bill</strong> to see how your party, district, and Congress control affect it!
-                    </div>
-                  </div>
+                <h3 style={{fontSize:20, marginBottom:4}}>Vote on Bills</h3>
+                <p className="text-sm text-muted mb-3">Party control affects which bills reach the floor · Voting with party builds PC</p>
+
+                <div style={{background:'rgba(52,211,153,0.06)', border:'1px solid rgba(52,211,153,0.15)', borderRadius:'var(--radius-sm)', padding:12, marginBottom:16}}>
+                  <p className="text-sm"><strong>Your Party:</strong> {district?.party} | <strong>WITH party:</strong> Gain PC (+8 to +15) | <strong>AGAINST:</strong> Lose PC (-12 to -22)</p>
                 </div>
-                
+
                 <div className="grid grid-2">
-                  {getAvailableBills().map(bill => {
-                    const hasVoted = votedBills.includes(bill.id);
+                  {availBills.map(bill => {
+                    const voted = votedBills.includes(bill.id);
                     return (
-                      <div key={bill.id} 
-                           className={`bill-card ${hasVoted ? 'voted' : ''}`}
-                           onMouseEnter={() => setHoveredBill(bill.id)}
-                           onMouseLeave={() => setHoveredBill(null)}>
-                        {hoveredBill === bill.id && (
-                          <BillTooltip bill={bill} district={selectedDistrict} />
+                      <div key={bill.id} className={`bill-card ${voted ? 'voted' : ''}`}
+                        onMouseEnter={() => setHoveredBill(bill.id)}
+                        onMouseLeave={() => setHoveredBill(null)}>
+
+                        {hoveredBill === bill.id && !voted && (
+                          <div className="tooltip-popup">
+                            <div className="tooltip-section">
+                              <div className="tooltip-label">Summary</div>
+                              <div>{bill.description}</div>
+                            </div>
+                            <div className="tooltip-section">
+                              <div className="tooltip-label">{district?.party} Position</div>
+                              <div>{district?.party === 'Democrat' ? bill.demSupport : bill.repSupport}</div>
+                            </div>
+                          </div>
                         )}
-                        <div className="font-bold mb-2" style={{ fontSize: '18px' }}>
-                          {hasVoted && '✔ '}{bill.name}
-                        </div>
-                        <div className="text-sm text-gray mb-3">Issue: {bill.issue}</div>
-                        {hasVoted ? (
-                          <div style={{ textAlign: 'center', padding: '14px', background: '#d1fae5', borderRadius: '4px' }}>
-                            <span style={{ color: '#065f46', fontWeight: 'bold', fontSize: '16px' }}>Already Voted</span>
+
+                        <div className="bill-name">{voted && '✓ '}{bill.name}</div>
+                        <span className="bill-issue">{bill.issue}</span>
+
+                        {voted ? (
+                          <div style={{padding:12, background:'#f0fdf4', borderRadius:6, textAlign:'center', fontWeight:600, color:'var(--accent-green)', fontSize:14}}>
+                            Already Voted
                           </div>
                         ) : (
-                          <div className="grid grid-2" style={{ gap: '10px' }}>
-                            <button className="btn btn-success" disabled={actionsLeft <= 0}
-                                    onClick={() => handleVote(bill, true)}
-                                    style={{ padding: '14px' }}>
-                              <div style={{ fontSize: '28px', marginBottom: '6px' }}>✅</div>
-                              WITH Party<br/>
-                              <span className="text-xs">+{bill.pcGain} PC</span>
+                          <div className="vote-btns">
+                            <button className="vote-btn vote-with" disabled={actions <= 0} onClick={() => handleVote(bill, true)}>
+                              ✅ WITH Party
+                              <span className="pc-change">+{bill.pcGain} PC</span>
                             </button>
-                            <button className="btn btn-danger" disabled={actionsLeft <= 0}
-                                    onClick={() => handleVote(bill, false)}
-                                    style={{ padding: '14px' }}>
-                              <div style={{ fontSize: '28px', marginBottom: '6px' }}>❌</div>
-                              AGAINST<br/>
-                              <span className="text-xs">-{Math.floor(bill.pcGain * 1.5)} PC</span>
+                            <button className="vote-btn vote-against" disabled={actions <= 0} onClick={() => handleVote(bill, false)}>
+                              ✗ AGAINST
+                              <span className="pc-change">-{Math.floor(bill.pcGain*1.5)} PC</span>
                             </button>
                           </div>
                         )}
@@ -2209,62 +1517,34 @@
                 </div>
               </div>
 
+              {/* Committees */}
               <div className="card">
-                <h3>Join Committees (Build Institutional Power)</h3>
-                
-                <div className="committee-tier-box mb-4">
-                  <h4 className="mb-2">🏛️ Committee Seniority System</h4>
-                  <div className="text-sm">
-                    <div className="mb-2"><strong>Tier 1 (Regular):</strong> Available Round 3+ • +8 PC • Entry-level committees</div>
-                    <div className="mb-2"><strong>Tier 2 (Important):</strong> Round 6+, PC≥5 • +12 PC • Major policy influence</div>
-                    <div className="mb-2"><strong>Tier 3 (Prestige):</strong> Round 9+, PC≥15-25 • +20-30 PC • Elite "Cardinals" of Congress</div>
-                  </div>
+                <h3 style={{fontSize:20, marginBottom:4}}>Join Committees</h3>
+                <p className="text-sm text-muted mb-3">Build institutional power through the seniority system</p>
+                <div style={{display:'flex', gap:12, marginBottom:16, flexWrap:'wrap'}}>
+                  <div className="text-xs"><span className="comm-tier tier-1">Tier 1</span> Round 3+ · +8 PC</div>
+                  <div className="text-xs"><span className="comm-tier tier-2">Tier 2</span> Round 6+, PC≥5 · +12 PC</div>
+                  <div className="text-xs"><span className="comm-tier tier-3">Tier 3</span> Round 9+, PC≥15-25 · +20-30 PC</div>
                 </div>
-                
                 <div className="grid grid-2">
-                  {committeesList.map(comm => {
-                    const canJoin = !committees.includes(comm.name) && 
-                                   round >= comm.minRound && 
-                                   politicalCapital >= comm.minPC;
-                    const tierLabel = comm.tier === 3 ? '⭐ PRESTIGE' : 
-                                     comm.tier === 2 ? '🎖️ Important' : 
-                                     '📋 Regular';
-                    const tierColor = comm.tier === 3 ? '#8b5cf6' : 
-                                     comm.tier === 2 ? '#0ea5e9' : 
-                                     '#6b7280';
-                    
+                  {COMMITTEES.map(c => {
+                    const joined = committees.includes(c.name);
+                    const canJoin = !joined && round >= c.minRound && pc >= c.minPC;
+                    const locked = !joined && !canJoin;
                     return (
-                      <button key={comm.name} className="action-btn"
-                              disabled={actionsLeft <= 0 || !canJoin || committees.includes(comm.name)}
-                              onClick={() => handleCommittee(comm)}
-                              style={{ padding: '20px' }}>
-                        <div className="font-bold" style={{ fontSize: '17px' }}>{comm.name}</div>
-                        <div className="text-xs mb-2" style={{ color: tierColor }}>{tierLabel} (+{comm.pcGain} PC)</div>
-                        
-                        {committees.includes(comm.name) && (
-                          <span style={{ color: '#10b981', fontSize: '16px' }}>✔ Member</span>
-                        )}
-                        
-                        {!committees.includes(comm.name) && (
-                          <>
-                            {round < comm.minRound && (
-                              <span className="text-xs" style={{ color: '#ef4444' }}>
-                                Need Round {comm.minRound} (now: {round})
-                              </span>
-                            )}
-                            {round >= comm.minRound && politicalCapital < comm.minPC && (
-                              <span className="text-xs" style={{ color: '#ef4444' }}>
-                                Need PC ≥ {comm.minPC} (have: {politicalCapital})
-                              </span>
-                            )}
-                            {canJoin && (
-                              <span className="text-xs" style={{ color: '#10b981' }}>
-                                ✔ Eligible to join!
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </button>
+                      <div key={c.name}
+                        className={`comm-card ${joined ? 'joined' : ''} ${locked ? 'locked' : ''}`}
+                        onClick={() => !joined && handleCommittee(c)}>
+                        <span className={`comm-tier tier-${c.tier}`}>
+                          {c.tier === 3 ? '⭐ Prestige' : c.tier === 2 ? 'Important' : 'Regular'}
+                        </span>
+                        <div className="font-bold" style={{fontSize:15, marginTop:4}}>{c.name}</div>
+                        <div className="text-xs text-muted" style={{marginTop:2}}>+{c.pcGain} PC</div>
+                        {joined && <div style={{color:'var(--accent-green)', fontSize:13, fontWeight:600, marginTop:4}}>✓ Member</div>}
+                        {locked && round < c.minRound && <div className="text-xs" style={{color:'var(--accent-red)', marginTop:4}}>Need Round {c.minRound}</div>}
+                        {locked && round >= c.minRound && pc < c.minPC && <div className="text-xs" style={{color:'var(--accent-red)', marginTop:4}}>Need PC ≥ {c.minPC}</div>}
+                        {canJoin && !joined && <div className="text-xs" style={{color:'var(--accent-green)', marginTop:4}}>✓ Eligible</div>}
+                      </div>
                     );
                   })}
                 </div>
@@ -2272,94 +1552,121 @@
             </>
           )}
 
-          {/* Game Log */}
-          {gameLog.length > 0 && (
+          {/* DISTRICT INFO TAB */}
+          {location === 'info' && district && (
             <div className="card">
-              <h3>Recent Activity</h3>
-              {gameLog.map((log, i) => (
-                <div key={i} className={'log-item log-' + log.type}>
-                  Round {log.round}: {log.message}
+              <h3 style={{fontSize:20, marginBottom:16}}>District Profile: {district.name}</h3>
+              <div className="grid grid-2 mb-3">
+                <div className="stat-box">
+                  <div className="stat-label">Population</div>
+                  <div className="stat-value" style={{fontSize:22}}>{(district.demographics.population/1000).toFixed(0)}K</div>
+                </div>
+                <div className="stat-box">
+                  <div className="stat-label">Median Income</div>
+                  <div className="stat-value" style={{fontSize:22}}>${(district.demographics.medianIncome/1000).toFixed(0)}K</div>
+                </div>
+              </div>
+              <h4 style={{fontSize:15, color:'var(--text-muted)', marginBottom:8, marginTop:16}}>Demographics</h4>
+              <div className="grid grid-4 mb-3">
+                {Object.entries(district.demographics).filter(([k]) => !['medianIncome','population'].includes(k)).map(([k,v]) => (
+                  <div key={k} className="stat-box">
+                    <div className="stat-label">{k}</div>
+                    <div className="stat-value" style={{fontSize:20}}>{v}%</div>
+                  </div>
+                ))}
+              </div>
+              <h4 style={{fontSize:15, color:'var(--text-muted)', marginBottom:8}}>Key Industries</h4>
+              <div style={{display:'flex', gap:6, flexWrap:'wrap', marginBottom:16}}>
+                {district.industries.map(ind => (
+                  <span key={ind} className="badge" style={{background:'rgba(255,255,255,0.05)', color:'var(--text-secondary)'}}>{ind}</span>
+                ))}
+              </div>
+              <h4 style={{fontSize:15, color:'var(--text-muted)', marginBottom:8}}>Voting Record</h4>
+              {voteHist.length === 0 ? <p className="text-sm text-muted">No votes yet.</p> : (
+                <div>
+                  {voteHist.map((v,i) => (
+                    <div key={i} className="text-sm mb-1">
+                      <span className="font-mono text-xs text-muted">R{v.round}</span> {v.billName} — <span style={{color: v.withParty ? 'var(--accent-green)' : 'var(--accent-red)'}}>{v.withParty ? 'WITH' : 'AGAINST'}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <h4 style={{fontSize:15, color:'var(--text-muted)', marginBottom:8, marginTop:16}}>Committees Joined</h4>
+              {committees.length === 0 ? <p className="text-sm text-muted">None yet.</p> : (
+                <div style={{display:'flex', gap:6, flexWrap:'wrap'}}>
+                  {committees.map(c => <span key={c} className="badge" style={{background:'#dcfce7', color:'var(--accent-green)'}}>{c}</span>)}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* CHARACTERS TAB */}
+          {location === 'characters' && (
+            <div className="card">
+              <h3 style={{fontSize:20, marginBottom:16}}>Key Characters</h3>
+              {[
+                { initials:'PL', bg: district?.party === 'Democrat' ? 'var(--dem-blue)' : 'var(--rep-red)', name:'Party Leader',
+                  quote: pc > 10 ? '"Keep up the excellent work, Representative."' : pc < -10 ? '"Fall in line or face consequences."' : '"Stay loyal to the party."' },
+                { initials:'OPP', bg:'var(--accent-gold)', name:'Your Opponent',
+                  quote: approval < 45 ? '"I can win this seat!"' : '"The incumbent is tough to beat..."' },
+                { initials:'CON', bg:'var(--text-muted)', name:'Your Constituents',
+                  quote: approval > 60 ? '"We support our Representative!"' : approval > 40 ? '"Could be doing more for us..."' : '"Time for change!"' },
+                { initials:'MED', bg:'var(--accent-purple)', name:'Local Media',
+                  quote: casework > 8 ? '"Rep known for strong constituent service."' : '"New Rep still finding their footing."' },
+              ].map((ch,i) => (
+                <div key={i} style={{display:'flex', gap:14, padding:14, background:'var(--bg-surface)', borderRadius:'var(--radius-sm)', marginBottom:10, border:'1px solid var(--border)'}}>
+                  <div style={{width:48, height:48, borderRadius:'50%', background:ch.bg, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:14, color:'#fff', flexShrink:0}}>
+                    {ch.initials}
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm">{ch.name}</div>
+                    <div className="text-sm text-muted" style={{fontStyle:'italic'}}>{ch.quote}</div>
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* End Round Button */}
-          <div className="card">
-            <button className="btn btn-primary" style={{ width: '100%', fontSize: '18px', padding: '16px' }}
-                    disabled={actionsLeft > 0}
-                    onClick={endRound}>
-              {actionsLeft > 0 ? 'Complete ' + actionsLeft + ' more actions' : 'End Round →'}
+          {/* ACTIVITY LOG */}
+          {log.length > 0 && (
+            <div className="card" style={{padding:'16px 20px'}}>
+              <h4 style={{fontSize:15, color:'var(--text-muted)', marginBottom:10}}>Recent Activity</h4>
+              {log.slice(0,6).map((l,i) => (
+                <div key={i} className={`log-item log-${l.type}`}>
+                  <span className="font-mono text-xs" style={{opacity:0.6}}>R{l.round}</span> {l.msg}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* END ROUND BUTTON */}
+          <div className="card" style={{padding:16}}>
+            <button className="btn btn-primary w-full" style={{fontSize:16, padding:14}}
+              disabled={actions > 0}
+              onClick={endRound}>
+              {actions > 0 ? `Complete ${actions} more action${actions>1?'s':''}` : round >= 12 ? 'Face Reelection →' : `End Round → Round ${round+1}`}
             </button>
-            {actionsLeft === 0 && (
-              <p className="text-center text-sm text-gray" style={{ marginTop: '10px' }}>
-                All actions completed! Click to advance to Round {round + 1}
-                {round === 6 && ' (Midterm elections!)'}
+            {actions === 0 && round < 12 && (
+              <p className="text-center text-xs text-muted mt-2">
+                All actions used. {round === 5 && '⚡ Midterm elections next round!'} {round === 11 && '🗳️ Final round before election!'}
               </p>
             )}
           </div>
 
-          {/* Control Panel */}
-          <div className="control-panel">
-            {showSaveLoad && (
-              <div className="save-load-panel">
-                <h4 style={{ marginBottom: '12px' }}>Save/Load Game</h4>
-                {savedGames.map(save => (
-                  <div key={save.slot} className="save-slot">
-                    <span>
-                      Slot {save.slot}
-                      {save.timestamp && <span className="text-xs"> ({new Date(save.timestamp).toLocaleDateString()})</span>}
-                    </span>
-                    <div>
-                      <button className="btn btn-primary" onClick={() => saveGame(save.slot)} style={{ marginRight: '4px' }}>
-                        Save
-                      </button>
-                      {save.data && (
-                        <>
-                          <button className="btn btn-success" onClick={() => loadGame(save.slot)}>
-                            Load
-                          </button>
-                          <button className="btn btn-danger" onClick={() => deleteGame(save.slot)}>
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            <button className="control-btn" onClick={() => setShowSaveLoad(!showSaveLoad)}>
-              💾 Save/Load
-            </button>
-            
-            <button className="control-btn" onClick={undoLastAction} 
-                    disabled={!lastAction || actionsLeft === 3}>
-              ↩️ Undo Last
-            </button>
-            
-            <button className="control-btn" onClick={resetRound}>
-              🔄 Reset Round
-            </button>
-            
-            <button className="control-btn" onClick={resetGame}
-                    style={{ background: 'rgba(239, 68, 68, 0.9)' }}>
-              🔴 Reset Game
-            </button>
+          {/* CONTROL PANEL */}
+          <div className="ctrl-panel">
+            <button className="ctrl-btn" onClick={undoLast} disabled={!lastState || actions >= 3}>↩ Undo</button>
+            <button className="ctrl-btn danger" onClick={() => { if (confirm('Reset this round?')) { setActions(3); setVotedBills([]); setSelectedAd(null); setSelectedIssue(null); } }}>🔄 Reset Round</button>
+            <button className="ctrl-btn danger" onClick={() => { if (confirm('Restart the entire game?')) window.location.reload(); }}>🗑️ New Game</button>
           </div>
 
-          {/* Modal for explanations */}
-          {showModal && (
-            <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          {/* MODAL */}
+          {modal && (
+            <div className="modal-overlay" onClick={() => setModal(null)}>
               <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h2>{modalContent.title}</h2>
-                <div style={{ whiteSpace: 'pre-wrap', marginTop: '20px', marginBottom: '28px', lineHeight: '1.6' }}>
-                  {modalContent.message}
-                </div>
-                <button className="btn btn-primary" onClick={() => setShowModal(false)} style={{ width: '100%' }}>
-                  Close
-                </button>
+                <h2>{modal.title}</h2>
+                <div style={{whiteSpace:'pre-wrap', marginBottom:24}}>{modal.body}</div>
+                <button className="btn btn-primary w-full" onClick={() => setModal(null)}>Close</button>
               </div>
             </div>
           )}
@@ -2368,7 +1675,7 @@
     }
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    root.render(React.createElement(App));
   </script>
 </body>
 </html>
