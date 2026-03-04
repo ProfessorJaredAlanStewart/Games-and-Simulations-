@@ -25,6 +25,7 @@ No logins. No installations. No cost. Just open and play.
 | [Texas Government Quiz Builder](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Texas%20Government%20Quiz%20Builder.html) | Texas | Build and take custom quizzes on Texas government topics. Great for exam prep or quick knowledge checks. |
 | [Texas Jeopardy — Classroom Edition](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Texas%20Jeopardy%20Classroom%20Edition.html) | Texas | Full Jeopardy-style game board with Texas government categories for team-based review sessions. |
 | [Wheel of Fortune — Texas Government](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Wheel_of_Fortune_Texas_Government.html) | Texas | Spin the wheel and solve Texas government–themed puzzles. A fun, fast-paced review of key terms and concepts. |
+| [Wheel of Fortune — Federal Government](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Wheel_of_Fortune_Federal_Government.html) | Federal | Spin the wheel and solve federal government–themed puzzles covering the Constitution, Congress, the presidency, and civil liberties. |
 
 ## 🛠 Instructor Tools
 
