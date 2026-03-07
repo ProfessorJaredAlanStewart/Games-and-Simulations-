@@ -40,6 +40,14 @@ No logins. No installations. No cost. Just open and play.
 | [Federal Government Trailblazer Trek](https://professorjaredalanstewart.github.io/tcc-govt-modules/) | Federal | Interactive learning trek through American federal government — the Constitution, branches of government, civil liberties, and public policy. |
 | [Texas Government Trailblazer Trek](https://professorjaredalanstewart.github.io/texas-govt-modules/) | Texas | Interactive learning trek through Texas government — the Texas Constitution, the legislature, the executive branch, and local government. |
 
+## 🎲 Bonus — Just for Fun
+
+> *Not a classroom resource. You've been warned.*
+
+| Resource | Description |
+|----------|-------------|
+| [Wheel of Levi](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Wheel_of_Levi.html) | A fun, wacky custom Wheel of Fortune–style game made for a very specific kid. Not educational. Not serious. Purely chaotic. |
+
 ---
 
 ## How to Use
