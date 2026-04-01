@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCC Syllabus Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{--tcc-navy:#003C5A;--tcc-blue:#006184;--tcc-teal:#00A9A5;--tcc-green:#7AB648;--tcc-mint:#E8F6F5;--tcc-light:#F4F9FB;--text-primary:#2C3E50;--text-secondary:#5A6B7D;--text-muted:#8A96A3;--border:#D8E1E8;--white:#FFF;--danger:#E74C3C;--warning:#F39C12;--success:#27AE60;--shadow-sm:0 1px 3px rgba(0,60,90,.08);--shadow-md:0 4px 12px rgba(0,60,90,.1);--shadow-lg:0 8px 30px rgba(0,60,90,.12);--radius:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',-apple-system,sans-serif;background:var(--tcc-light);color:var(--text-primary);line-height:1.6;font-size:17px;min-height:100vh}
+.app-header{background:linear-gradient(135deg,var(--tcc-navy) 0%,var(--tcc-blue) 60%,var(--tcc-teal) 100%);color:#fff;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,60,90,.25)}
+.header-inner{max-width:1000px;margin:0 auto;padding:18px 30px;display:flex;align-items:center;justify-content:space-between}
+.header-brand{display:flex;align-items:center;gap:16px}
+.tcc-logo-mark{font-family:'Source Sans 3',sans-serif;font-weight:900;font-size:28px;letter-spacing:3px;background:#fff;color:var(--tcc-navy);padding:4px 12px;border-radius:4px;line-height:1}
+.header-title{font-size:20px;font-weight:600;opacity:.95}
+.header-subtitle{font-size:13px;font-weight:300;opacity:.7;letter-spacing:.05em;text-transform:uppercase}
+.stepper-bar{background:rgba(0,0,0,.15);padding:12px 30px}
+.stepper-bar-inner{max-width:1000px;margin:0 auto}
+.stepper-track{display:flex;gap:4px;align-items:center}
+.step-pill{flex:1;height:7px;border-radius:3px;background:rgba(255,255,255,.2);transition:.4s;cursor:pointer}
+.step-pill.active{background:var(--tcc-green)}.step-pill.completed{background:rgba(255,255,255,.6)}
+.step-label-header{color:rgba(255,255,255,.9);font-size:15px;font-weight:600;white-space:nowrap}
+.main-container{max-width:860px;margin:0 auto;padding:30px 20px 60px}
+
+/* LANDING */
+.landing-screen{text-align:center;padding:50px 20px}
+.landing-title{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;color:var(--tcc-navy);margin-bottom:10px}
+.landing-desc{font-size:19px;color:var(--text-secondary);margin-bottom:40px;max-width:580px;margin-left:auto;margin-right:auto}
+.landing-options{display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.landing-card{background:#fff;border:2px solid var(--border);border-radius:14px;padding:36px 30px;width:330px;cursor:pointer;transition:.25s;text-align:center}
+.landing-card:hover{border-color:var(--tcc-teal);box-shadow:var(--shadow-lg);transform:translateY(-3px)}
+.landing-card .lc-icon{font-size:52px;margin-bottom:14px}
+.landing-card .lc-title{font-size:21px;font-weight:700;color:var(--tcc-navy);margin-bottom:8px}
+.landing-card .lc-desc{font-size:16px;color:var(--text-secondary);line-height:1.5}
+
+/* IMPORT */
+.import-screen{display:none}.import-screen.active{display:block}
+.upload-zone{background:#fff;border:3px dashed var(--border);border-radius:14px;padding:50px 30px;text-align:center;cursor:pointer;transition:.25s;margin-bottom:24px}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--tcc-teal);background:var(--tcc-mint)}
+.upload-zone .uz-icon{font-size:52px;margin-bottom:10px}
+.upload-zone .uz-text{font-size:20px;font-weight:600;color:var(--tcc-navy);margin-bottom:6px}
+.upload-zone .uz-sub{font-size:16px;color:var(--text-muted)}
+.import-status{background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:28px;display:none;text-align:center}
+.import-status.active{display:block}
+.spinner{display:inline-block;width:36px;height:36px;border:4px solid var(--border);border-top-color:var(--tcc-teal);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status-text{font-size:18px;color:var(--tcc-navy);font-weight:600}
+.status-sub{font-size:15px;color:var(--text-muted);margin-top:4px}
+.import-error{background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radius);padding:20px;color:var(--danger);display:none;margin-top:16px;font-size:16px}
+.import-error.active{display:block}
+
+/* FORM */
+.form-step{display:none;animation:fadeSlide .35s ease}.form-step.active{display:block}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.step-header{margin-bottom:28px}
+.step-number{font-size:15px;font-weight:700;color:var(--tcc-teal);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.step-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--tcc-navy);line-height:1.2}
+.step-desc{color:var(--text-secondary);font-size:17px;margin-top:6px}
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:28px;margin-bottom:20px}
+.card-title{font-size:16px;font-weight:700;color:var(--tcc-navy);margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--tcc-mint);text-transform:uppercase;letter-spacing:.04em}
+.field-row{display:grid;gap:16px;margin-bottom:16px}
+.field-row.cols-2{grid-template-columns:1fr 1fr}.field-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:650px){.field-row.cols-2,.field-row.cols-3{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column}
+.field label{font-size:14px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.field label .req{color:var(--danger);margin-left:2px}
+.field input,.field select,.field textarea{font-family:'Source Sans 3',sans-serif;font-size:17px;padding:12px 14px;border:1.5px solid var(--border);border-radius:7px;color:var(--text-primary);background:var(--white);transition:border-color .2s,box-shadow .2s;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--tcc-teal);box-shadow:0 0 0 3px rgba(0,169,165,.12)}
+.field textarea{resize:vertical;min-height:110px;line-height:1.5}
+.field .hint{font-size:14px;color:var(--text-muted);margin-top:4px}
+.field input.auto-filled,.field select.auto-filled,.field textarea.auto-filled{background:#F0FFF4;border-color:var(--success)}
+
+.hours-table{width:100%;border-collapse:collapse;font-size:16px}
+.hours-table th{background:var(--tcc-mint);color:var(--tcc-navy);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;padding:9px 10px;text-align:left;border-bottom:2px solid var(--tcc-teal)}
+.hours-table td{padding:5px 6px;border-bottom:1px solid #EEF2F5}
+.hours-table input{font-family:'Source Sans 3',sans-serif;font-size:15px;padding:8px;border:1.5px solid var(--border);border-radius:5px;width:100%;outline:none}
+.hours-table input:focus{border-color:var(--tcc-teal)}
+.hours-table .day-label{font-weight:600;color:var(--tcc-navy);width:55px;font-size:16px}
+
+.dynamic-list-item{background:var(--tcc-light);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
+.dynamic-list-item .item-content{flex:1}
+.dynamic-list-item .remove-btn{background:none;border:none;color:var(--danger);cursor:pointer;font-size:22px;padding:4px;opacity:.5;transition:opacity .2s;flex-shrink:0;margin-top:2px}
+.dynamic-list-item .remove-btn:hover{opacity:1}
+.add-btn{display:inline-flex;align-items:center;gap:6px;background:var(--tcc-mint);color:var(--tcc-teal);border:1.5px dashed var(--tcc-teal);border-radius:8px;padding:12px 20px;font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:.2s;margin-top:8px}
+.add-btn:hover{background:var(--tcc-teal);color:#fff;border-color:var(--tcc-teal)}
+.checkbox-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer}
+.checkbox-row input[type="checkbox"]{width:22px;height:22px;accent-color:var(--tcc-teal);cursor:pointer}
+.checkbox-row label{font-size:16px;color:var(--text-primary);cursor:pointer;font-weight:500}
+
+.nav-bar{display:flex;justify-content:space-between;align-items:center;margin-top:30px;padding-top:20px;border-top:1px solid var(--border)}
+.btn{font-family:'Source Sans 3',sans-serif;font-size:17px;font-weight:600;padding:13px 28px;border-radius:8px;border:none;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px}
+.btn-secondary{background:var(--white);color:var(--text-secondary);border:1.5px solid var(--border)}
+.btn-secondary:hover{border-color:var(--tcc-teal);color:var(--tcc-teal)}
+.btn-primary{background:linear-gradient(135deg,var(--tcc-blue),var(--tcc-teal));color:#fff;box-shadow:0 2px 8px rgba(0,97,132,.3)}
+.btn-primary:hover{box-shadow:0 4px 16px rgba(0,97,132,.4);transform:translateY(-1px)}
+.btn-success{background:linear-gradient(135deg,var(--tcc-green),var(--success));color:#fff;box-shadow:0 2px 8px rgba(122,182,72,.3)}
+
+/* PREVIEW */
+#previewContainer{display:none}#previewContainer.active{display:block}
+.preview-toolbar{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-md);border:1px solid var(--border);padding:16px 24px;margin-bottom:24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:82px;z-index:50}
+.preview-toolbar .btn{font-size:15px;padding:11px 20px}
+.toolbar-spacer{flex:1}
+.copy-feedback{font-size:15px;color:var(--success);font-weight:600;opacity:0;transition:opacity .3s}
+.copy-feedback.show{opacity:1}
+.syllabus-output{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-lg);border:1px solid var(--border);overflow:hidden}
+.syllabus-content{padding:48px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#222}
+.syllabus-content .syl-header{text-align:center;margin-bottom:30px;padding-bottom:20px;border-bottom:3px solid #006184}
+.syllabus-content .syl-header .college-name{font-family:'Source Sans 3',Arial,sans-serif;font-size:24px;font-weight:700;color:#006184;letter-spacing:.05em;text-transform:uppercase;margin-bottom:2px}
+.syllabus-content .syl-header .doc-type{font-size:15px;color:#5A6B7D;font-style:italic;margin-bottom:12px}
+.syllabus-content .syl-header .course-title-block{font-family:'Source Sans 3',Arial,sans-serif;font-size:28px;font-weight:700;color:#003C5A;margin:8px 0 4px}
+.syllabus-content .syl-header .section-line{font-size:16px;color:#5A6B7D}
+.syllabus-content .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 30px;margin-bottom:20px;padding:18px 22px;background:#F4F9FB;border-radius:6px;border-left:4px solid #00A9A5}
+.syllabus-content .info-item{font-size:15px}
+.syllabus-content .info-item strong{color:#003C5A}
+.syllabus-content .dept-contacts{display:grid;grid-template-columns:1fr 1fr;gap:7px 30px;margin-bottom:24px;padding:16px 22px;background:#FFF9F0;border-radius:6px;border-left:4px solid #F39C12}
+.syllabus-content .dept-contacts .contact-header{grid-column:span 2;font-family:'Source Sans 3',Arial,sans-serif;font-size:14px;font-weight:700;color:#003C5A;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.syllabus-content .dept-contacts .info-item{font-size:14.5px}
+.syllabus-content .syl-section{margin-bottom:24px}
+.syllabus-content .syl-section-title{font-family:'Source Sans 3',Arial,sans-serif;font-size:19px;font-weight:700;color:#006184;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #E8F6F5;text-transform:uppercase;letter-spacing:.03em}
+.syllabus-content .syl-subsection-title{font-family:'Source Sans 3',Arial,sans-serif;font-size:16px;font-weight:700;color:#003C5A;margin:14px 0 6px}
+.syllabus-content p{margin-bottom:10px}
+.syllabus-content ul,.syllabus-content ol{margin:8px 0 12px 24px}
+.syllabus-content li{margin-bottom:5px}
+.syllabus-content .hours-output-table{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:15px}
+.syllabus-content .hours-output-table th{background:#006184;color:#fff;font-family:'Source Sans 3',Arial,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding:9px 14px;text-align:left}
+.syllabus-content .hours-output-table td{padding:8px 14px;border-bottom:1px solid #E8F6F5}
+.syllabus-content .hours-output-table tr:nth-child(even){background:#FAFCFD}
+.syllabus-content .grade-table{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:15px}
+.syllabus-content .grade-table th{background:#006184;color:#fff;font-family:'Source Sans 3',Arial,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding:9px 14px;text-align:left}
+.syllabus-content .grade-table td{padding:9px 14px;border-bottom:1px solid #E8F6F5}
+.syllabus-content .grade-table tr:nth-child(even){background:#FAFCFD}
+.syllabus-content .policy-section{margin-bottom:18px;padding:16px 20px;background:#FAFCFD;border-left:3px solid #D8E1E8;border-radius:0 6px 6px 0}
+.syllabus-content .policy-section .policy-title{font-family:'Source Sans 3',Arial,sans-serif;font-size:16px;font-weight:700;color:#006184;margin-bottom:6px}
+.syllabus-content .policy-section p{font-size:14px;line-height:1.6;color:#444;margin-bottom:6px}
+.syllabus-content .policy-section a{color:#006184}
+.syllabus-content .syl-footer{text-align:center;margin-top:30px;padding-top:16px;border-top:2px solid #E8F6F5;font-size:13px;color:#8A96A3}
+.missing-badge{display:inline-block;background:#FEF3CD;color:#856404;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:4px;margin-left:8px}
+.icr-steps{display:flex;flex-direction:column;gap:8px}
+.icr-step{display:flex;align-items:center;gap:12px;font-size:16px;color:var(--text-primary);line-height:1.4}
+.icr-step-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--tcc-teal);color:#fff;border-radius:50%;font-size:14px;font-weight:700;flex-shrink:0}
+
+@media print{
+body{background:#fff}
+.app-header,.preview-toolbar,.stepper-bar{display:none!important}
+.main-container{padding:0;max-width:100%}
+.syllabus-output{box-shadow:none;border:none}
+.syllabus-content{padding:24px}
+.syllabus-content .policy-section,.syllabus-content .syl-section{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="app-header">
+<div class="header-inner"><div class="header-brand"><div class="tcc-logo-mark">TCC</div><div><div class="header-title">Syllabus Generator</div><div class="header-subtitle">Tarrant County College District</div></div></div><div id="headerStepLabel" class="step-label-header"></div></div>
+<div class="stepper-bar" id="stepperBar" style="display:none"><div class="stepper-bar-inner"><div class="stepper-track" id="stepperTrack"></div></div></div>
+</header>
+
+<!-- LANDING -->
+<div class="main-container" id="landingScreen">
+<div class="landing-screen">
+<div class="landing-title">TCC Syllabus Generator</div>
+<div class="landing-desc">Create a professional, Canvas-ready syllabus with all required TCC District policies automatically included.</div>
+<div class="landing-options">
+<div class="landing-card" onclick="startFromScratch()"><div class="lc-icon">📝</div><div class="lc-title">Build from Scratch</div><div class="lc-desc">Enter your course information step-by-step using the guided form.</div></div>
+<div class="landing-card" onclick="startImport()"><div class="lc-icon">📄</div><div class="lc-title">Import from ICR</div><div class="lc-desc">Upload your existing ICR PDF and we'll auto-fill the form. Just review, add your Chair & Dean info, and generate.</div></div>
+</div>
+</div>
+</div>
+
+<!-- IMPORT SCREEN -->
+<div class="main-container import-screen" id="importScreen">
+<div class="step-header"><div class="step-number">Import ICR</div><div class="step-title">Upload Your ICR PDF</div><div class="step-desc">We'll extract your course information and pre-fill the form. You'll review everything before generating.</div></div>
+
+<div class="card" style="border-left:4px solid var(--tcc-teal);background:linear-gradient(135deg,#F0FAFA 0%,#fff 100%);margin-bottom:24px">
+<div style="display:flex;align-items:flex-start;gap:14px">
+<div style="font-size:32px;flex-shrink:0;margin-top:2px">📥</div>
+<div style="flex:1">
+<div style="font-size:18px;font-weight:700;color:var(--tcc-navy);margin-bottom:10px">How to Download Your ICR</div>
+<div class="icr-steps">
+<div class="icr-step"><span class="icr-step-num">1</span><span>Go to <a href="https://hello.tccd.edu/" target="_blank" style="color:var(--tcc-blue);font-weight:600">hello.tccd.edu</a></span></div>
+<div class="icr-step"><span class="icr-step-num">2</span><span>Under <strong>"Instructional Resources"</strong>, choose <strong>Schedule - ICR</strong></span></div>
+<div class="icr-step"><span class="icr-step-num">3</span><span>Choose your <strong>Semester</strong></span></div>
+<div class="icr-step"><span class="icr-step-num">4</span><span>Under the <strong>"Class Req"</strong> column, select the ICR for your section</span></div>
+<div class="icr-step"><span class="icr-step-num">5</span><span>Click <strong>"View ICR"</strong> in the top right corner</span></div>
+<div class="icr-step"><span class="icr-step-num">6</span><span><strong>Save the file</strong> to your computer, then upload it below</span></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="upload-zone" id="uploadZone" onclick="document.getElementById('icrFileInput').click()">
+<div class="uz-icon">📁</div><div class="uz-text">Click to upload your ICR</div><div class="uz-sub">PDF file — drag and drop also works (no .pdf extension needed)</div>
+<input type="file" id="icrFileInput" accept=".pdf,application/pdf,*/*" style="display:none" onchange="handleICRUpload(event)">
+</div>
+<div class="import-status" id="importStatus"><div class="spinner"></div><div class="status-text" id="importStatusText">Reading PDF...</div><div class="status-sub" id="importStatusSub">This usually takes about 15 seconds</div></div>
+<div class="import-error" id="importError"></div>
+<div class="nav-bar"><button class="btn btn-secondary" onclick="backToLanding()">← Back</button><div></div></div>
+</div>
+
+<!-- FORM -->
+<div class="main-container" id="formContainer" style="display:none">
+
+<!-- STEP 1 -->
+<div class="form-step active" data-step="1">
+<div class="step-header"><div class="step-number">Step 1 of 7</div><div class="step-title">Course Information</div><div class="step-desc">Basic course identifiers and term details.</div></div>
+<div class="card"><div class="card-title">Course Details</div>
+<div class="field-row cols-3">
+<div class="field"><label>Prefix <span class="req">*</span></label><select id="coursePrefix"><option value="">Select…</option><option>GOVT</option><option>HIST</option><option>PHIL</option><option>PSYC</option><option>SOCI</option><option>ECON</option><option>EDUC</option><option>GEOG</option><option>ENGL</option><option>MATH</option><option>BIOL</option><option>CHEM</option><option>PHYS</option><option>SPCH</option><option>SPAN</option><option>KINE</option><option>ACCT</option><option>BMGT</option><option>COSC</option><option>CRIJ</option><option>DRAM</option><option>MUSI</option><option>RNSG</option><option>ARTS</option></select></div>
+<div class="field"><label>Course # <span class="req">*</span></label><input type="text" id="courseNumber" placeholder="e.g. 2305" maxlength="6"></div>
+<div class="field"><label>Section #</label><input type="text" id="sectionNumber" placeholder="e.g. 57005" maxlength="10"></div>
+</div>
+<div class="field-row cols-2">
+<div class="field"><label>Course Title <span class="req">*</span></label><input type="text" id="courseTitle" placeholder="e.g. Federal Government"></div>
+<div class="field"><label>CRN / Synonym</label><input type="text" id="courseCRN" placeholder="e.g. 57005"></div>
+</div></div>
+
+<div class="card"><div class="card-title">Term & Dates</div>
+<div class="field-row cols-2">
+<div class="field"><label>Term <span class="req">*</span></label><select id="courseTerm"><option value="">Select…</option><option>2025 Fall</option><option>2025 Wintermester</option><option>2026 Spring</option><option>2026 Maymester</option><option>2026 Summer I</option><option>2026 Summer II</option><option>2026 Fall</option><option>2026 Wintermester</option><option>2027 Spring</option></select></div>
+<div class="field"><label>Modality <span class="req">*</span></label><select id="courseModality"><option value="">Select…</option><option>Face-to-Face</option><option>Online (Asynchronous)</option><option>Online (Synchronous)</option><option>Hybrid</option><option>HyFlex</option></select></div>
+</div>
+<div class="field-row cols-3">
+<div class="field"><label>Official Day of Record</label><input type="date" id="officialDayRecord"></div>
+<div class="field"><label>Last Day to Drop</label><input type="date" id="lastDayDrop"></div>
+<div class="field"><label>Eval Window</label><input type="text" id="evalWindow" placeholder="01/28/26 - 03/13/26"></div>
+</div></div>
+
+<div class="card"><div class="card-title">Meeting Schedule</div>
+<div class="field"><label>Days, Times & Location</label><textarea id="meetingSchedule" rows="3" placeholder="e.g. Monday/Wednesday 11:00 AM - 12:20 PM, Room TREF 3202&#10;Or: Online - Asynchronous"></textarea></div></div>
+<div class="nav-bar"><button class="btn btn-secondary" onclick="backToLanding()">← Start Over</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
+</div>
+
+<!-- STEP 2 -->
+<div class="form-step" data-step="2">
+<div class="step-header"><div class="step-number">Step 2 of 7</div><div class="step-title">Instructor & Department</div><div class="step-desc">Contact details, office hours, and department leadership.</div></div>
+<div class="card"><div class="card-title">Instructor Contact</div>
+<div class="field-row cols-2"><div class="field"><label>Name <span class="req">*</span></label><input type="text" id="instrName" placeholder="e.g. Dr. Jane Smith"></div><div class="field"><label>Office</label><input type="text" id="instrOffice" placeholder="e.g. TR TREF 5224A"></div></div>
+<div class="field-row cols-2"><div class="field"><label>Phone</label><input type="tel" id="instrPhone" placeholder="817-515-1354"></div><div class="field"><label>Email <span class="req">*</span></label><input type="email" id="instrEmail" placeholder="name@tccd.edu"></div></div>
+<div class="field"><label>Preferred Contact / Response Time</label><input type="text" id="instrContact" placeholder="Email is best. I respond within 24 hours on weekdays."></div></div>
+
+<div class="card" style="border-left:3px solid var(--warning)"><div class="card-title">Department Leadership <span class="missing-badge" id="deptBadge">Required for all syllabi</span></div>
+<p style="font-size:15px;color:var(--text-secondary);margin-bottom:16px;">Students need to know who to contact if they have an issue beyond the instructor. This appears near the top of every syllabus.</p>
+<div class="field-row cols-2"><div class="field"><label>Department Chair Name <span class="req">*</span></label><input type="text" id="chairName" placeholder="e.g. Prof. Jared Stewart"></div><div class="field"><label>Chair Email <span class="req">*</span></label><input type="email" id="chairEmail" placeholder="jared.stewart@tccd.edu"></div></div>
+<div class="field-row cols-2"><div class="field"><label>Division Dean Name <span class="req">*</span></label><input type="text" id="deanName" placeholder="e.g. Dr. Name Here"></div><div class="field"><label>Dean Email <span class="req">*</span></label><input type="email" id="deanEmail" placeholder="name@tccd.edu"></div></div></div>
+
+<div class="card"><div class="card-title">Student Support Hours</div>
+<p style="font-size:15px;color:var(--text-muted);margin-bottom:14px">Enter your availability. Leave blank for days you're unavailable.</p>
+<table class="hours-table"><thead><tr><th>Day</th><th>Start</th><th>End</th><th>Start</th><th>End</th><th>Start</th><th>End</th></tr></thead><tbody>
+<tr><td class="day-label">Mon</td><td><input id="hrs_mon_s1" placeholder="9:00 AM"></td><td><input id="hrs_mon_e1" placeholder="2:30 PM"></td><td><input id="hrs_mon_s2"></td><td><input id="hrs_mon_e2"></td><td><input id="hrs_mon_s3"></td><td><input id="hrs_mon_e3"></td></tr>
+<tr><td class="day-label">Tue</td><td><input id="hrs_tue_s1"></td><td><input id="hrs_tue_e1"></td><td><input id="hrs_tue_s2"></td><td><input id="hrs_tue_e2"></td><td><input id="hrs_tue_s3"></td><td><input id="hrs_tue_e3"></td></tr>
+<tr><td class="day-label">Wed</td><td><input id="hrs_wed_s1"></td><td><input id="hrs_wed_e1"></td><td><input id="hrs_wed_s2"></td><td><input id="hrs_wed_e2"></td><td><input id="hrs_wed_s3"></td><td><input id="hrs_wed_e3"></td></tr>
+<tr><td class="day-label">Thu</td><td><input id="hrs_thu_s1"></td><td><input id="hrs_thu_e1"></td><td><input id="hrs_thu_s2"></td><td><input id="hrs_thu_e2"></td><td><input id="hrs_thu_s3"></td><td><input id="hrs_thu_e3"></td></tr>
+<tr><td class="day-label">Fri</td><td><input id="hrs_fri_s1"></td><td><input id="hrs_fri_e1"></td><td><input id="hrs_fri_s2"></td><td><input id="hrs_fri_e2"></td><td><input id="hrs_fri_s3"></td><td><input id="hrs_fri_e3"></td></tr>
+<tr><td class="day-label">Sat</td><td><input id="hrs_sat_s1"></td><td><input id="hrs_sat_e1"></td><td><input id="hrs_sat_s2"></td><td><input id="hrs_sat_e2"></td><td><input id="hrs_sat_s3"></td><td><input id="hrs_sat_e3"></td></tr>
+<tr><td class="day-label">Sun</td><td><input id="hrs_sun_s1"></td><td><input id="hrs_sun_e1"></td><td><input id="hrs_sun_s2"></td><td><input id="hrs_sun_e2"></td><td><input id="hrs_sun_s3"></td><td><input id="hrs_sun_e3"></td></tr>
+</tbody></table>
+<div class="field" style="margin-top:14px"><label>Additional Hours Notes</label><input type="text" id="hoursNotes" placeholder="e.g. Also by appointment via email."></div></div>
+<div class="nav-bar"><button class="btn btn-secondary" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
+</div>
+
+<!-- STEP 3 -->
+<div class="form-step" data-step="3">
+<div class="step-header"><div class="step-number">Step 3 of 7</div><div class="step-title">Textbooks & Materials</div><div class="step-desc">Required and recommended course materials.</div></div>
+<div class="card"><div class="card-title">Textbooks</div>
+<div id="textbookList"><div class="dynamic-list-item"><div class="item-content"><div class="field-row cols-2" style="margin-bottom:8px"><div class="field"><label>Title</label><input type="text" class="tb-title" placeholder="e.g. We the People (2025)"></div><div class="field"><label>Author</label><input type="text" class="tb-author" placeholder="Thomas Patterson"></div></div><div class="field-row cols-2"><div class="field"><label>ISBN</label><input type="text" class="tb-isbn"></div><div class="field"><label>Publisher / Edition</label><input type="text" class="tb-pub"></div></div></div><button class="remove-btn" onclick="removeItem(this)">✕</button></div></div>
+<button class="add-btn" onclick="addTextbook()">+ Add Another Textbook</button></div>
+<div class="card"><div class="card-title">Special Materials</div>
+<div class="checkbox-row"><input type="checkbox" id="tccPlus"><label for="tccPlus">This course uses <strong>TCC Plus</strong> (Inclusive Access)</label></div>
+<div class="field"><label>Additional Materials</label><textarea id="specialMaterials" rows="4" placeholder="e.g. Access to Connect, calculator, reliable internet"></textarea></div></div>
+<div class="nav-bar"><button class="btn btn-secondary" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
+</div>
+
+<!-- STEP 4 -->
+<div class="form-step" data-step="4">
+<div class="step-header"><div class="step-number">Step 4 of 7</div><div class="step-title">Course Focus & Objectives</div><div class="step-desc">Describe your course and what students will learn.</div></div>
+<div class="card"><div class="card-title">Course Description</div>
+<div class="field"><label>Description / Focus</label><textarea id="courseDescription" rows="5" placeholder="Overview of what the course covers."></textarea></div></div>
+<div class="card"><div class="card-title">Learning Objectives</div>
+<div class="field"><label>Course Learning Objectives</label><textarea id="learningObjectives" rows="8" placeholder="One objective per line."></textarea><div class="hint">One per line. They'll become a bulleted list.</div></div></div>
+<div class="nav-bar"><button class="btn btn-secondary" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
+</div>
+
+<!-- STEP 5 -->
+<div class="form-step" data-step="5">
+<div class="step-header"><div class="step-number">Step 5 of 7</div><div class="step-title">Assignments & Grading</div><div class="step-desc">Grade components, scale, and criteria.</div></div>
+<div class="card"><div class="card-title">Graded Components</div>
+<div id="gradeComponentsList"><div class="dynamic-list-item"><div class="item-content"><div class="field-row cols-3"><div class="field" style="grid-column:span 2"><label>Component</label><input type="text" class="gc-name" placeholder="e.g. Exams"></div><div class="field"><label>Weight (%)</label><input type="number" class="gc-weight" placeholder="40" min="0" max="100"></div></div><div class="field" style="margin-top:8px"><label>Details</label><input type="text" class="gc-details" placeholder="e.g. 3 exams, lowest dropped"></div></div><button class="remove-btn" onclick="removeItem(this)">✕</button></div></div>
+<button class="add-btn" onclick="addGradeComponent()">+ Add Component</button></div>
+<div class="card"><div class="card-title">Grading Scale</div>
+<div class="field"><label>Scale</label><select id="gradingScale"><option value="standard">Standard: A=90-100, B=80-89, C=70-79, D=60-69, F=below 60</option><option value="custom">Custom (enter below)</option></select></div>
+<div class="field" id="customScaleField" style="display:none;margin-top:12px"><label>Custom Scale</label><textarea id="customScale" rows="4"></textarea></div></div>
+<div class="card"><div class="card-title">Grading Criteria</div>
+<div class="field"><label>Criteria / Late Work / Make-Up</label><textarea id="gradingCriteria" rows="5" placeholder="How is work evaluated? Late policy?"></textarea></div></div>
+<div class="nav-bar"><button class="btn btn-secondary" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
+</div>
+
+<!-- STEP 6 -->
+<div class="form-step" data-step="6">
+<div class="step-header"><div class="step-number">Step 6 of 7</div><div class="step-title">Schedule & Additional</div><div class="step-desc">Course schedule and instructor policies.</div></div>
+<div class="card"><div class="card-title">Course Schedule</div>
+<div class="field"><label>Schedule / Key Dates</label><textarea id="courseSchedule" rows="8" placeholder="Week-by-week outline or 'See Canvas.'"></textarea></div></div>
+<div class="card"><div class="card-title">Additional Information</div>
+<div class="field"><label>Additional Info</label><textarea id="additionalInfo" rows="6" placeholder="Special projects, tech requirements, etc."></textarea></div></div>
+<div class="card"><div class="card-title">Instructor Policies</div>
+<div class="field"><label>Attendance (Instructor-Specific)</label><textarea id="attendancePolicy" rows="4" placeholder="Beyond TCC default. Leave blank for default only."></textarea></div>
+<div class="field" style="margin-top:14px"><label>Academic Integrity (Instructor-Specific)</label><textarea id="integrityPolicy" rows="4" placeholder="Leave blank for default only."></textarea></div>
+<div class="field" style="margin-top:14px"><label>Communication Policy</label><textarea id="commPolicy" rows="3" placeholder="e.g. I respond within 24 hours on business days."></textarea></div></div>
+<div class="nav-bar"><button class="btn btn-secondary" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
+</div>
+
+<!-- STEP 7 -->
+<div class="form-step" data-step="7">
+<div class="step-header"><div class="step-number">Step 7 of 7</div><div class="step-title">Review & Generate</div><div class="step-desc">Review and generate your syllabus.</div></div>
+<div class="card"><div class="card-title">District Policies (Auto-Included)</div>
+<p style="font-size:15px;color:var(--text-secondary);margin-bottom:12px">These are automatically appended to every syllabus.</p>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div class="checkbox-row"><input type="checkbox" checked disabled><label>Student Accessibility Resources (SAR/ADA)</label></div>
+<div class="checkbox-row"><input type="checkbox" checked disabled><label>Title IX & Sexual Misconduct</label></div>
+<div class="checkbox-row"><input type="checkbox" checked disabled><label>Pregnant and Parenting Students</label></div>
+<div class="checkbox-row"><input type="checkbox" checked disabled><label>Campus Carry</label></div>
+<div class="checkbox-row"><input type="checkbox" checked disabled><label>CARE Team & Basic Needs</label></div>
+<div class="checkbox-row"><input type="checkbox" checked disabled><label>Attendance Policy</label></div>
+<div class="checkbox-row"><input type="checkbox" checked disabled><label>Course Evaluation</label></div>
+<div class="checkbox-row"><input type="checkbox" checked disabled><label>Student Financial Aid</label></div>
+<div class="checkbox-row"><input type="checkbox" checked disabled><label>Academic Calendar & Student Handbook</label></div>
+</div></div>
+<div class="card"><div class="card-title">Quick Summary</div><div id="summaryContent" style="font-size:16px;line-height:1.7"></div></div>
+<div id="validationErrors" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:18px;margin-bottom:16px;color:var(--danger);font-size:16px"></div>
+<div class="nav-bar"><button class="btn btn-secondary" onclick="prevStep()">← Back</button><button class="btn btn-success" onclick="generateSyllabus()" style="font-size:18px;padding:14px 36px">✦ Generate Syllabus</button></div>
+</div>
+
+</div>
+
+<!-- PREVIEW -->
+<div class="main-container" id="previewContainer">
+<div class="preview-toolbar"><button class="btn btn-secondary" onclick="backToEdit()">← Edit</button><div class="toolbar-spacer"></div><span class="copy-feedback" id="copyFeedback">Copied to clipboard!</span><button class="btn btn-primary" onclick="copyToClipboard()">📋 Copy for Canvas</button><button class="btn btn-secondary" onclick="window.print()">🖨 Print / Save PDF</button></div>
+<div class="syllabus-output"><div class="syllabus-content" id="syllabusOutput"></div></div>
+</div>
+
+<script>
+let currentStep=1;const totalSteps=7;
+if(typeof pdfjsLib!=='undefined')pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+function startFromScratch(){document.getElementById('landingScreen').style.display='none';document.getElementById('formContainer').style.display='block';document.getElementById('stepperBar').style.display='block';initStepper();showStep(1)}
+function startImport(){document.getElementById('landingScreen').style.display='none';document.getElementById('importScreen').classList.add('active')}
+function backToLanding(){document.getElementById('landingScreen').style.display='';document.getElementById('importScreen').classList.remove('active');document.getElementById('formContainer').style.display='none';document.getElementById('stepperBar').style.display='none';document.getElementById('previewContainer').classList.remove('active');document.getElementById('headerStepLabel').textContent=''}
+
+function initStepper(){const t=document.getElementById('stepperTrack');t.innerHTML='';for(let i=1;i<=totalSteps;i++){const p=document.createElement('div');p.className='step-pill'+(i===1?' active':'');p.dataset.step=i;p.onclick=()=>goToStep(i);t.appendChild(p)}}
+function updateStepper(){document.querySelectorAll('.step-pill').forEach(p=>{const s=+p.dataset.step;p.className='step-pill';if(s<currentStep)p.classList.add('completed');if(s===currentStep)p.classList.add('active')});document.getElementById('headerStepLabel').textContent=`Step ${currentStep} of ${totalSteps} — ${['','Course','Instructor','Materials','Objectives','Grading','Schedule','Review'][currentStep]||''}`}
+function showStep(n){document.querySelectorAll('.form-step').forEach(e=>e.classList.remove('active'));const t=document.querySelector(`.form-step[data-step="${n}"]`);if(t){t.classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}currentStep=n;updateStepper();if(n===7)buildReviewSummary()}
+function nextStep(){if(currentStep<totalSteps)showStep(currentStep+1)}
+function prevStep(){if(currentStep>1)showStep(currentStep-1)}
+function goToStep(n){if(n>=1&&n<=totalSteps)showStep(n)}
+
+function addTextbook(){const l=document.getElementById('textbookList'),d=document.createElement('div');d.className='dynamic-list-item';d.innerHTML='<div class="item-content"><div class="field-row cols-2" style="margin-bottom:8px"><div class="field"><label>Title</label><input type="text" class="tb-title"></div><div class="field"><label>Author</label><input type="text" class="tb-author"></div></div><div class="field-row cols-2"><div class="field"><label>ISBN</label><input type="text" class="tb-isbn"></div><div class="field"><label>Publisher</label><input type="text" class="tb-pub"></div></div></div><button class="remove-btn" onclick="removeItem(this)">✕</button>';l.appendChild(d)}
+function addGradeComponent(){const l=document.getElementById('gradeComponentsList'),d=document.createElement('div');d.className='dynamic-list-item';d.innerHTML='<div class="item-content"><div class="field-row cols-3"><div class="field" style="grid-column:span 2"><label>Component</label><input type="text" class="gc-name"></div><div class="field"><label>Weight (%)</label><input type="number" class="gc-weight" min="0" max="100"></div></div><div class="field" style="margin-top:8px"><label>Details</label><input type="text" class="gc-details"></div></div><button class="remove-btn" onclick="removeItem(this)">✕</button>';l.appendChild(d)}
+function removeItem(b){const i=b.closest('.dynamic-list-item');if(i.parentElement.querySelectorAll('.dynamic-list-item').length>1)i.remove()}
+document.getElementById('gradingScale').addEventListener('change',function(){document.getElementById('customScaleField').style.display=this.value==='custom'?'block':'none'});
+
+// Drag & drop
+const uz=document.getElementById('uploadZone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('dragover')});
+uz.addEventListener('dragleave',()=>uz.classList.remove('dragover'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('dragover');const f=e.dataTransfer.files[0];if(f)validateAndProcess(f);else showImportError('No file detected. Please try again.')});
+function handleICRUpload(e){if(e.target.files[0])validateAndProcess(e.target.files[0])}
+async function validateAndProcess(file){
+if(file.type==='application/pdf'){processICR(file);return}
+try{const ab=await file.slice(0,5).arrayBuffer();const h=new Uint8Array(ab);const sig=String.fromCharCode(...h);if(sig.startsWith('%PDF')){processICR(file);return}}catch(e){}
+showImportError('This doesn\u2019t appear to be a PDF file. Please upload your ICR as a PDF.')}
+
+async function processICR(file){
+const status=document.getElementById('importStatus'),errEl=document.getElementById('importError');
+errEl.classList.remove('active');status.classList.add('active');
+document.getElementById('importStatusText').textContent='Reading PDF...';
+document.getElementById('importStatusSub').textContent='Extracting text from your ICR';
+try{
+const ab=await file.arrayBuffer(),pdf=await pdfjsLib.getDocument({data:ab}).promise;let txt='';
+for(let i=1;i<=pdf.numPages;i++){
+const pg=await pdf.getPage(i),tc=await pg.getTextContent();
+// Sort items by Y (descending=top-first) then X (left-to-right)
+const items=tc.items.filter(it=>it.str.trim()).map(it=>({str:it.str,x:Math.round(it.transform[4]),y:Math.round(it.transform[5])}));
+items.sort((a,b)=>b.y-a.y||a.x-b.x);
+let lastY=null;
+for(const it of items){
+if(lastY!==null && Math.abs(it.y-lastY)>3) txt+='\n';
+else if(lastY!==null) txt+=' ';
+txt+=it.str;lastY=it.y;
+}
+txt+='\n\n';
+}
+if(txt.trim().length<50)throw new Error('Could not extract enough text. The PDF may be scanned. Please use "Build from Scratch" instead.');
+document.getElementById('importStatusText').textContent='Parsing ICR...';
+document.getElementById('importStatusSub').textContent='Extracting your course information';
+
+// Use local parser (works offline, instant)
+let parsed = parseICRLocal(txt);
+
+// Try API enhancement (optional, may fail)
+try {
+document.getElementById('importStatusSub').textContent='Enhancing with AI analysis...';
+const apiParsed = await parseICRAPI(txt);
+if(apiParsed) {
+// Merge: API fills in anything local parser missed
+for(const [k,v] of Object.entries(apiParsed)){
+if(v && (!parsed[k] || parsed[k]==='')) parsed[k]=v;
+}
+}
+} catch(apiErr) {
+console.log('API enhancement skipped:', apiErr.message);
+// Local parse is sufficient, continue silently
+}
+
+autoFill(parsed);
+status.classList.remove('active');
+document.getElementById('importScreen').classList.remove('active');
+document.getElementById('formContainer').style.display='block';
+document.getElementById('stepperBar').style.display='block';
+initStepper();showStep(2);
+// Show reminder
+setTimeout(()=>{if(!document.getElementById('importReminder')){
+const r=document.createElement('div');r.id='importReminder';
+r.style.cssText='background:#FFF9E6;border:1.5px solid #F0D060;border-radius:10px;padding:18px 22px;margin-bottom:20px;font-size:15px;color:#6B5900;line-height:1.5;';
+r.innerHTML='<strong>📋 Imported from ICR — please double-check!</strong><br>We pulled as much as we could from your ICR. Please review each step to make sure everything came through correctly, especially the <strong>Course Description</strong>, <strong>Learning Objectives</strong>, and <strong>Assignments</strong>. Fields highlighted in <span style="background:#F0FFF4;padding:2px 6px;border:1px solid #27AE60;border-radius:3px;font-size:13px">green</span> were auto-filled.';
+const fc=document.getElementById('formContainer');
+fc.insertBefore(r,fc.querySelector('.form-step.active'))}},100);
+}catch(err){status.classList.remove('active');showImportError(err.message||'Something went wrong. Try "Build from Scratch".')}}
+
+function showImportError(m){const e=document.getElementById('importError');e.textContent=m;e.classList.add('active')}
+
+// ═══ LOCAL ICR PARSER ═══
+function parseICRLocal(txt){
+const d={coursePrefix:'',courseNumber:'',sectionNumber:'',courseTitle:'',term:'',
+instructorName:'',instructorOffice:'',instructorPhone:'',instructorEmail:'',
+officialDayOfRecord:'',lastDayToDrop:'',evalWindow:'',
+officeHours:[],textbooks:[],tccPlus:false,specialMaterials:'',courseDescription:'',
+learningObjectives:'',requirements:'',gradingCriteria:'',courseSchedule:'',additionalInfo:'',
+gradeComponents:[]};
+
+const flat=txt.replace(/[^\S\n]+/g,' ');
+
+// Course prefix-number-section and title
+const cm=flat.match(/([A-Z]{3,4})-(\d{4})-(\d{3,6})\s+(.+?)(?:\n|$)/m);
+if(cm){d.coursePrefix=cm[1];d.courseNumber=cm[2];d.sectionNumber=cm[3];d.courseTitle=cm[4].trim().replace(/\s+/g,' ')}
+
+// Instructor - stop at Office, Phone, or double-space
+const im=flat.match(/Instructor:\s*([A-Za-z,\.\s'-]+?)(?:\s{2,}|Office|Phone|\n)/i);
+if(im){let name=im[1].trim();
+if(name.includes(','))name=name.split(',').map(s=>s.trim()).reverse().join(' ');
+d.instructorName=name}
+
+// Office - just grab the location code
+const om=flat.match(/Office:\s*([A-Z]{2}[\w\s]+?\d+\w*)/i);
+if(om) d.instructorOffice=om[1].trim();
+
+// Phone
+const pm=flat.match(/Phone:\s*([\d][\d\-\.\(\)\s]{6,15})/i);
+if(pm) d.instructorPhone=pm[1].trim();
+
+// Email
+const em=flat.match(/E-?mail:\s*([\w\.\-]+@[\w\.\-]+)/i);
+if(em) d.instructorEmail=em[1].trim();
+
+// Term
+const tm=flat.match(/Term:\s*(\d{4}\s+\w+)/i);
+if(tm) d.term=tm[1].trim();
+
+// Dates
+const odr=flat.match(/Official\s+day\s+of\s+record:\s*([\d\/\-]+)/i);
+if(odr) d.officialDayOfRecord=odr[1];
+const ldd=flat.match(/Last\s+day\s+to\s+drop:\s*([\d\/\-]+)/i);
+if(ldd) d.lastDayToDrop=ldd[1];
+const ev=flat.match(/evaluated\s+between\s+([\d\/]+)\s+and\s+([\d\/]+)/i);
+if(ev) d.evalWindow=ev[1]+' - '+ev[2];
+
+// Office hours
+const dayPat=/\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*\s+(\d{1,2}:\d{2}\s*[AP]M)\s+(\d{1,2}:\d{2}\s*[AP]M)/gi;
+let dm;while((dm=dayPat.exec(flat))!==null){
+d.officeHours.push({day:dm[1].substring(0,3),start:dm[2].trim(),end:dm[3].trim()})}
+
+// ── SECTION EXTRACTION ──
+const sectionHeaders=['Text\\(s\\):','Special Materials:','Focus:','Requirements:',
+'Grading Criteria:','Class Dates:','Daily Assignments:','Additional Class Information:',
+'District Course Requirements','TCCD Academic Calendar','Page \\d+ of \\d+'];
+const sectionRe=new RegExp('('+sectionHeaders.join('|')+')','gi');
+const sections={};let match;const positions=[];
+while((match=sectionRe.exec(flat))!==null){
+positions.push({name:match[1].replace(/:/g,'').trim(),start:match.index+match[0].length})}
+for(let i=0;i<positions.length;i++){
+const end=i+1<positions.length?positions[i+1].start-positions[i+1].name.length-1:flat.length;
+const content=flat.substring(positions[i].start,end).trim();
+const key=positions[i].name.toLowerCase().replace(/[()]/g,'');
+if(!sections[key]) sections[key]=content}
+
+// Textbooks
+const textSec=sections['texts']||'';
+if(textSec){
+const bm=textSec.match(/"([^"]+)"\s*(?:\((\d{4})\))?\s*[-–—]?\s*(?:Author:\s*)?(.+?)(?:\n|This comes|$)/);
+if(bm){let title=bm[1].trim();if(bm[2])title+=` (${bm[2]})`;
+d.textbooks.push({title:title,author:(bm[3]||'').replace(/^\s*[-–—]?\s*Author:\s*/i,'').trim()})}
+else{const bm2=textSec.match(/(.+?)[-–—]\s*(?:Author:\s*)?(.+?)(?:\n|This comes|$)/);
+if(bm2)d.textbooks.push({title:bm2[1].trim(),author:bm2[2].replace(/^\s*Author:\s*/i,'').trim()})}}
+
+if(/TCC\s*Plus/i.test(flat)) d.tccPlus=true;
+
+// Special materials
+const specSec=sections['special materials']||'';
+if(specSec) d.specialMaterials=specSec.replace(/\n/g,' ').trim();
+
+// ── FOCUS → Description + Learning Objectives ──
+const focusSec=sections['focus']||'';
+if(focusSec){
+const lines=focusSec.split('\n').map(l=>l.trim()).filter(l=>l);
+// Remove the "Class Learning Objectives" heading if present
+const filtered=lines.filter(l=>!/^Class\s+Learning\s+Objectives$/i.test(l));
+
+// Find the description = lines before the first bullet-style item
+const descLines=[];
+const objLines=[];
+let hitBullets=false;
+for(const line of filtered){
+// Detect bullet-style or indented list items
+const isBullet=/^[•\-\uf0b7○◦]\s|^the\s+\w+,\s|^[a-z]/.test(line) && line.length<120;
+const isTopBullet=/^(Origin|Structure|The development)/i.test(line);
+if(isTopBullet||isBullet||hitBullets){
+hitBullets=true;
+objLines.push(line);
+} else {
+descLines.push(line);
+}
+}
+d.courseDescription=descLines.join('\n').trim();
+if(objLines.length>0){
+d.learningObjectives=objLines.map(l=>l.replace(/^[•\-\uf0b7○◦]\s*/,'')).join('\n')}}
+
+// ── REQUIREMENTS → Grade Components ──
+const reqSec=sections['requirements']||'';
+if(reqSec){
+d.requirements=reqSec.trim();
+// Parse grade components from requirements
+const compPatterns=[
+{re:/Civic\s+Action\s+Project[^)]*\((?:Worth\s+)?(\d+)%/i, name:'Civic Action Project'},
+{re:/(?:Connect\s+)?SmartBook\s+Readings/i, name:'SmartBook Readings'},
+{re:/Discussion\s+Board\s+Posts?/i, name:'Discussion Board Posts'},
+{re:/Quizzes/i, name:'Quizzes'},
+{re:/Exams?(?:\s|$)/i, name:'Exams'},
+{re:/(?:Midterm|Mid-term)/i, name:'Midterm'},
+{re:/Final\s+(?:Exam|Project|Paper)/i, name:'Final'},
+{re:/(?:Research\s+)?Papers?(?:\s|$)/i, name:'Papers'},
+{re:/Participation/i, name:'Participation'},
+{re:/Homework/i, name:'Homework'},
+{re:/Labs?(?:\s|$)/i, name:'Labs'},
+];
+for(const cp of compPatterns){
+const m=reqSec.match(cp.re);
+if(m){
+// Try to find weight
+const ctx=reqSec.substring(Math.max(0,m.index-10),Math.min(reqSec.length,m.index+m[0].length+80));
+const wm=ctx.match(/(\d+)\s*%/);
+const weight=wm?wm[1]:'';
+// Try to find details like "(Two Scores Dropped)"
+const dm=ctx.match(/\(([^)]+)\)/);
+const details=dm?dm[1]:'';
+d.gradeComponents.push({name:cp.name,weight:weight,details:details})
+}}}
+
+// Grading criteria
+const gradeSec=sections['grading criteria']||'';
+if(gradeSec) d.gradingCriteria=gradeSec.replace(/\n/g,' ').replace(/\s{2,}/g,' ').trim();
+
+// Additional info
+const addSec=sections['additional class information']||'';
+if(addSec) d.additionalInfo=addSec.replace(/\n/g,' ').replace(/\s{2,}/g,' ').trim();
+
+// Schedule
+const schSec=sections['class dates']||sections['daily assignments']||'';
+if(schSec) d.courseSchedule=schSec.replace(/\n/g,' ').replace(/\s{2,}/g,' ').trim();
+
+console.log('ICR Parsed sections:',Object.keys(sections));
+console.log('Parsed result:',JSON.stringify(d,null,2));
+return d}
+
+// ═══ API PARSER (optional enhancement) ═══
+async function parseICRAPI(txt){
+const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:`Parse this TCC ICR into JSON. Return ONLY valid JSON, no markdown backticks, no explanation.
+Keys: coursePrefix, courseNumber, sectionNumber, courseTitle, term, instructorName, instructorOffice, instructorPhone, instructorEmail, officialDayOfRecord (MM/DD/YYYY), lastDayToDrop (MM/DD/YYYY), refund100 (MM/DD/YYYY), refund70 (MM/DD/YYYY), refund25 (MM/DD/YYYY), evalWindow, officeHours (array of {day,start,end}), textbooks (array of {title,author}), tccPlus (boolean), specialMaterials, courseDescription, learningObjectives (newline-separated), requirements, gradingCriteria, courseSchedule, additionalInfo. Use "" for missing values.
+
+ICR text:
+${txt}`}]})});
+if(!r.ok) throw new Error('API returned '+r.status);
+const data=await r.json(),text=data.content.map(c=>c.text||'').join('');
+return JSON.parse(text.replace(/```json\s*/g,'').replace(/```/g,'').trim())}
+
+function autoFill(d){
+function sv(id,v){const e=document.getElementById(id);if(e&&v){e.value=v;e.classList.add('auto-filled')}}
+function ss(id,v){const e=document.getElementById(id);if(!e||!v)return;for(let o of e.options)if(o.value===v||o.value.toLowerCase()===v.toLowerCase()||o.textContent.toLowerCase().includes(v.toLowerCase())){e.value=o.value;e.classList.add('auto-filled');return}}
+function pd(s){if(!s)return'';const m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);if(m){let y=m[3].length===2?'20'+m[3]:m[3];return`${y}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`}return''}
+ss('coursePrefix',d.coursePrefix);sv('courseNumber',d.courseNumber);sv('sectionNumber',d.sectionNumber);sv('courseTitle',d.courseTitle);sv('courseCRN',d.sectionNumber);ss('courseTerm',d.term);
+sv('officialDayRecord',pd(d.officialDayOfRecord));sv('lastDayDrop',pd(d.lastDayToDrop));sv('evalWindow',d.evalWindow);
+sv('instrName',d.instructorName);sv('instrOffice',d.instructorOffice);sv('instrPhone',d.instructorPhone);sv('instrEmail',d.instrEmail||d.instructorEmail);
+if(d.officeHours&&Array.isArray(d.officeHours)){const dm={mon:'mon',tue:'tue',wed:'wed',thu:'thu',fri:'fri',sat:'sat',sun:'sun',monday:'mon',tuesday:'tue',wednesday:'wed',thursday:'thu',friday:'fri',saturday:'sat',sunday:'sun'};d.officeHours.forEach(h=>{const k=dm[(h.day||'').toLowerCase()];if(k){const s=document.getElementById(`hrs_${k}_s1`),e=document.getElementById(`hrs_${k}_e1`);if(s&&!s.value){s.value=h.start||'';s.classList.add('auto-filled')}if(e&&!e.value){e.value=h.end||'';e.classList.add('auto-filled')}}})}
+if(d.textbooks&&d.textbooks.length){const l=document.getElementById('textbookList'),fi=l.querySelector('.dynamic-list-item');d.textbooks.forEach((tb,i)=>{let it;if(i===0&&fi)it=fi;else{addTextbook();it=l.querySelector('.dynamic-list-item:last-child')}if(tb.title){const e=it.querySelector('.tb-title');e.value=tb.title;e.classList.add('auto-filled')}if(tb.author){const e=it.querySelector('.tb-author');e.value=tb.author;e.classList.add('auto-filled')}})}
+if(d.tccPlus)document.getElementById('tccPlus').checked=true;
+sv('specialMaterials',d.specialMaterials);sv('courseDescription',d.courseDescription);sv('learningObjectives',d.learningObjectives);sv('gradingCriteria',d.gradingCriteria);sv('additionalInfo',d.additionalInfo);sv('courseSchedule',d.courseSchedule);
+// Fill grade components
+if(d.gradeComponents&&d.gradeComponents.length){
+const list=document.getElementById('gradeComponentsList');
+d.gradeComponents.forEach((gc,i)=>{
+let item;
+if(i===0){item=list.querySelector('.dynamic-list-item')}
+else{addGradeComponent();item=list.querySelector('.dynamic-list-item:last-child')}
+if(item&&gc.name){const ne=item.querySelector('.gc-name');ne.value=gc.name;ne.classList.add('auto-filled')}
+if(item&&gc.weight){const we=item.querySelector('.gc-weight');we.value=gc.weight;we.classList.add('auto-filled')}
+if(item&&gc.details){const de=item.querySelector('.gc-details');de.value=gc.details;de.classList.add('auto-filled')}
+})}}
+
+function buildReviewSummary(){
+const v=id=>(document.getElementById(id)?.value||'').trim();
+let h='<table style="width:100%;font-size:16px;border-collapse:collapse">';
+[['Course',`${v('coursePrefix')} ${v('courseNumber')}${v('sectionNumber')?'-'+v('sectionNumber'):''}: ${v('courseTitle')}`],['Instructor',v('instrName')],['Email',v('instrEmail')],['Term',v('courseTerm')],['Modality',v('courseModality')],['Dept. Chair',v('chairName')||'<span style="color:var(--danger)">⚠ Missing</span>'],['Division Dean',v('deanName')||'<span style="color:var(--danger)">⚠ Missing</span>']].forEach(([l,val])=>{if(val&&val!==': ')h+=`<tr><td style="padding:7px 12px 7px 0;font-weight:600;color:var(--tcc-navy);white-space:nowrap;vertical-align:top">${l}</td><td style="padding:7px 0">${val}</td></tr>`});
+h+='</table>';
+const miss=[];if(!v('chairName'))miss.push('Chair Name');if(!v('chairEmail'))miss.push('Chair Email');if(!v('deanName'))miss.push('Dean Name');if(!v('deanEmail'))miss.push('Dean Email');
+if(miss.length)h+=`<div style="margin-top:14px;padding:12px 16px;background:#FEF3CD;border-radius:6px;color:#856404;font-size:15px"><strong>⚠ Missing required fields:</strong> ${miss.join(', ')}. Go back to Step 2.</div>`;
+document.getElementById('summaryContent').innerHTML=h}
+
+function val(id){return(document.getElementById(id)?.value||'').trim()}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function fmtDate(ds){if(!ds)return'';const d=new Date(ds+'T12:00:00');return d.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})}
+function toList(t){if(!t)return'';const l=t.split('\n').map(l=>l.trim()).filter(l=>l);return l.length?'<ul>'+l.map(l=>`<li>${esc(l.replace(/^[-•*]\s*/,''))}</li>`).join('')+'</ul>':''}
+function toParas(t){if(!t)return'';return t.split('\n').filter(l=>l.trim()).map(l=>`<p>${esc(l)}</p>`).join('')}
+function getHours(){const days=['mon','tue','wed','thu','fri','sat','sun'],labels=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];let r=[];days.forEach((d,i)=>{const b=[];for(let n=1;n<=3;n++){const s=val(`hrs_${d}_s${n}`),e=val(`hrs_${d}_e${n}`);if(s&&e)b.push(`${s} – ${e}`)}if(b.length)r.push({day:labels[i],times:b.join(', ')})});return r}
+function getBooks(){let b=[];document.querySelectorAll('#textbookList .dynamic-list-item').forEach(i=>{const t=i.querySelector('.tb-title')?.value?.trim()||'',a=i.querySelector('.tb-author')?.value?.trim()||'',n=i.querySelector('.tb-isbn')?.value?.trim()||'',p=i.querySelector('.tb-pub')?.value?.trim()||'';if(t)b.push({title:t,author:a,isbn:n,pub:p})});return b}
+function getComps(){let c=[];document.querySelectorAll('#gradeComponentsList .dynamic-list-item').forEach(i=>{const n=i.querySelector('.gc-name')?.value?.trim()||'',w=i.querySelector('.gc-weight')?.value?.trim()||'',d=i.querySelector('.gc-details')?.value?.trim()||'';if(n)c.push({name:n,weight:w,details:d})});return c}
+
+function generateSyllabus(){
+const miss=[];if(!val('chairName'))miss.push('Department Chair Name');if(!val('chairEmail'))miss.push('Department Chair Email');if(!val('deanName'))miss.push('Division Dean Name');if(!val('deanEmail'))miss.push('Division Dean Email');
+if(miss.length){const e=document.getElementById('validationErrors');e.innerHTML=`<strong>⚠ Cannot generate:</strong> Fill in required fields on Step 2: <strong>${miss.join(', ')}</strong>.`;e.style.display='block';window.scrollTo({top:e.offsetTop-100,behavior:'smooth'});return}
+document.getElementById('validationErrors').style.display='none';
+const pf=val('coursePrefix'),cn=val('courseNumber'),sn=val('sectionNumber'),ct=val('courseTitle'),crn=val('courseCRN'),tm=val('courseTerm'),mod=val('courseModality'),odr=fmtDate(val('officialDayRecord')),ldd=fmtDate(val('lastDayDrop')),ew=val('evalWindow'),mt=val('meetingSchedule');
+const iN=val('instrName'),iO=val('instrOffice'),iP=val('instrPhone'),iE=val('instrEmail'),iC=val('instrContact'),hN=val('hoursNotes');
+const chN=val('chairName'),chE=val('chairEmail'),deN=val('deanName'),deE=val('deanEmail');
+const hrs=getHours(),bks=getBooks(),tp=document.getElementById('tccPlus').checked,sm=val('specialMaterials');
+const cd=val('courseDescription'),lo=val('learningObjectives');
+const gc=getComps(),gs=val('gradingScale'),cs=val('customScale'),gci=val('gradingCriteria');
+const sch=val('courseSchedule'),ai=val('additionalInfo'),ap=val('attendancePolicy'),ip=val('integrityPolicy'),cp=val('commPolicy');
+let h='';
+h+=`<div class="syl-header"><div class="college-name">Tarrant County College District</div><div class="doc-type">Instructor's Course Requirements / Syllabus</div><div class="course-title-block">${esc(pf)} ${esc(cn)}: ${esc(ct)}</div><div class="section-line">${sn?'Section '+esc(sn):''}${crn?' (CRN: '+esc(crn)+')':''} — ${esc(tm)}</div></div>`;
+h+=`<div class="info-grid">`;
+if(iN)h+=`<div class="info-item"><strong>Instructor:</strong> ${esc(iN)}</div>`;if(iO)h+=`<div class="info-item"><strong>Office:</strong> ${esc(iO)}</div>`;
+if(iP)h+=`<div class="info-item"><strong>Phone:</strong> ${esc(iP)}</div>`;if(iE)h+=`<div class="info-item"><strong>Email:</strong> ${esc(iE)}</div>`;
+if(mod)h+=`<div class="info-item"><strong>Modality:</strong> ${esc(mod)}</div>`;if(tm)h+=`<div class="info-item"><strong>Term:</strong> ${esc(tm)}</div>`;
+if(odr)h+=`<div class="info-item"><strong>Official Day of Record:</strong> ${odr}</div>`;if(ldd)h+=`<div class="info-item"><strong>Last Day to Drop:</strong> ${ldd}</div>`;
+if(mt)h+=`<div class="info-item" style="grid-column:span 2"><strong>Meeting:</strong> ${esc(mt)}</div>`;
+h+=`</div>`;
+h+=`<div class="dept-contacts"><div class="contact-header">Department & Division Leadership</div><div class="info-item"><strong>Department Chair:</strong> ${esc(chN)}</div><div class="info-item"><strong>Email:</strong> ${esc(chE)}</div><div class="info-item"><strong>Division Dean:</strong> ${esc(deN)}</div><div class="info-item"><strong>Email:</strong> ${esc(deE)}</div></div>`;
+if(iC||cp){h+=`<div class="syl-section"><div class="syl-section-title">Communication</div>`;if(iC)h+=`<p>${esc(iC)}</p>`;if(cp)h+=toParas(cp);h+=`</div>`}
+if(hrs.length){h+=`<div class="syl-section"><div class="syl-section-title">Student Support Hours</div><table class="hours-output-table"><thead><tr><th>Day</th><th>Hours</th></tr></thead><tbody>`;hrs.forEach(r=>{h+=`<tr><td><strong>${r.day}</strong></td><td>${esc(r.times)}</td></tr>`});h+=`</tbody></table>`;if(hN)h+=`<p><em>${esc(hN)}</em></p>`;h+=`</div>`}
+if(bks.length||sm||tp){h+=`<div class="syl-section"><div class="syl-section-title">Textbooks & Materials</div>`;bks.forEach(b=>{h+=`<p><strong>${esc(b.title)}</strong>`;if(b.author)h+=` — ${esc(b.author)}`;if(b.pub)h+=` (${esc(b.pub)})`;if(b.isbn)h+=`<br><span style="font-size:13px;color:#666">ISBN: ${esc(b.isbn)}</span>`;h+=`</p>`});if(tp)h+=`<p><strong>TCC Plus (Inclusive Access):</strong> Your textbook and materials are available immediately upon registration at a discounted price — no need to visit the bookstore.</p>`;if(sm)h+=toParas(sm);h+=`</div>`}
+if(cd)h+=`<div class="syl-section"><div class="syl-section-title">Course Description</div>${toParas(cd)}</div>`;
+if(lo)h+=`<div class="syl-section"><div class="syl-section-title">Course Learning Objectives</div><p>Upon successful completion of this course, students will be able to:</p>${toList(lo)}</div>`;
+if(gc.length){h+=`<div class="syl-section"><div class="syl-section-title">Assignments & Grading</div><table class="grade-table"><thead><tr><th>Component</th><th style="width:100px;text-align:center">Weight</th><th>Details</th></tr></thead><tbody>`;let tw=0;gc.forEach(c=>{const w=parseInt(c.weight)||0;tw+=w;h+=`<tr><td><strong>${esc(c.name)}</strong></td><td style="text-align:center">${c.weight?c.weight+'%':'—'}</td><td>${c.details?esc(c.details):'—'}</td></tr>`});h+=`<tr style="background:#E8F6F5;font-weight:700"><td>Total</td><td style="text-align:center">${tw}%</td><td></td></tr></tbody></table>`;
+h+=`<div class="syl-subsection-title">Grading Scale</div>`;if(gs==='standard')h+=`<table class="grade-table" style="max-width:300px"><thead><tr><th>Grade</th><th>Range</th></tr></thead><tbody><tr><td><strong>A</strong></td><td>90–100</td></tr><tr><td><strong>B</strong></td><td>80–89</td></tr><tr><td><strong>C</strong></td><td>70–79</td></tr><tr><td><strong>D</strong></td><td>60–69</td></tr><tr><td><strong>F</strong></td><td>Below 60</td></tr></tbody></table>`;else if(cs)h+=toParas(cs);h+=`</div>`}
+if(gci)h+=`<div class="syl-section"><div class="syl-section-title">Grading Criteria</div>${toParas(gci)}</div>`;
+if(sch)h+=`<div class="syl-section"><div class="syl-section-title">Course Schedule</div>${toParas(sch)}</div>`;
+if(ai)h+=`<div class="syl-section"><div class="syl-section-title">Additional Information</div>${toParas(ai)}</div>`;
+if(ap)h+=`<div class="syl-section"><div class="syl-section-title">Attendance Policy</div>${toParas(ap)}</div>`;
+if(ip)h+=`<div class="syl-section"><div class="syl-section-title">Academic Integrity</div>${toParas(ip)}</div>`;
+// DISTRICT POLICIES
+h+=`<div class="syl-section"><div class="syl-section-title" style="border-bottom-color:#006184;border-bottom-width:3px">Tarrant County College District Policies</div><p style="font-style:italic;color:#666;font-size:13px">The following policies apply to all TCC courses. See the <a href="https://www.tccd.edu/academics/academic-resources/student-handbook/" target="_blank">TCCD Student Handbook</a> and <a href="https://www.tccd.edu/academics/academic-resources/academic-calendar/" target="_blank">TCCD Academic Calendar</a>.</p>`;
+h+=`<div class="policy-section"><div class="policy-title">Attendance Policy</div><p>Regular and punctual class attendance is expected at Tarrant County College. Student absences will be recorded from the first day the class meets.</p><p>A student in an on-campus course missing a cumulative of 15 percent of class meetings and not keeping up with assignments may be dropped at the discretion of the instructor.</p><p>A student in an online course is required to complete the online orientation and actively participate as described in the ICRs. A student not meeting these requirements may be dropped at the discretion of the instructor.</p></div>`;
+h+=`<div class="policy-section"><div class="policy-title">Student Accessibility Resources (SAR)</div><p>Any student with a documented disability needing academic accommodations is required to contact the SAR Office on each campus. All discussions are confidential. Because SAR accommodations may require early planning and are not provided retroactively, students are encouraged to contact SAR as early in the semester as possible. TCC professors will honor SAR-issued accommodation requests.</p></div>`;
+h+=`<div class="policy-section"><div class="policy-title">Title IX — Reports of Discrimination Based on Sex</div><p>All TCC faculty are designated "Responsible Employees" and are required to report Sexual Misconduct. State law requires reporting of sexual harassment, sexual assault, dating/domestic violence, and stalking to the Title IX Coordinator.</p><p>Students who desire confidentiality may: (1) speak with a licensed counselor at a TCC campus (free), or (2) contact an off-campus rape crisis center.</p></div>`;
+h+=`<div class="policy-section"><div class="policy-title">Pregnant and Parenting Students</div><p>Title IX prohibits discrimination based on pregnancy, childbirth, false pregnancy, termination of pregnancy, or recovery from these conditions; and for parenting a child under one year of age. Visit <a href="https://www.tccd.edu/services/title-ix/supporting-pregnant-and-parenting-students/" target="_blank">Supporting Pregnant and Parenting Students</a>.</p></div>`;
+h+=`<div class="policy-section"><div class="policy-title">Campus Carry</div><p>The Campus Carry law (SB 11, effective Aug. 1, 2017) allows licensed individuals to carry a concealed handgun in buildings on public community college campuses, except in designated prohibited areas. Open carry is not permitted. See <a href="http://www.tccd.edu/services/police-department/open-carry/campus-carry-regulations/" target="_blank">Campus Carry Regulations</a>. Emergency: <a href="https://www.tccd.edu/about/emergency-information/" target="_blank">tccd.edu/emergency-information</a>.</p></div>`;
+h+=`<div class="policy-section"><div class="policy-title">CARE Team & Basic Needs</div><p>Each campus has a CARE Team providing support for students in distress. Report at <a href="http://www.tccd.edu/incidentreport/" target="_blank">tccd.edu/incidentreport</a>. For imminent threats: TCC Police 817-515-8911 or 911.</p><p>Students facing basic needs challenges (food, housing, transportation) may apply for the <a href="https://www.tccd.edu/services/care-team/" target="_blank">Student Emergency Assistance Fund</a>.</p></div>`;
+h+=`<div class="policy-section"><div class="policy-title">Course Evaluation</div><p>Students are strongly encouraged to participate in course evaluations with constructive feedback. Results are anonymous and unavailable to faculty until after grades post.</p>${ew?`<p>This course may be evaluated between <strong>${esc(ew)}</strong>.</p>`:''}</div>`;
+h+=`<div class="policy-section"><div class="policy-title">Paying for College</div><p>TCC awards over $85.2 million in financial aid annually. Apply via FAFSA. Visit <a href="https://www.tccd.edu/services/financial-aid/" target="_blank">Student Financial Aid Services</a>.</p></div>`;
+h+=`</div>`;
+h+=`<div class="syl-footer"><strong>Tarrant County College District</strong><br><a href="https://www.tccd.edu/academics/academic-resources/student-handbook/" target="_blank">Student Handbook</a> · <a href="https://www.tccd.edu/academics/academic-resources/academic-calendar/" target="_blank">Academic Calendar</a> · <a href="https://www.tccd.edu/services/financial-aid/" target="_blank">Financial Aid</a><br><span style="font-size:11px;color:#AAA">Generated with TCC Syllabus Generator</span></div>`;
+document.getElementById('syllabusOutput').innerHTML=h;
+document.getElementById('formContainer').style.display='none';
+document.getElementById('previewContainer').classList.add('active');
+window.scrollTo({top:0,behavior:'smooth'})}
+
+function backToEdit(){document.getElementById('formContainer').style.display='block';document.getElementById('previewContainer').classList.remove('active');window.scrollTo({top:0,behavior:'smooth'})}
+
+async function copyToClipboard(){const c=document.getElementById('syllabusOutput');try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([c.innerHTML],{type:'text/html'}),'text/plain':new Blob([c.innerText],{type:'text/plain'})})])}catch(e){const r=document.createRange();r.selectNodeContents(c);const s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges()}const f=document.getElementById('copyFeedback');f.classList.add('show');setTimeout(()=>f.classList.remove('show'),2500)}
+</script>
+</body>
+</html>
