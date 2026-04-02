@@ -274,11 +274,10 @@ body{background:#fff}
 
 <!-- STEP 4 -->
 <div class="form-step" data-step="4">
-<div class="step-header"><div class="step-number">Step 4 of 7</div><div class="step-title">Course Focus & Objectives</div><div class="step-desc">Describe your course and what students will learn.</div></div>
-<div class="card"><div class="card-title">Course Description</div>
-<div class="field"><label>Description / Focus</label><textarea id="courseDescription" rows="5" placeholder="Overview of what the course covers."></textarea></div></div>
-<div class="card"><div class="card-title">Learning Objectives</div>
-<div class="field"><label>Course Learning Objectives</label><textarea id="learningObjectives" rows="8" placeholder="One objective per line."></textarea><div class="hint">One per line. They'll become a bulleted list.</div></div></div>
+<div class="step-header"><div class="step-number">Step 4 of 7</div><div class="step-title">Course Focus & Objectives</div><div class="step-desc">This is pulled directly from the "Focus" section of your ICR.</div></div>
+<div class="card"><div class="card-title">Course Focus & Learning Objectives</div>
+<div class="field"><label>Focus / Learning Objectives</label><textarea id="courseFocus" rows="12" placeholder="Paste the content from your ICR's Focus section here — description and learning objectives together.&#10;&#10;Example:&#10;This course is all about how the Federal government works. We'll look at:&#10;• Origin and development of the U.S. Constitution&#10;• Structure and powers of the national government&#10;• The role of political parties, interest groups, and media"></textarea>
+<div class="hint">This will appear as-is in your syllabus under "Course Focus & Learning Objectives." Bullet points (•) will be preserved.</div></div></div>
 <div class="nav-bar"><button class="btn btn-secondary" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
 </div>
 
@@ -434,8 +433,8 @@ function parseICRLocal(txt){
 const d={coursePrefix:'',courseNumber:'',sectionNumber:'',courseTitle:'',term:'',
 instructorName:'',instructorOffice:'',instructorPhone:'',instructorEmail:'',
 officialDayOfRecord:'',lastDayToDrop:'',evalWindow:'',
-officeHours:[],textbooks:[],tccPlus:false,specialMaterials:'',courseDescription:'',
-learningObjectives:'',requirements:'',gradingCriteria:'',courseSchedule:'',additionalInfo:'',
+officeHours:[],textbooks:[],tccPlus:false,specialMaterials:'',courseFocus:'',
+requirements:'',gradingCriteria:'',courseSchedule:'',additionalInfo:'',
 gradeComponents:[]};
 
 const flat=txt.replace(/[^\S\n]+/g,' ');
@@ -486,7 +485,13 @@ const sectionHeaders=['Text\\(s\\):','Special Materials:','Focus:','Requirements
 const sectionRe=new RegExp('('+sectionHeaders.join('|')+')','gi');
 const sections={};let match;const positions=[];
 while((match=sectionRe.exec(flat))!==null){
-positions.push({name:match[1].replace(/:/g,'').trim(),start:match.index+match[0].length})}
+// Only count as a section header if it's at the start of a line
+// This prevents "Course Requirements:" from stealing the "Requirements:" section
+const idx=match.index;
+const lineStart=flat.lastIndexOf('\n',idx-1);
+const textBefore=flat.substring(lineStart+1,idx).trim();
+if(textBefore.length===0){
+positions.push({name:match[1].replace(/:/g,'').trim(),start:match.index+match[0].length})}}
 for(let i=0;i<positions.length;i++){
 const end=i+1<positions.length?positions[i+1].start-positions[i+1].name.length-1:flat.length;
 const content=flat.substring(positions[i].start,end).trim();
@@ -495,7 +500,7 @@ if(!sections[key]) sections[key]=content}
 
 // Textbooks
 const textSec=sections['texts']||'';
-if(textSec){
+if(textSec && !/^N\/?A$/i.test(textSec.trim())){
 const bm=textSec.match(/"([^"]+)"\s*(?:\((\d{4})\))?\s*[-–—]?\s*(?:Author:\s*)?(.+?)(?:\n|This comes|$)/);
 if(bm){let title=bm[1].trim();if(bm[2])title+=` (${bm[2]})`;
 d.textbooks.push({title:title,author:(bm[3]||'').replace(/^\s*[-–—]?\s*Author:\s*/i,'').trim()})}
@@ -506,64 +511,78 @@ if(/TCC\s*Plus/i.test(flat)) d.tccPlus=true;
 
 // Special materials
 const specSec=sections['special materials']||'';
-if(specSec) d.specialMaterials=specSec.replace(/\n/g,' ').trim();
+if(specSec && !/^N\/?A$/i.test(specSec.trim())) d.specialMaterials=specSec.replace(/\n/g,' ').trim();
 
-// ── FOCUS → Description + Learning Objectives ──
+// ── FOCUS → Single combined field ──
+// Key challenge: bullets wrap across lines in the PDF, e.g.:
+//   "• Where the Texas Constitution"
+//   "came from and how it's changed"
+// We join continuation lines ONLY when previous line starts with a bullet (•)
+// and current line is lowercase and prev doesn't end with terminal punctuation.
+// This avoids merging standalone indented items (like in GOVT-2305).
 const focusSec=sections['focus']||'';
 if(focusSec){
-const lines=focusSec.split('\n').map(l=>l.trim()).filter(l=>l);
-// Remove the "Class Learning Objectives" heading if present
-const filtered=lines.filter(l=>!/^Class\s+Learning\s+Objectives$/i.test(l));
-
-// Find the description = lines before the first bullet-style item
-const descLines=[];
-const objLines=[];
-let hitBullets=false;
-for(const line of filtered){
-// Detect bullet-style or indented list items
-const isBullet=/^[•\-\uf0b7○◦]\s|^the\s+\w+,\s|^[a-z]/.test(line) && line.length<120;
-const isTopBullet=/^(Origin|Structure|The development)/i.test(line);
-if(isTopBullet||isBullet||hitBullets){
-hitBullets=true;
-objLines.push(line);
+const rawLines=focusSec.split('\n');
+const joined=[];
+for(const line of rawLines){
+const trimmed=line.trim();
+if(!trimmed) continue;
+if(/^Class\s+Learning\s+Objectives$/i.test(trimmed)) continue;
+if(/^Course\s+Learning\s+Objectives$/i.test(trimmed)) continue;
+const prev=joined.length>0?joined[joined.length-1]:'';
+const prevStartsBullet=/^[•\-\uf0b7○◦]/.test(prev);
+const prevEndsIncomplete=prev && !/[.!?:]\s*$/.test(prev);
+const currIsLowercase=/^[a-z]/.test(trimmed);
+const currNotBullet=!/^[•\-\uf0b7○◦]/.test(trimmed);
+// Join to previous if: prev is a bullet line, still mid-sentence, and current is lowercase
+const isContinuation=joined.length>0 && currNotBullet && currIsLowercase && prevStartsBullet && prevEndsIncomplete;
+if(isContinuation){
+joined[joined.length-1]+=' '+trimmed;
 } else {
-descLines.push(line);
+joined.push(trimmed);
 }
 }
-d.courseDescription=descLines.join('\n').trim();
-if(objLines.length>0){
-d.learningObjectives=objLines.map(l=>l.replace(/^[•\-\uf0b7○◦]\s*/,'')).join('\n')}}
+d.courseFocus=joined.join('\n')}
 
 // ── REQUIREMENTS → Grade Components ──
 const reqSec=sections['requirements']||'';
 if(reqSec){
 d.requirements=reqSec.trim();
-// Parse grade components from requirements
+
+// Strategy A: Tabular format "ComponentName    XX%"
+const tableLines=reqSec.split('\n').map(l=>l.trim()).filter(l=>l);
+const tablePattern=/^(.+?)\s+(\d{1,3})%\s*$/;
+for(const line of tableLines){
+const m=line.match(tablePattern);
+if(m && !/^(Total|Course Req|Page|Specifications)/i.test(m[1].trim())){
+d.gradeComponents.push({name:m[1].trim(),weight:m[2],details:''})}}
+
+// Strategy B: Known component keywords with (Worth XX%) or just XX%
+if(d.gradeComponents.length===0){
 const compPatterns=[
-{re:/Civic\s+Action\s+Project[^)]*\((?:Worth\s+)?(\d+)%/i, name:'Civic Action Project'},
+{re:/Civic\s+Action\s+Project[^)]*?\((?:Worth\s+)?(\d+)%/i, name:'Civic Action Project'},
 {re:/(?:Connect\s+)?SmartBook\s+Readings/i, name:'SmartBook Readings'},
 {re:/Discussion\s+Board\s+Posts?/i, name:'Discussion Board Posts'},
 {re:/Quizzes/i, name:'Quizzes'},
-{re:/Exams?(?:\s|$)/i, name:'Exams'},
-{re:/(?:Midterm|Mid-term)/i, name:'Midterm'},
-{re:/Final\s+(?:Exam|Project|Paper)/i, name:'Final'},
+{re:/(?:Midterm|Mid-term)\s*(?:Exam)?/i, name:'Midterm Exam'},
+{re:/Final\s+(?:Exam|Project|Paper)/i, name:'Final Exam'},
+{re:/Exam\s*\d/i, name:'Exams'},
 {re:/(?:Research\s+)?Papers?(?:\s|$)/i, name:'Papers'},
-{re:/Participation/i, name:'Participation'},
+{re:/(?:Attendance|Participation)/i, name:'Attendance/Participation'},
 {re:/Homework/i, name:'Homework'},
 {re:/Labs?(?:\s|$)/i, name:'Labs'},
 ];
 for(const cp of compPatterns){
 const m=reqSec.match(cp.re);
 if(m){
-// Try to find weight
-const ctx=reqSec.substring(Math.max(0,m.index-10),Math.min(reqSec.length,m.index+m[0].length+80));
-const wm=ctx.match(/(\d+)\s*%/);
+const ctx=reqSec.substring(Math.max(0,m.index-10),Math.min(reqSec.length,m.index+m[0].length+100));
+const wm=ctx.match(/(?:Worth\s+)?(\d+)\s*%/);
 const weight=wm?wm[1]:'';
-// Try to find details like "(Two Scores Dropped)"
 const dm=ctx.match(/\(([^)]+)\)/);
-const details=dm?dm[1]:'';
-d.gradeComponents.push({name:cp.name,weight:weight,details:details})
-}}}
+let details=dm?dm[1]:'';
+if(/Worth\s+\d+%/.test(details)) details='';
+d.gradeComponents.push({name:cp.name,weight:weight,details:details})}}}
+}
 
 // Grading criteria
 const gradeSec=sections['grading criteria']||'';
@@ -571,7 +590,7 @@ if(gradeSec) d.gradingCriteria=gradeSec.replace(/\n/g,' ').replace(/\s{2,}/g,' '
 
 // Additional info
 const addSec=sections['additional class information']||'';
-if(addSec) d.additionalInfo=addSec.replace(/\n/g,' ').replace(/\s{2,}/g,' ').trim();
+if(addSec && !/^N\/?A$/i.test(addSec.trim())) d.additionalInfo=addSec.replace(/\n/g,' ').replace(/\s{2,}/g,' ').trim();
 
 // Schedule
 const schSec=sections['class dates']||sections['daily assignments']||'';
@@ -602,7 +621,7 @@ sv('instrName',d.instructorName);sv('instrOffice',d.instructorOffice);sv('instrP
 if(d.officeHours&&Array.isArray(d.officeHours)){const dm={mon:'mon',tue:'tue',wed:'wed',thu:'thu',fri:'fri',sat:'sat',sun:'sun',monday:'mon',tuesday:'tue',wednesday:'wed',thursday:'thu',friday:'fri',saturday:'sat',sunday:'sun'};d.officeHours.forEach(h=>{const k=dm[(h.day||'').toLowerCase()];if(k){const s=document.getElementById(`hrs_${k}_s1`),e=document.getElementById(`hrs_${k}_e1`);if(s&&!s.value){s.value=h.start||'';s.classList.add('auto-filled')}if(e&&!e.value){e.value=h.end||'';e.classList.add('auto-filled')}}})}
 if(d.textbooks&&d.textbooks.length){const l=document.getElementById('textbookList'),fi=l.querySelector('.dynamic-list-item');d.textbooks.forEach((tb,i)=>{let it;if(i===0&&fi)it=fi;else{addTextbook();it=l.querySelector('.dynamic-list-item:last-child')}if(tb.title){const e=it.querySelector('.tb-title');e.value=tb.title;e.classList.add('auto-filled')}if(tb.author){const e=it.querySelector('.tb-author');e.value=tb.author;e.classList.add('auto-filled')}})}
 if(d.tccPlus)document.getElementById('tccPlus').checked=true;
-sv('specialMaterials',d.specialMaterials);sv('courseDescription',d.courseDescription);sv('learningObjectives',d.learningObjectives);sv('gradingCriteria',d.gradingCriteria);sv('additionalInfo',d.additionalInfo);sv('courseSchedule',d.courseSchedule);
+sv('specialMaterials',d.specialMaterials);sv('courseFocus',d.courseFocus||d.courseDescription||'');sv('gradingCriteria',d.gradingCriteria);sv('additionalInfo',d.additionalInfo);sv('courseSchedule',d.courseSchedule);
 // Fill grade components
 if(d.gradeComponents&&d.gradeComponents.length){
 const list=document.getElementById('gradeComponentsList');
@@ -641,43 +660,122 @@ const pf=val('coursePrefix'),cn=val('courseNumber'),sn=val('sectionNumber'),ct=v
 const iN=val('instrName'),iO=val('instrOffice'),iP=val('instrPhone'),iE=val('instrEmail'),iC=val('instrContact'),hN=val('hoursNotes');
 const chN=val('chairName'),chE=val('chairEmail'),deN=val('deanName'),deE=val('deanEmail');
 const hrs=getHours(),bks=getBooks(),tp=document.getElementById('tccPlus').checked,sm=val('specialMaterials');
-const cd=val('courseDescription'),lo=val('learningObjectives');
+const cf=val('courseFocus');
 const gc=getComps(),gs=val('gradingScale'),cs=val('customScale'),gci=val('gradingCriteria');
 const sch=val('courseSchedule'),ai=val('additionalInfo'),ap=val('attendancePolicy'),ip=val('integrityPolicy'),cp=val('commPolicy');
 let h='';
-h+=`<div class="syl-header"><div class="college-name">Tarrant County College District</div><div class="doc-type">Instructor's Course Requirements / Syllabus</div><div class="course-title-block">${esc(pf)} ${esc(cn)}: ${esc(ct)}</div><div class="section-line">${sn?'Section '+esc(sn):''}${crn?' (CRN: '+esc(crn)+')':''} — ${esc(tm)}</div></div>`;
-h+=`<div class="info-grid">`;
-if(iN)h+=`<div class="info-item"><strong>Instructor:</strong> ${esc(iN)}</div>`;if(iO)h+=`<div class="info-item"><strong>Office:</strong> ${esc(iO)}</div>`;
-if(iP)h+=`<div class="info-item"><strong>Phone:</strong> ${esc(iP)}</div>`;if(iE)h+=`<div class="info-item"><strong>Email:</strong> ${esc(iE)}</div>`;
-if(mod)h+=`<div class="info-item"><strong>Modality:</strong> ${esc(mod)}</div>`;if(tm)h+=`<div class="info-item"><strong>Term:</strong> ${esc(tm)}</div>`;
-if(odr)h+=`<div class="info-item"><strong>Official Day of Record:</strong> ${odr}</div>`;if(ldd)h+=`<div class="info-item"><strong>Last Day to Drop:</strong> ${ldd}</div>`;
-if(mt)h+=`<div class="info-item" style="grid-column:span 2"><strong>Meeting:</strong> ${esc(mt)}</div>`;
-h+=`</div>`;
-h+=`<div class="dept-contacts"><div class="contact-header">Department & Division Leadership</div><div class="info-item"><strong>Department Chair:</strong> ${esc(chN)}</div><div class="info-item"><strong>Email:</strong> ${esc(chE)}</div><div class="info-item"><strong>Division Dean:</strong> ${esc(deN)}</div><div class="info-item"><strong>Email:</strong> ${esc(deE)}</div></div>`;
-if(iC||cp){h+=`<div class="syl-section"><div class="syl-section-title">Communication</div>`;if(iC)h+=`<p>${esc(iC)}</p>`;if(cp)h+=toParas(cp);h+=`</div>`}
-if(hrs.length){h+=`<div class="syl-section"><div class="syl-section-title">Student Support Hours</div><table class="hours-output-table"><thead><tr><th>Day</th><th>Hours</th></tr></thead><tbody>`;hrs.forEach(r=>{h+=`<tr><td><strong>${r.day}</strong></td><td>${esc(r.times)}</td></tr>`});h+=`</tbody></table>`;if(hN)h+=`<p><em>${esc(hN)}</em></p>`;h+=`</div>`}
-if(bks.length||sm||tp){h+=`<div class="syl-section"><div class="syl-section-title">Textbooks & Materials</div>`;bks.forEach(b=>{h+=`<p><strong>${esc(b.title)}</strong>`;if(b.author)h+=` — ${esc(b.author)}`;if(b.pub)h+=` (${esc(b.pub)})`;if(b.isbn)h+=`<br><span style="font-size:13px;color:#666">ISBN: ${esc(b.isbn)}</span>`;h+=`</p>`});if(tp)h+=`<p><strong>TCC Plus (Inclusive Access):</strong> Your textbook and materials are available immediately upon registration at a discounted price — no need to visit the bookstore.</p>`;if(sm)h+=toParas(sm);h+=`</div>`}
-if(cd)h+=`<div class="syl-section"><div class="syl-section-title">Course Description</div>${toParas(cd)}</div>`;
-if(lo)h+=`<div class="syl-section"><div class="syl-section-title">Course Learning Objectives</div><p>Upon successful completion of this course, students will be able to:</p>${toList(lo)}</div>`;
-if(gc.length){h+=`<div class="syl-section"><div class="syl-section-title">Assignments & Grading</div><table class="grade-table"><thead><tr><th>Component</th><th style="width:100px;text-align:center">Weight</th><th>Details</th></tr></thead><tbody>`;let tw=0;gc.forEach(c=>{const w=parseInt(c.weight)||0;tw+=w;h+=`<tr><td><strong>${esc(c.name)}</strong></td><td style="text-align:center">${c.weight?c.weight+'%':'—'}</td><td>${c.details?esc(c.details):'—'}</td></tr>`});h+=`<tr style="background:#E8F6F5;font-weight:700"><td>Total</td><td style="text-align:center">${tw}%</td><td></td></tr></tbody></table>`;
-h+=`<div class="syl-subsection-title">Grading Scale</div>`;if(gs==='standard')h+=`<table class="grade-table" style="max-width:300px"><thead><tr><th>Grade</th><th>Range</th></tr></thead><tbody><tr><td><strong>A</strong></td><td>90–100</td></tr><tr><td><strong>B</strong></td><td>80–89</td></tr><tr><td><strong>C</strong></td><td>70–79</td></tr><tr><td><strong>D</strong></td><td>60–69</td></tr><tr><td><strong>F</strong></td><td>Below 60</td></tr></tbody></table>`;else if(cs)h+=toParas(cs);h+=`</div>`}
-if(gci)h+=`<div class="syl-section"><div class="syl-section-title">Grading Criteria</div>${toParas(gci)}</div>`;
-if(sch)h+=`<div class="syl-section"><div class="syl-section-title">Course Schedule</div>${toParas(sch)}</div>`;
-if(ai)h+=`<div class="syl-section"><div class="syl-section-title">Additional Information</div>${toParas(ai)}</div>`;
-if(ap)h+=`<div class="syl-section"><div class="syl-section-title">Attendance Policy</div>${toParas(ap)}</div>`;
-if(ip)h+=`<div class="syl-section"><div class="syl-section-title">Academic Integrity</div>${toParas(ip)}</div>`;
-// DISTRICT POLICIES
-h+=`<div class="syl-section"><div class="syl-section-title" style="border-bottom-color:#006184;border-bottom-width:3px">Tarrant County College District Policies</div><p style="font-style:italic;color:#666;font-size:13px">The following policies apply to all TCC courses. See the <a href="https://www.tccd.edu/academics/academic-resources/student-handbook/" target="_blank">TCCD Student Handbook</a> and <a href="https://www.tccd.edu/academics/academic-resources/academic-calendar/" target="_blank">TCCD Academic Calendar</a>.</p>`;
-h+=`<div class="policy-section"><div class="policy-title">Attendance Policy</div><p>Regular and punctual class attendance is expected at Tarrant County College. Student absences will be recorded from the first day the class meets.</p><p>A student in an on-campus course missing a cumulative of 15 percent of class meetings and not keeping up with assignments may be dropped at the discretion of the instructor.</p><p>A student in an online course is required to complete the online orientation and actively participate as described in the ICRs. A student not meeting these requirements may be dropped at the discretion of the instructor.</p></div>`;
-h+=`<div class="policy-section"><div class="policy-title">Student Accessibility Resources (SAR)</div><p>Any student with a documented disability needing academic accommodations is required to contact the SAR Office on each campus. All discussions are confidential. Because SAR accommodations may require early planning and are not provided retroactively, students are encouraged to contact SAR as early in the semester as possible. TCC professors will honor SAR-issued accommodation requests.</p></div>`;
-h+=`<div class="policy-section"><div class="policy-title">Title IX — Reports of Discrimination Based on Sex</div><p>All TCC faculty are designated "Responsible Employees" and are required to report Sexual Misconduct. State law requires reporting of sexual harassment, sexual assault, dating/domestic violence, and stalking to the Title IX Coordinator.</p><p>Students who desire confidentiality may: (1) speak with a licensed counselor at a TCC campus (free), or (2) contact an off-campus rape crisis center.</p></div>`;
-h+=`<div class="policy-section"><div class="policy-title">Pregnant and Parenting Students</div><p>Title IX prohibits discrimination based on pregnancy, childbirth, false pregnancy, termination of pregnancy, or recovery from these conditions; and for parenting a child under one year of age. Visit <a href="https://www.tccd.edu/services/title-ix/supporting-pregnant-and-parenting-students/" target="_blank">Supporting Pregnant and Parenting Students</a>.</p></div>`;
-h+=`<div class="policy-section"><div class="policy-title">Campus Carry</div><p>The Campus Carry law (SB 11, effective Aug. 1, 2017) allows licensed individuals to carry a concealed handgun in buildings on public community college campuses, except in designated prohibited areas. Open carry is not permitted. See <a href="http://www.tccd.edu/services/police-department/open-carry/campus-carry-regulations/" target="_blank">Campus Carry Regulations</a>. Emergency: <a href="https://www.tccd.edu/about/emergency-information/" target="_blank">tccd.edu/emergency-information</a>.</p></div>`;
-h+=`<div class="policy-section"><div class="policy-title">CARE Team & Basic Needs</div><p>Each campus has a CARE Team providing support for students in distress. Report at <a href="http://www.tccd.edu/incidentreport/" target="_blank">tccd.edu/incidentreport</a>. For imminent threats: TCC Police 817-515-8911 or 911.</p><p>Students facing basic needs challenges (food, housing, transportation) may apply for the <a href="https://www.tccd.edu/services/care-team/" target="_blank">Student Emergency Assistance Fund</a>.</p></div>`;
-h+=`<div class="policy-section"><div class="policy-title">Course Evaluation</div><p>Students are strongly encouraged to participate in course evaluations with constructive feedback. Results are anonymous and unavailable to faculty until after grades post.</p>${ew?`<p>This course may be evaluated between <strong>${esc(ew)}</strong>.</p>`:''}</div>`;
-h+=`<div class="policy-section"><div class="policy-title">Paying for College</div><p>TCC awards over $85.2 million in financial aid annually. Apply via FAFSA. Visit <a href="https://www.tccd.edu/services/financial-aid/" target="_blank">Student Financial Aid Services</a>.</p></div>`;
-h+=`</div>`;
-h+=`<div class="syl-footer"><strong>Tarrant County College District</strong><br><a href="https://www.tccd.edu/academics/academic-resources/student-handbook/" target="_blank">Student Handbook</a> · <a href="https://www.tccd.edu/academics/academic-resources/academic-calendar/" target="_blank">Academic Calendar</a> · <a href="https://www.tccd.edu/services/financial-aid/" target="_blank">Financial Aid</a><br><span style="font-size:11px;color:#AAA">Generated with TCC Syllabus Generator</span></div>`;
+// ── Inline style constants for Canvas compatibility ──
+const S={
+hdr:'text-align:center;margin-bottom:30px;padding-bottom:20px;border-bottom:3px solid #006184',
+college:'font-family:Arial,sans-serif;font-size:22px;font-weight:700;color:#006184;letter-spacing:0.05em;text-transform:uppercase;margin:0',
+doc:'font-size:14px;color:#5A6B7D;font-style:italic;margin:4px 0 12px',
+ctitle:'font-family:Arial,sans-serif;font-size:26px;font-weight:700;color:#003C5A;margin:8px 0 4px',
+secline:'font-size:15px;color:#5A6B7D;margin:0',
+stitle:'font-family:Arial,sans-serif;font-size:18px;font-weight:700;color:#006184;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid #E8F6F5;text-transform:uppercase;letter-spacing:0.03em',
+sub:'font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#003C5A;margin:14px 0 6px',
+ptitle:'font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#006184;margin:0 0 6px',
+psec:'margin-bottom:16px;padding:14px 18px;background:#FAFCFD;border-left:3px solid #D8E1E8',
+pp:'font-size:13.5px;line-height:1.6;color:#444;margin:0 0 6px',
+p:'font-family:Georgia,serif;font-size:15px;line-height:1.65;color:#222;margin:0 0 10px',
+th:'background:#006184;color:#fff;font-family:Arial,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;padding:9px 14px;text-align:left',
+td:'padding:9px 14px;border-bottom:1px solid #E8F6F5;font-family:Georgia,serif;font-size:14px',
+tde:'padding:9px 14px;border-bottom:1px solid #E8F6F5;font-family:Georgia,serif;font-size:14px;background:#FAFCFD',
+link:'color:#006184',
+infotbl:'width:100%;border-collapse:collapse;margin-bottom:20px;background:#F4F9FB;border-left:4px solid #00A9A5',
+infotd:'padding:6px 16px;font-family:Georgia,serif;font-size:14px;color:#222;vertical-align:top',
+depttbl:'width:100%;border-collapse:collapse;margin-bottom:24px;background:#FFF9F0;border-left:4px solid #F39C12',
+depthead:'padding:8px 16px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#003C5A;text-transform:uppercase;letter-spacing:0.04em',
+};
+
+// ── Header ──
+h+=`<div style="${S.hdr}"><p style="${S.college}">Tarrant County College District</p><p style="${S.doc}">Instructor's Course Requirements / Syllabus</p><p style="${S.ctitle}">${esc(pf)} ${esc(cn)}: ${esc(ct)}</p><p style="${S.secline}">${sn?'Section '+esc(sn):''}${crn?' (CRN: '+esc(crn)+')':''} — ${esc(tm)}</p></div>`;
+
+// ── Info grid as table ──
+const infoRows=[];
+if(iN) infoRows.push(['Instructor',esc(iN)]);if(iO) infoRows.push(['Office',esc(iO)]);
+if(iP) infoRows.push(['Phone',esc(iP)]);if(iE) infoRows.push(['Email',esc(iE)]);
+if(mod) infoRows.push(['Modality',esc(mod)]);if(tm) infoRows.push(['Term',esc(tm)]);
+if(odr) infoRows.push(['Official Day of Record',odr]);if(ldd) infoRows.push(['Last Day to Drop',ldd]);
+if(mt) infoRows.push(['Meeting',esc(mt)]);
+h+=`<table style="${S.infotbl}"><tbody>`;
+for(let i=0;i<infoRows.length;i+=2){
+h+=`<tr><td style="${S.infotd}"><strong style="color:#003C5A">${infoRows[i][0]}:</strong> ${infoRows[i][1]}</td>`;
+if(i+1<infoRows.length) h+=`<td style="${S.infotd}"><strong style="color:#003C5A">${infoRows[i+1][0]}:</strong> ${infoRows[i+1][1]}</td>`;
+else h+=`<td style="${S.infotd}"></td>`;
+h+=`</tr>`}
+h+=`</tbody></table>`;
+
+// ── Department leadership ──
+h+=`<table style="${S.depttbl}"><tbody>`;
+h+=`<tr><td colspan="2" style="${S.depthead}">Department & Division Leadership</td></tr>`;
+h+=`<tr><td style="${S.infotd}"><strong style="color:#003C5A">Department Chair:</strong> ${esc(chN)}</td><td style="${S.infotd}"><strong style="color:#003C5A">Email:</strong> ${esc(chE)}</td></tr>`;
+h+=`<tr><td style="${S.infotd}"><strong style="color:#003C5A">Division Dean:</strong> ${esc(deN)}</td><td style="${S.infotd}"><strong style="color:#003C5A">Email:</strong> ${esc(deE)}</td></tr>`;
+h+=`</tbody></table>`;
+
+// ── Sections helper ──
+function secTitle(t){return `<p style="${S.stitle}">${t}</p>`}
+function para(t){return `<p style="${S.p}">${esc(t)}</p>`}
+function parasFromText(t){if(!t)return '';return t.split('\\n').filter(l=>l.trim()).map(l=>`<p style="${S.p}">${esc(l)}</p>`).join('')}
+
+// ── Communication ──
+if(iC||cp){h+=secTitle('Communication');if(iC)h+=`<p style="${S.p}">${esc(iC)}</p>`;if(cp)h+=cp.split('\\n').filter(l=>l.trim()).map(l=>`<p style="${S.p}">${esc(l)}</p>`).join('')}
+
+// ── Office Hours ──
+if(hrs.length){h+=secTitle('Student Support Hours');
+h+=`<table style="width:100%;border-collapse:collapse;margin:10px 0 16px"><thead><tr><th style="${S.th}">Day</th><th style="${S.th}">Hours</th></tr></thead><tbody>`;
+hrs.forEach((r,i)=>{const bg=i%2?S.tde:S.td;h+=`<tr><td style="${bg}"><strong>${r.day}</strong></td><td style="${bg}">${esc(r.times)}</td></tr>`});
+h+=`</tbody></table>`;if(hN)h+=`<p style="${S.p}"><em>${esc(hN)}</em></p>`}
+
+// ── Textbooks ──
+if(bks.length||sm||tp){h+=secTitle('Textbooks & Materials');
+bks.forEach(b=>{h+=`<p style="${S.p}"><strong>${esc(b.title)}</strong>`;if(b.author)h+=` — ${esc(b.author)}`;if(b.pub)h+=` (${esc(b.pub)})`;if(b.isbn)h+=`<br><span style="font-size:13px;color:#666">ISBN: ${esc(b.isbn)}</span>`;h+=`</p>`});
+if(tp)h+=`<p style="${S.p}"><strong>TCC Plus (Inclusive Access):</strong> Your textbook and materials are available immediately upon registration at a discounted price — no need to visit the bookstore.</p>`;
+if(sm) sm.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}
+
+// ── Course Focus ──
+if(cf){h+=secTitle('Course Focus & Learning Objectives');
+const cfLines=cf.split('\n');let inList=false;
+for(const line of cfLines){const t=line.trim();if(!t)continue;
+if(/^[•\-\uf0b7○◦]/.test(t)){if(!inList){h+='<ul style="margin:8px 0 12px 24px;font-family:Georgia,serif;font-size:15px;color:#222">';inList=true}h+=`<li style="margin-bottom:5px">${esc(t.replace(/^[•\-\uf0b7○◦]\s*/,''))}</li>`}
+else{if(inList){h+='</ul>';inList=false}h+=`<p style="${S.p}">${esc(t)}</p>`}}
+if(inList)h+='</ul>'}
+
+// ── Grade components ──
+if(gc.length){h+=secTitle('Assignments & Grading');
+h+=`<table style="width:100%;border-collapse:collapse;margin:10px 0 16px"><thead><tr><th style="${S.th}">Component</th><th style="${S.th};width:100px;text-align:center">Weight</th><th style="${S.th}">Details</th></tr></thead><tbody>`;
+let tw=0;gc.forEach((c,i)=>{const w=parseInt(c.weight)||0;tw+=w;const bg=i%2?S.tde:S.td;
+h+=`<tr><td style="${bg}"><strong>${esc(c.name)}</strong></td><td style="${bg};text-align:center">${c.weight?c.weight+'%':'—'}</td><td style="${bg}">${c.details?esc(c.details):'—'}</td></tr>`});
+h+=`<tr><td style="${S.td};background:#E8F6F5;font-weight:700">Total</td><td style="${S.td};background:#E8F6F5;font-weight:700;text-align:center">${tw}%</td><td style="${S.td};background:#E8F6F5"></td></tr></tbody></table>`;
+h+=`<p style="${S.sub}">Grading Scale</p>`;
+if(gs==='standard'){h+=`<table style="width:auto;border-collapse:collapse;margin:10px 0 16px"><thead><tr><th style="${S.th}">Grade</th><th style="${S.th}">Range</th></tr></thead><tbody>`;
+[['A','90–100'],['B','80–89'],['C','70–79'],['D','60–69'],['F','Below 60']].forEach(([g,r],i)=>{const bg=i%2?S.tde:S.td;h+=`<tr><td style="${bg}"><strong>${g}</strong></td><td style="${bg}">${r}</td></tr>`});
+h+=`</tbody></table>`} else if(cs){cs.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}}
+
+// ── Other sections ──
+if(gci){h+=secTitle('Grading Criteria');gci.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}
+if(sch){h+=secTitle('Course Schedule');sch.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}
+if(ai){h+=secTitle('Additional Information');ai.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}
+if(ap){h+=secTitle('Attendance Policy');ap.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}
+if(ip){h+=secTitle('Academic Integrity');ip.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}
+
+// ── DISTRICT POLICIES ──
+h+=`<p style="${S.stitle};border-bottom:3px solid #006184">Tarrant County College District Policies</p>`;
+h+=`<p style="font-style:italic;color:#666;font-size:13px;margin:0 0 16px">The following policies apply to all TCC courses. See the <a style="${S.link}" href="https://www.tccd.edu/academics/academic-resources/student-handbook/" target="_blank">TCCD Student Handbook</a> and <a style="${S.link}" href="https://www.tccd.edu/academics/academic-resources/academic-calendar/" target="_blank">TCCD Academic Calendar</a>.</p>`;
+
+function policyBlock(title,bodyHtml){return `<div style="${S.psec}"><p style="${S.ptitle}">${title}</p>${bodyHtml}</div>`}
+function pp(t){return `<p style="${S.pp}">${t}</p>`}
+
+h+=policyBlock('Attendance Policy',pp('Regular and punctual class attendance is expected at Tarrant County College. Student absences will be recorded from the first day the class meets.')+pp('A student in an on-campus course missing a cumulative of 15 percent of class meetings and not keeping up with assignments may be dropped at the discretion of the instructor.')+pp('A student in an online course is required to complete the online orientation and actively participate as described in the ICRs. A student not meeting these requirements may be dropped at the discretion of the instructor.'));
+h+=policyBlock('Student Accessibility Resources (SAR)',pp('Any student with a documented disability needing academic accommodations is required to contact the SAR Office on each campus. All discussions are confidential. Because SAR accommodations may require early planning and are not provided retroactively, students are encouraged to contact SAR as early in the semester as possible. TCC professors will honor SAR-issued accommodation requests.'));
+h+=policyBlock('Title IX — Reports of Discrimination Based on Sex',pp('All TCC faculty are designated "Responsible Employees" and are required to report Sexual Misconduct. State law requires reporting of sexual harassment, sexual assault, dating/domestic violence, and stalking to the Title IX Coordinator.')+pp('Students who desire confidentiality may: (1) speak with a licensed counselor at a TCC campus (free), or (2) contact an off-campus rape crisis center.'));
+h+=policyBlock('Pregnant and Parenting Students',pp('Title IX prohibits discrimination based on pregnancy, childbirth, false pregnancy, termination of pregnancy, or recovery from these conditions; and for parenting a child under one year of age. Visit <a style="'+S.link+'" href="https://www.tccd.edu/services/title-ix/supporting-pregnant-and-parenting-students/" target="_blank">Supporting Pregnant and Parenting Students</a>.'));
+h+=policyBlock('Campus Carry',pp('The Campus Carry law (SB 11, effective Aug. 1, 2017) allows licensed individuals to carry a concealed handgun in buildings on public community college campuses, except in designated prohibited areas. Open carry is not permitted. See <a style="'+S.link+'" href="http://www.tccd.edu/services/police-department/open-carry/campus-carry-regulations/" target="_blank">Campus Carry Regulations</a>. Emergency: <a style="'+S.link+'" href="https://www.tccd.edu/about/emergency-information/" target="_blank">tccd.edu/emergency-information</a>.'));
+h+=policyBlock('CARE Team & Basic Needs',pp('Each campus has a CARE Team providing support for students in distress. Report at <a style="'+S.link+'" href="http://www.tccd.edu/incidentreport/" target="_blank">tccd.edu/incidentreport</a>. For imminent threats: TCC Police 817-515-8911 or 911.')+pp('Students facing basic needs challenges (food, housing, transportation) may apply for the <a style="'+S.link+'" href="https://www.tccd.edu/services/care-team/" target="_blank">Student Emergency Assistance Fund</a>.'));
+h+=policyBlock('Course Evaluation',pp('Students are strongly encouraged to participate in course evaluations with constructive feedback. Results are anonymous and unavailable to faculty until after grades post.')+(ew?pp('This course may be evaluated between <strong>'+esc(ew)+'</strong>.'):''));
+h+=policyBlock('Paying for College',pp('TCC awards over $85.2 million in financial aid annually. Apply via FAFSA. Visit <a style="'+S.link+'" href="https://www.tccd.edu/services/financial-aid/" target="_blank">Student Financial Aid Services</a>.'));
+
+// ── Footer ──
+h+=`<div style="text-align:center;margin-top:30px;padding-top:16px;border-top:2px solid #E8F6F5;font-size:13px;color:#8A96A3"><strong>Tarrant County College District</strong><br><a style="${S.link}" href="https://www.tccd.edu/academics/academic-resources/student-handbook/" target="_blank">Student Handbook</a> · <a style="${S.link}" href="https://www.tccd.edu/academics/academic-resources/academic-calendar/" target="_blank">Academic Calendar</a> · <a style="${S.link}" href="https://www.tccd.edu/services/financial-aid/" target="_blank">Financial Aid</a></div>`;
 document.getElementById('syllabusOutput').innerHTML=h;
 document.getElementById('formContainer').style.display='none';
 document.getElementById('previewContainer').classList.add('active');
