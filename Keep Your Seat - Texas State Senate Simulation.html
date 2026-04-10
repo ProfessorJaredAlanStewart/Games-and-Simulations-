@@ -691,6 +691,44 @@ h1, h2, h3, h4, h5, h6, button, .label, .badge, .stat-label, .advisor-name, .nav
 
 /* --- Hint Button --- */
 .hint-btn {
+
+/* --- Save/Load Panel --- */
+.save-panel {
+  position: fixed; bottom: 56px; right: 16px; z-index: 810;
+  background: #fff; border-radius: var(--radius); padding: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.18); border: 1px solid var(--border);
+  min-width: 260px; animation: advisorSlide .3s ease-out;
+}
+.save-panel h4 { font-size: .9rem; margin-bottom: 12px; }
+.save-slot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; margin-bottom: 6px; background: #f8f9fa;
+  border-radius: var(--radius-xs); font-size: .85rem;
+}
+.save-slot-info { flex: 1; }
+.save-slot-meta { font-size: .72rem; color: var(--text-dim); }
+.save-slot-btns { display: flex; gap: 4px; }
+.save-slot-btns button {
+  padding: 4px 10px; border: none; border-radius: 4px;
+  font-size: .72rem; font-weight: 600; cursor: pointer;
+  font-family: -apple-system, sans-serif;
+}
+.save-slot-btns .sv-save { background: var(--tcc-navy); color: #fff; }
+.save-slot-btns .sv-load { background: var(--success); color: #fff; }
+.save-slot-btns .sv-del { background: var(--danger); color: #fff; }
+
+/* --- Continue Button on Title --- */
+.title-continue {
+  background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.25);
+  color: #fff; padding: 14px 36px; border-radius: var(--radius);
+  font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 12px;
+  font-family: -apple-system, sans-serif; transition: all .2s;
+  backdrop-filter: blur(4px);
+}
+.title-continue:hover { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.4); transform: translateY(-2px); }
+
+/* --- Hint Button --- */
+.hint-btn {
   position: fixed; bottom: 16px; left: 16px; z-index: 800;
   padding: 12px 18px; background: linear-gradient(135deg, #f59e0b, #d97706);
   color: #fff; border: none; border-radius: 24px; font-size: .85rem; font-weight: 700;
@@ -904,8 +942,92 @@ let S = {
   selectedIssue: null,
   studentName: '',
   showLog: false,
+  showSavePanel: false,
   roundEventMod: {}
 };
+
+// ── SAVE / LOAD ───────────────────────────────────────────────
+
+const SAVE_KEY = 'keepYourSeat_v2_';
+
+function buildSaveData() {
+  return {
+    district: S.district, round: S.round, actions: S.actions,
+    money: S.money, approval: S.approval, ltGov: S.ltGov,
+    energy: S.energy, incumbency: S.incumbency, casework: S.casework,
+    location: S.location, committees: S.committees,
+    votedBills: S.votedBills, voteHistory: S.voteHistory,
+    log: S.log.slice(0, 10), headlines: S.headlines.slice(-5),
+    tweets: S.tweets.slice(-5), approvalHistory: S.approvalHistory,
+    primaryThreat: S.primaryThreat, sessionActive: S.sessionActive,
+    specialSession: S.specialSession, approvalFloor: S.approvalFloor,
+    approvalCeiling: S.approvalCeiling, issueOwnership: S.issueOwnership,
+    studentName: S.studentName,
+    savedAt: new Date().toISOString(),
+    savedRound: S.round,
+    savedDistrict: S.district ? S.district.name : ''
+  };
+}
+
+function saveGame(slot) {
+  try {
+    localStorage.setItem(SAVE_KEY + slot, JSON.stringify(buildSaveData()));
+    addLog('Game saved to Slot ' + slot, 'success');
+    S.showSavePanel = false;
+    showFeedback('Game Saved', 'Progress saved to Slot ' + slot + '. Load anytime from the title screen or the save menu.', 'success', []);
+  } catch(e) {
+    showFeedback('Save Failed', 'Could not save. Your browser may have storage disabled.', 'danger', []);
+  }
+}
+
+function loadGame(slot) {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY + slot);
+    if (!raw) return false;
+    const d = JSON.parse(raw);
+    S.screen = 'playing';
+    Object.assign(S, {
+      district:d.district, round:d.round, actions:d.actions, money:d.money,
+      approval:d.approval, ltGov:d.ltGov, energy:d.energy, incumbency:d.incumbency,
+      casework:d.casework, location:d.location, committees:d.committees||[],
+      votedBills:d.votedBills||[], voteHistory:d.voteHistory||[],
+      log:d.log||[], headlines:d.headlines||[], tweets:d.tweets||[],
+      approvalHistory:d.approvalHistory||[], primaryThreat:d.primaryThreat||false,
+      sessionActive:d.sessionActive!==undefined?d.sessionActive:true,
+      specialSession:d.specialSession||false, approvalFloor:d.approvalFloor||25,
+      approvalCeiling:d.approvalCeiling||75, issueOwnership:d.issueOwnership||{},
+      studentName:d.studentName||'', currentEvent:null, roundEventMod:{},
+      feedback:null, showSavePanel:false, advisorDismissed:false
+    });
+    addLog('Game loaded from Slot ' + slot, 'success');
+    render(); return true;
+  } catch(e) { return false; }
+}
+
+function deleteSave(slot) {
+  if (confirm('Delete save in Slot ' + slot + '?')) {
+    localStorage.removeItem(SAVE_KEY + slot);
+    render();
+  }
+}
+
+function getSaveInfo(slot) {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY + slot);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    return { district: d.savedDistrict||'Unknown', round: d.savedRound||'?', date: d.savedAt ? new Date(d.savedAt).toLocaleDateString() : '?' };
+  } catch(e) { return null; }
+}
+
+function hasSavedGames() {
+  for (let i = 1; i <= 3; i++) if (localStorage.getItem(SAVE_KEY + i)) return true;
+  try { return !!localStorage.getItem(SAVE_KEY + 'auto'); } catch(e) { return false; }
+}
+
+function autoSave() {
+  try { localStorage.setItem(SAVE_KEY + 'auto', JSON.stringify(buildSaveData())); } catch(e) {}
+}
 
 // ── HELPERS ───────────────────────────────────────────────────
 
@@ -1279,6 +1401,7 @@ function endRound() {
   }
 
   addLog("Round " + S.round + " begins (Months " + ((S.round-1)*2+1) + "-" + (S.round*2) + ")", 'info');
+  autoSave();
   render();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1317,6 +1440,17 @@ function renderMenu(el) {
       <div class="title-divider"></div>
       <p class="title-tagline">You just won a seat in the Texas Senate.<br>Now try to keep it.</p>
       <button class="title-cta" onclick="S.screen='select';render()">Enter the Capitol</button>
+      ${hasSavedGames() ? '<div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;align-items:center">' +
+        (function(){
+          let btns = '';
+          const auto = getSaveInfo('auto');
+          if (auto) btns += '<button class="title-continue" onclick="loadGame(\'auto\')">Continue (' + auto.district + ' \u2022 Round ' + auto.round + ')</button>';
+          for (let i = 1; i <= 3; i++) {
+            const info = getSaveInfo(i);
+            if (info) btns += '<button class="title-continue" onclick="loadGame(' + i + ')">Load Slot ' + i + ' (' + info.district + ' \u2022 R' + info.round + ' \u2022 ' + info.date + ')</button>';
+          }
+          return btns;
+        })() + '</div>' : ''}
       <p class="title-footer">Based on contemporary Texas politics &bull; 12 rounds &bull; Real districts &bull; Real bills</p>
     </div>`;
 }
@@ -1380,7 +1514,7 @@ function renderGame(el) {
       </div>
     </div>
 
-    <div class="container anim-fade">`;
+    <div class="container">`;
 
   // Event banner — visible all round so player can reference it
   if (S.currentEvent) {
@@ -1499,8 +1633,29 @@ function renderGame(el) {
   // Hint button (fixed bottom-left)
   html += `<button class="hint-btn no-print" onclick="S.hintRequested=true;render()"><span class="hint-pulse"></span> Ask Chief of Staff</button>`;
 
+  // Save panel (above controls)
+  if (S.showSavePanel) {
+    let panelHtml = '<div class="save-panel no-print"><h4>\u{1F4BE} Save / Load Game</h4>';
+    for (let i = 1; i <= 3; i++) {
+      const info = getSaveInfo(i);
+      panelHtml += '<div class="save-slot"><div class="save-slot-info">Slot ' + i;
+      if (info) panelHtml += '<div class="save-slot-meta">' + info.district + ' \u2022 R' + info.round + ' \u2022 ' + info.date + '</div>';
+      else panelHtml += '<div class="save-slot-meta">Empty</div>';
+      panelHtml += '</div><div class="save-slot-btns">';
+      panelHtml += '<button class="sv-save" onclick="saveGame(' + i + ')">Save</button>';
+      if (info) {
+        panelHtml += '<button class="sv-load" onclick="loadGame(' + i + ')">Load</button>';
+        panelHtml += '<button class="sv-del" onclick="deleteSave(' + i + ')">Del</button>';
+      }
+      panelHtml += '</div></div>';
+    }
+    panelHtml += '</div>';
+    html += panelHtml;
+  }
+
   // Controls
   html += `<div class="controls-bar no-print">
+    <button class="ctrl-btn" onclick="S.showSavePanel=!S.showSavePanel;render()">\u{1F4BE} Save/Load</button>
     <button class="ctrl-btn ctrl-danger" onclick="if(confirm('Reset entire game?'))location.reload()">\u{1F534} Reset</button>
   </div>`;
 
