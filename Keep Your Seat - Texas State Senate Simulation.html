@@ -970,6 +970,7 @@ let S = {
   selectedIssue: null,
   studentName: '',
   showLog: false,
+  showGradePreview: false,
   showSavePanel: false,
   roundEventMod: {}
 };
@@ -1057,6 +1058,40 @@ function autoSave() {
   try { localStorage.setItem(SAVE_KEY + 'auto', JSON.stringify(buildSaveData())); } catch(e) {}
 }
 
+function buildGradeRow(label, score, max, tip) {
+  const pct = Math.round((score / max) * 100);
+  const barColor = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--danger)';
+  return '<div style="background:#f8f9fa;border-radius:6px;padding:10px 12px;border:1px solid var(--border)">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
+      '<span style="font-size:.8rem;font-weight:600">' + label + '</span>' +
+      '<span style="font-size:.85rem;font-weight:700">' + score + '/' + max + '</span>' +
+    '</div>' +
+    '<div style="height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin-bottom:4px">' +
+      '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:3px"></div>' +
+    '</div>' +
+    '<div style="font-size:.7rem;color:var(--text-dim)">' + tip + '</div>' +
+  '</div>';
+}
+
+function calcGradePreview() {
+  const partyVotes = S.voteHistory.filter(v => v.withLeadership).length;
+  const loyalty = S.voteHistory.length > 0 ? Math.round((partyVotes / S.voteHistory.length) * 100) : 0;
+  const approvalScore = Math.min(30, Math.round((S.approval / 80) * 30));
+  const ltGovScore = Math.min(20, Math.max(0, Math.round(((S.ltGov + 20) / 45) * 20)));
+  const caseworkScore = Math.min(15, S.casework);
+  const committeeScore = Math.min(15, S.committees.length * 5);
+  const loyaltyScore = Math.min(10, Math.round(loyalty / 10));
+  const moneyScore = Math.min(10, Math.round((S.money / 200000) * 10));
+  const total = approvalScore + ltGovScore + caseworkScore + committeeScore + loyaltyScore + moneyScore;
+  const pct = Math.round((total / 100) * 100);
+  let grade = 'F', color = '#B71C1C';
+  if (pct >= 90) { grade = 'A'; color = '#1B5E20'; }
+  else if (pct >= 80) { grade = 'B'; color = '#00695C'; }
+  else if (pct >= 70) { grade = 'C'; color = '#F57C00'; }
+  else if (pct >= 60) { grade = 'D'; color = '#E65100'; }
+  return { approvalScore, ltGovScore, caseworkScore, committeeScore, loyaltyScore, moneyScore, total, pct, grade, color };
+}
+
 // ── HELPERS ───────────────────────────────────────────────────
 
 const $ = id => document.getElementById(id);
@@ -1124,21 +1159,35 @@ function getAdvisorMessage() {
   if (S.hintRequested) {
     S.hintRequested = false;
     if (a === 0) return "You've used all your actions this round. Click \"End Round\" at the bottom to advance!";
-    // Event-aware ad recommendation
+
+    // Grade-aware advice: find weakest scoring category
+    const gp = calcGradePreview();
+    const cats = [
+      { name:'Approval', score:gp.approvalScore, max:30, pct:Math.round(gp.approvalScore/30*100), fix:'Do casework (District Office \u2192 orange button) or give speeches on district-aligned issues.' },
+      { name:'Lt. Gov Influence', score:gp.ltGovScore, max:20, pct:Math.round(gp.ltGovScore/20*100), fix:'Vote WITH leadership on bills at the Capitol, or join available committees.' },
+      { name:'Casework', score:gp.caseworkScore, max:15, pct:Math.round(gp.caseworkScore/15*100), fix:'Click the orange Casework button in the District Office. Each case is worth 1 point (max 15).' },
+      { name:'Committees', score:gp.committeeScore, max:15, pct:Math.round(gp.committeeScore/15*100), fix:'Go to the Capitol and scroll to Join Committees. You need 3 committees for full marks (5 pts each).' },
+      { name:'Party Loyalty', score:gp.loyaltyScore, max:10, pct:Math.round(gp.loyaltyScore/10*100), fix:'Vote WITH leadership more often on bills at the Capitol.' },
+      { name:'Fiscal Management', score:gp.moneyScore, max:10, pct:Math.round(gp.moneyScore/10*100), fix:'Fundraise from interest groups in the District Office to build your war chest.' }
+    ];
+    const weakest = cats.reduce((a, b) => a.pct < b.pct ? a : b);
+
+    // Event-aware ad recommendation takes priority if active
     const boostedIssue = S.roundEventMod.modIssue;
     const boostedName = boostedIssue ? (ISSUES.find(i => i.id === boostedIssue) || {}).name : null;
+    if (boostedName && S.money >= 10000 && S.location === 'district') {
+      return "\u{1F4A1} News cycle boost! " + boostedName + " ads and speeches are extra effective this round. " + (S.money >= 25000 ? "Try a TV campaign ($25K, 1.8x)." : "Try digital ads ($10K, 1.4x).") + " \u{1F4CA} Grade check: your current grade is " + gp.grade + " (" + gp.pct + "%). Weakest area: " + weakest.name + " (" + weakest.score + "/" + weakest.max + ").";
+    }
+
+    // Grade-focused advice based on location
     if (S.location === 'district') {
-      if (boostedName && S.money >= 10000) return "\u{1F4A1} The current news cycle is boosting " + boostedName + " \u2014 ads and speeches on this issue will be especially effective this round! Consider a " + (S.money >= 25000 ? "TV campaign ($25K, 1.8x impact)" : "digital campaign ($10K, 1.4x impact)") + " to ride the wave.";
-      if (S.approval < 45) return "Your approval is low. Casework is the safest way to gain approval \u2014 it always helps. Speeches are free but the issue matters \u2014 pick one aligned with your district.";
-      if (S.money < 20000) return "Funds are getting tight. Consider fundraising from aligned interest groups before running ads. Watch which groups match your district's values.";
-      return "From your District Office you can run ads, give speeches, do casework, or fundraise. Casework is the safest play. Ads cost money but have multiplied impact. Speeches are free and boost Lt. Gov influence +3." + (boostedName ? " Tip: " + boostedName + " is boosted by current events!" : "");
+      return "\u{1F4CA} Grade check: " + gp.grade + " (" + gp.pct + "%). Your weakest category is " + weakest.name + " (" + weakest.score + "/" + weakest.max + "). " + weakest.fix + (S.approval < 45 ? " Your approval is also dangerously low at " + S.approval + "%." : "");
     }
     if (S.location === 'capitol') {
-      if (!S.sessionActive && !S.specialSession) return "The Legislature isn't in session — you can't vote on bills right now. Switch to your District Office for casework, speeches, and fundraising.";
-      if (S.ltGov < 0) return "Your Lt. Gov influence is negative — that's dangerous. Vote WITH leadership to rebuild trust, or you risk a primary challenge. Joining committees also builds influence.";
-      return "At the Capitol, you vote on bills and join committees. Voting WITH leadership builds Lt. Gov influence but may cost district approval. Committees unlock as your influence grows — check the tier requirements.";
+      if (!S.sessionActive && !S.specialSession) return "Legislature not in session \u2014 switch to District Office. \u{1F4CA} Grade: " + gp.grade + " (" + gp.pct + "%). Weakest: " + weakest.name + " (" + weakest.score + "/" + weakest.max + "). " + weakest.fix;
+      return "\u{1F4CA} Grade check: " + gp.grade + " (" + gp.pct + "%). Weakest: " + weakest.name + " (" + weakest.score + "/" + weakest.max + "). " + weakest.fix + (S.ltGov < 0 ? " Warning: Lt. Gov influence is negative!" : "");
     }
-    return "Use your " + a + " remaining action" + (a!==1?"s":"") + " wisely. Balance district approval (need 50% to win) with Lt. Gov influence (controls your committee access and avoids primary challenges).";
+    return "\u{1F4CA} Grade: " + gp.grade + " (" + gp.pct + "%). Weakest: " + weakest.name + " (" + weakest.score + "/" + weakest.max + "). " + weakest.fix;
   }
 
   // Round-over notification — always show this when actions hit 0
@@ -1159,7 +1208,7 @@ function getAdvisorMessage() {
 
   // ── ROUND 2: Committee intro (explicit direction) ──
   if (r === 2) {
-    if (a === 3) return "Round 2 \u2014 new options unlocked! Click the \"The Capitol\" tab below, then scroll past the \"Vote on Bills\" section to the \"Join Committees\" area at the bottom. You'll see Tier 1 committees like Agriculture, Transportation, and Veterans Affairs. Each one that says \"\u2714 Eligible!\" in green can be joined \u2014 just click the card. Committees boost your Lt. Gov influence, and the Lt. Governor controls ALL appointments in Texas!";
+    if (a === 3) return "Round 2 \u2014 new options unlocked! Click the \"The Capitol\" tab below, then scroll past the bills to the \"Join Committees\" section. Click any card that says \"\u2714 Eligible!\" to join. Committees are worth 5 grade points each (max 15) and boost your Lt. Gov Influence score (worth 20 grade points). You need BOTH to get an A! Check the \"\u{1F4CA} Grade Preview\" panel to track your progress.";
     if (a === 2) {
       if (S.location === 'capitol') return "Good work at the Capitol! Click the \"District Office\" tab below to switch back. From there you can: click the orange \"Casework\" button for guaranteed approval, click the \u{1F3A4} \"Public Speech\" card then pick an issue, or scroll down to \"Fundraising\" and click an interest group. Mix it up \u2014 a strong senator needs both district support AND Capitol power.";
       return "Good work! From your District Office you can: click the orange \"Casework\" button for guaranteed approval, click the \u{1F3A4} \"Public Speech\" card then pick an issue, or scroll down to \"Fundraising\" and click an interest group card. Try something different from last round \u2014 variety builds a well-rounded senator.";
@@ -1170,11 +1219,13 @@ function getAdvisorMessage() {
   // ── ROUND 3: Strategy deepening (personalized) ──
   if (r === 3) {
     if (a === 3) {
+      const gp = calcGradePreview();
       const tips = [];
-      if (S.approval < 50) tips.push("your approval is " + S.approval + "% \u2014 click District Office, scroll down, and hit the orange Casework button or give a speech on an issue your district supports");
-      if (S.ltGov < 5) tips.push("your Lt. Gov influence is only " + S.ltGov + " \u2014 click The Capitol tab and vote WITH leadership, or join a Tier 1 committee to build up for Tier 2 at Round 4");
-      if (S.money < 60000) tips.push("your funds are $" + (S.money/1000).toFixed(0) + "K \u2014 click District Office and scroll to the Fundraising section to click an interest group");
-      return "Round 3 \u2014 you're finding your footing! " + (tips.length > 0 ? "Quick check: " + tips.join("; ") + "." : "You're in solid shape across the board. Keep balancing approval and influence.") + " After this round, I'll step back from guided advice \u2014 but I'm always here if you click the yellow \"Ask Chief of Staff\" button in the bottom-left corner!";
+      if (gp.approvalScore < 20) tips.push("Approval score is " + gp.approvalScore + "/30 \u2014 do casework or speeches from District Office");
+      if (gp.ltGovScore < 10) tips.push("Lt. Gov Influence score is " + gp.ltGovScore + "/20 \u2014 vote WITH leadership or join committees at Capitol");
+      if (gp.caseworkScore < 5) tips.push("Casework score is only " + gp.caseworkScore + "/15 \u2014 each case is 1 point, click the orange Casework button");
+      if (gp.moneyScore < 4) tips.push("Fiscal Management score is " + gp.moneyScore + "/10 \u2014 fundraise from interest groups in District Office");
+      return "Round 3 \u2014 your current grade is " + gp.grade + " (" + gp.pct + "%). " + (tips.length > 0 ? "Areas to improve: " + tips.join("; ") + "." : "You're on track across all six categories!") + " Check the \"\u{1F4CA} Grade Preview\" panel anytime to see your scores. After this round, I'll step back \u2014 but click the yellow \"Ask Chief of Staff\" button for grade-specific advice anytime!";
     }
     if (a === 2) {
       const leanVal = parseInt((S.district.lean.match(/\d+/)||['0'])[0]);
@@ -1285,11 +1336,12 @@ function doVote(bill, withLeadership) {
 
   showFeedback(
     (withLeadership ? "Voted WITH Leadership" : "Voted AGAINST Leadership") + ": " + bill.name,
-    (leaderReaction ? leaderReaction + " " : "") + bill.description,
+    (leaderReaction ? leaderReaction + " " : "") + bill.description + " \u{1F4CA} Affects: Approval score, Lt. Gov Influence score" + (withLeadership ? ", and Party Loyalty score." : "."),
     ltChange >= 0 ? 'success' : 'warning',
     [
       { label:"Lt. Gov", val:(ltChange>=0?"+":"")+ltChange, cls:ltChange>=0?"impact-pos":"impact-neg" },
-      { label:"Approval", val:(appChange>=0?"+":"")+appChange+"%", cls:appChange>=0?"impact-pos":"impact-neg" }
+      { label:"Approval", val:(appChange>=0?"+":"")+appChange+"%", cls:appChange>=0?"impact-pos":"impact-neg" },
+      { label:"Loyalty", val:Math.round((S.voteHistory.filter(v=>v.withLeadership).length / S.voteHistory.length)*100)+"%", cls:"" }
     ]
   );
 }
@@ -1304,8 +1356,8 @@ function doCasework() {
   S.headlines.push("Senator helps constituents with state services");
   S.tweets.push("Thank you Senator for helping with my property tax appeal! \u{1F64F}");
   addLog("Casework complete. Approval +" + gain + "%", 'success');
-  showFeedback("Constituent Service Complete", "You helped a resident navigate state services. This builds lasting goodwill in your district.", 'success',
-    [{ label:"Approval", val:"+" + gain + "%", cls:"impact-pos" }, { label:"Total Cases", val:S.casework, cls:"" }]
+  showFeedback("Constituent Service Complete", "You helped a resident navigate state services. \u{1F4CA} Grade impact: Approval score +" + gain + "%, Casework score now " + S.casework + "/15.", 'success',
+    [{ label:"Approval", val:"+" + gain + "%", cls:"impact-pos" }, { label:"Casework Score", val:S.casework + "/15", cls:"impact-pos" }]
   );
 }
 
@@ -1320,7 +1372,7 @@ function doFundraise(group) {
   if (group.issue === 'energy') S.energy = clamp(S.energy + (group.liberal ? -5 : 5), 0, 100);
   S.headlines.push("Senator receives support from " + group.name);
   addLog("Raised $" + amount.toLocaleString() + " from " + group.name, impact >= 0 ? 'success' : 'warning');
-  showFeedback("Fundraising: " + group.name, "You raised $" + amount.toLocaleString() + ". Remember: no contribution limits in Texas!", impact >= 0 ? 'success' : 'warning',
+  showFeedback("Fundraising: " + group.name, "You raised $" + amount.toLocaleString() + ". No contribution limits in Texas! \u{1F4CA} This boosts your Fiscal Management and Approval scores.", impact >= 0 ? 'success' : 'warning',
     [{ label:"Funds", val:"+$" + (amount/1000) + "K", cls:"impact-pos" }, { label:"Approval", val:(impact>=0?"+":"") + impact + "%", cls:impact>=0?"impact-pos":"impact-neg" }]
   );
 }
@@ -1370,8 +1422,8 @@ function doCommittee(comm) {
   S.actions--;
   S.headlines.push("Sen. " + S.district.senator.split(' ').pop() + " joins " + comm.name + " Committee");
   addLog("Joined " + comm.name + ". Lt.Gov +" + comm.ltGovGain, 'success');
-  showFeedback("Committee Assignment: " + comm.name, "The Lt. Governor appointed you to " + comm.name + ". " + (comm.tier === 3 ? "This is an elite committee \u2014 major power position!" : "Build influence to reach higher-tier committees."), 'success',
-    [{ label:"Lt. Gov", val:"+" + comm.ltGovGain, cls:"impact-pos" }, { label:"Committees", val:S.committees.length, cls:"" }]
+  showFeedback("Committee Assignment: " + comm.name, "The Lt. Governor appointed you to " + comm.name + ". " + (comm.tier === 3 ? "Elite committee \u2014 major power!" : "Build influence for higher tiers.") + " \u{1F4CA} Committee score now " + (S.committees.length * 5) + "/15, Lt. Gov Influence boosted.", 'success',
+    [{ label:"Lt. Gov", val:"+" + comm.ltGovGain, cls:"impact-pos" }, { label:"Committee Score", val:(S.committees.length * 5) + "/15", cls:"impact-pos" }]
   );
 }
 
@@ -1512,6 +1564,45 @@ function renderSelect(el) {
         <h2>Choose Your Senate District</h2>
         <p>Each district offers different challenges based on real Texas political dynamics.</p>
       </div>
+
+      <div class="card" style="border-left: 4px solid var(--tcc-lime); margin-bottom: 24px;">
+        <h3 style="font-size:1.1rem; margin-bottom:12px;">\u{1F4CA} How You'll Be Graded</h3>
+        <p style="font-size:.9rem; color:var(--text-dim); margin-bottom:14px;">Your final grade is based on six dimensions of legislative performance. Every action you take in the game contributes to one or more of these categories:</p>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:14px;">
+          <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center; border:1px solid var(--border);">
+            <div style="font-size:1.3rem; font-weight:700; color:var(--tcc-navy);">30</div>
+            <div style="font-size:.75rem; color:var(--text-dim); font-weight:600;">APPROVAL</div>
+            <div style="font-size:.72rem; color:var(--text-dim); margin-top:2px;">Casework, speeches, ads, voting with your district</div>
+          </div>
+          <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center; border:1px solid var(--border);">
+            <div style="font-size:1.3rem; font-weight:700; color:var(--tcc-navy);">20</div>
+            <div style="font-size:.75rem; color:var(--text-dim); font-weight:600;">LT. GOV INFLUENCE</div>
+            <div style="font-size:.72rem; color:var(--text-dim); margin-top:2px;">Voting with leadership, joining committees, speeches</div>
+          </div>
+          <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center; border:1px solid var(--border);">
+            <div style="font-size:1.3rem; font-weight:700; color:var(--tcc-navy);">15</div>
+            <div style="font-size:.75rem; color:var(--text-dim); font-weight:600;">CASEWORK</div>
+            <div style="font-size:.72rem; color:var(--text-dim); margin-top:2px;">Constituent service from the District Office (1 pt each, max 15)</div>
+          </div>
+          <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center; border:1px solid var(--border);">
+            <div style="font-size:1.3rem; font-weight:700; color:var(--tcc-navy);">15</div>
+            <div style="font-size:.75rem; color:var(--text-dim); font-weight:600;">COMMITTEES</div>
+            <div style="font-size:.72rem; color:var(--text-dim); margin-top:2px;">Join committees at the Capitol (5 pts each, max 3)</div>
+          </div>
+          <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center; border:1px solid var(--border);">
+            <div style="font-size:1.3rem; font-weight:700; color:var(--tcc-navy);">10</div>
+            <div style="font-size:.75rem; color:var(--text-dim); font-weight:600;">PARTY LOYALTY</div>
+            <div style="font-size:.72rem; color:var(--text-dim); margin-top:2px;">Voting WITH leadership on bills at the Capitol</div>
+          </div>
+          <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center; border:1px solid var(--border);">
+            <div style="font-size:1.3rem; font-weight:700; color:var(--tcc-navy);">10</div>
+            <div style="font-size:.75rem; color:var(--text-dim); font-weight:600;">FISCAL MANAGEMENT</div>
+            <div style="font-size:.72rem; color:var(--text-dim); margin-top:2px;">Fundraise and manage your campaign funds wisely</div>
+          </div>
+        </div>
+        <p style="font-size:.85rem; color:var(--text-dim); text-align:center;"><strong>100 total points</strong> \u2022 A = 90+ \u2022 B = 80-89 \u2022 C = 70-79 \u2022 D = 60-69 \u2022 F = below 60</p>
+      </div>
+
       <div class="district-grid">${cards}</div>
     </div>`;
 }
@@ -1647,6 +1738,28 @@ function renderGame(el) {
     <div class="media-tweets">
       ${recentTweets.map(t => `<div class="tweet"><span class="tweet-handle">@texan${rand(100,999)}</span> ${t}</div>`).join('')}
     </div>
+  </div>`;
+
+  // Grade Preview panel
+  const gp = calcGradePreview();
+  html += `<div class="card no-print">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="S.showGradePreview=!S.showGradePreview;render()">
+      <h3 style="font-size:1rem;margin:0">\u{1F4CA} Grade Preview <span style="font-size:.85rem;font-weight:400;color:var(--text-dim)">|</span> <span style="font-size:1.1rem;font-weight:700;color:${gp.color}">${gp.grade}</span> <span style="font-size:.85rem;color:var(--text-dim)">(${gp.pct}%)</span></h3>
+      <span style="font-size:.85rem;color:var(--text-dim)">${S.showGradePreview ? '\u25B2 Hide' : '\u25BC Show Details'}</span>
+    </div>
+    ${S.showGradePreview ? '<div style="margin-top:14px">' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        buildGradeRow('Approval', gp.approvalScore, 30, 'Casework, speeches, ads, district-aligned votes') +
+        buildGradeRow('Lt. Gov Influence', gp.ltGovScore, 20, 'Vote with leadership, join committees') +
+        buildGradeRow('Casework', gp.caseworkScore, 15, 'Constituent service (1 pt each)') +
+        buildGradeRow('Committees', gp.committeeScore, 15, 'Join committees (5 pts each, max 3)') +
+        buildGradeRow('Party Loyalty', gp.loyaltyScore, 10, 'Vote WITH leadership on bills') +
+        buildGradeRow('Fiscal Mgmt', gp.moneyScore, 10, 'Fundraise and keep funds healthy') +
+      '</div>' +
+      '<div style="margin-top:10px;text-align:center;padding:8px;background:#f8f9fa;border-radius:6px;font-size:.85rem">' +
+        '<strong>' + gp.total + ' / 100</strong> \u2022 ' +
+        'A=90+ \u2022 B=80-89 \u2022 C=70-79 \u2022 D=60-69 \u2022 F=below 60' +
+      '</div></div>' : ''}
   </div>`;
 
   // Activity log toggle
