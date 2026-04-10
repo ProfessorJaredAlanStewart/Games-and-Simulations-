@@ -1497,6 +1497,7 @@ function render() {
   const app = $('app');
   if (S.screen !== 'playing') document.body.classList.remove('bg-district', 'bg-capitol');
   if (S.screen === 'menu') { renderMenu(app); return; }
+  if (S.screen === 'howgraded') { renderHowGraded(app); return; }
   if (S.screen === 'select') { renderSelect(app); return; }
   if (S.screen === 'primary') { renderPrimary(app); return; }
   if (S.screen === 'election') { renderElection(app); return; }
@@ -1521,7 +1522,7 @@ function renderMenu(el) {
       <div class="title-sub">Texas State Senate Simulation</div>
       <div class="title-divider"></div>
       <p class="title-tagline">You just won a seat in the Texas Senate.<br>Now try to keep it.</p>
-      <button class="title-cta" onclick="S.screen='select';render()">Enter the Capitol</button>
+      <button class="title-cta" onclick="S.screen='howgraded';render()">Enter the Capitol</button>
       ${hasSavedGames() ? '<div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;align-items:center">' +
         (function(){
           let btns = '';
@@ -1534,6 +1535,75 @@ function renderMenu(el) {
           return btns;
         })() + '</div>' : ''}
       <p class="title-footer">Based on contemporary Texas politics &bull; 12 rounds &bull; Real districts &bull; Real bills</p>
+    </div>`;
+}
+
+// ── DISTRICT SELECT ───────────────────────────────────────────
+
+function renderHowGraded(el) {
+  el.innerHTML = `
+    <div class="container anim-fade">
+      <div class="card" style="max-width:800px; margin:0 auto;">
+        <h2 style="font-family:Georgia,'Times New Roman',serif; font-size:1.8rem; color:var(--tcc-navy); text-align:center; margin-bottom:6px;">\u{1F4CA} How You'll Be Graded</h2>
+        <p style="text-align:center; color:var(--text-dim); margin-bottom:24px;">Your final grade is based on six dimensions of legislative performance.</p>
+
+        <p style="font-size:.95rem; margin-bottom:16px;">You'll play 12 rounds as a Texas State Senator. Every action you take \u2014 every vote, every speech, every constituent you help \u2014 contributes to your score across these six categories:</p>
+
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:24px;">
+          <div style="background:#f8f9fa; border-radius:var(--radius-sm); padding:16px; text-align:center; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; font-weight:800; color:var(--tcc-navy);">30</div>
+            <div style="font-size:.78rem; font-weight:700; color:var(--text-dim); margin-bottom:6px;">APPROVAL</div>
+            <div style="font-size:.82rem; color:var(--text); line-height:1.45;">Keep your constituents happy. Do <strong>casework</strong> from the District Office, give <strong>speeches</strong> on issues your district cares about, and run <strong>ads</strong> during news cycles.</div>
+          </div>
+          <div style="background:#f8f9fa; border-radius:var(--radius-sm); padding:16px; text-align:center; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; font-weight:800; color:var(--tcc-navy);">20</div>
+            <div style="font-size:.78rem; font-weight:700; color:var(--text-dim); margin-bottom:6px;">LT. GOV INFLUENCE</div>
+            <div style="font-size:.82rem; color:var(--text); line-height:1.45;">Build power in Austin. <strong>Vote WITH leadership</strong> on bills, <strong>join committees</strong>, and give <strong>speeches</strong>. The Lt. Governor controls your political future.</div>
+          </div>
+          <div style="background:#f8f9fa; border-radius:var(--radius-sm); padding:16px; text-align:center; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; font-weight:800; color:var(--tcc-navy);">15</div>
+            <div style="font-size:.78rem; font-weight:700; color:var(--text-dim); margin-bottom:6px;">CASEWORK</div>
+            <div style="font-size:.82rem; color:var(--text); line-height:1.45;">Help your constituents. Click the <strong>orange Casework button</strong> in the District Office. Each case earns 1 point (max 15). This is the easiest category to max out.</div>
+          </div>
+          <div style="background:#f8f9fa; border-radius:var(--radius-sm); padding:16px; text-align:center; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; font-weight:800; color:var(--tcc-navy);">15</div>
+            <div style="font-size:.78rem; font-weight:700; color:var(--text-dim); margin-bottom:6px;">COMMITTEES</div>
+            <div style="font-size:.82rem; color:var(--text); line-height:1.45;"><strong>Join committees</strong> at the Capitol. Each one is worth 5 points (max 3 committees = 15). Higher-tier committees unlock as your Lt. Gov influence grows.</div>
+          </div>
+          <div style="background:#f8f9fa; border-radius:var(--radius-sm); padding:16px; text-align:center; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; font-weight:800; color:var(--tcc-navy);">10</div>
+            <div style="font-size:.78rem; font-weight:700; color:var(--text-dim); margin-bottom:6px;">PARTY LOYALTY</div>
+            <div style="font-size:.82rem; color:var(--text); line-height:1.45;">Vote <strong>WITH leadership</strong> on bills at the Capitol. Your loyalty percentage is tracked across all votes. But beware \u2014 your district may disagree!</div>
+          </div>
+          <div style="background:#f8f9fa; border-radius:var(--radius-sm); padding:16px; text-align:center; border:1px solid var(--border);">
+            <div style="font-size:1.5rem; font-weight:800; color:var(--tcc-navy);">10</div>
+            <div style="font-size:.78rem; font-weight:700; color:var(--text-dim); margin-bottom:6px;">FISCAL MANAGEMENT</div>
+            <div style="font-size:.82rem; color:var(--text); line-height:1.45;"><strong>Fundraise</strong> from interest groups in the District Office and manage your campaign war chest. Ads cost money \u2014 don't go broke before Election Day!</div>
+          </div>
+        </div>
+
+        <div style="background:var(--warning-bg); border:2px solid #f59e0b; border-radius:var(--radius-sm); padding:16px; margin-bottom:20px;">
+          <p style="font-size:.95rem; margin-bottom:8px;"><strong>\u{1F4AF} Grade Scale:</strong> A = 90+ \u2022 B = 80-89 \u2022 C = 70-79 \u2022 D = 60-69 \u2022 F = below 60</p>
+          <p style="font-size:.88rem; color:#78350f;">Your score out of 100 points determines your letter grade on the completion report you'll print and submit at the end.</p>
+        </div>
+
+        <div style="background:var(--info-bg); border:2px solid var(--tcc-blue); border-radius:var(--radius-sm); padding:16px; margin-bottom:20px;">
+          <p style="font-size:.95rem; margin-bottom:8px;"><strong>\u{1F4A1} Tips for Success:</strong></p>
+          <p style="font-size:.88rem; color:#1e40af; margin-bottom:6px;">\u2022 The game has <strong>two locations</strong>: your <strong>District Office</strong> (casework, speeches, ads, fundraising) and <strong>The Capitol</strong> (voting on bills, joining committees). Switch between them using the tabs.</p>
+          <p style="font-size:.88rem; color:#1e40af; margin-bottom:6px;">\u2022 You get <strong>3 actions per round</strong> across 12 rounds. Use them wisely \u2014 every action should improve at least one grade category.</p>
+          <p style="font-size:.88rem; color:#1e40af; margin-bottom:6px;">\u2022 Click the yellow <strong>"Ask Chief of Staff"</strong> button in the bottom-left corner anytime during the game. Your Chief of Staff will tell you your current grade, identify your weakest category, and tell you exactly what to click to improve it.</p>
+          <p style="font-size:.88rem; color:#1e40af;">\u2022 The <strong>\u{1F4CA} Grade Preview</strong> panel (available during gameplay) shows your live score across all six categories with progress bars. Check it often!</p>
+        </div>
+
+        <div style="background:var(--success-bg); border:2px solid var(--success); border-radius:var(--radius-sm); padding:16px; margin-bottom:24px;">
+          <p style="font-size:.95rem; margin-bottom:6px;"><strong>\u{1F3AF} Your Goal:</strong></p>
+          <p style="font-size:.88rem; color:#065f46;">Survive 12 rounds, maintain at least 50% approval to win re-election, AND earn the highest grade possible by excelling across all six categories. Winning the election isn't enough \u2014 a great senator builds power, serves constituents, manages money, and navigates party politics.</p>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" onclick="S.screen='select';render()" style="font-size:1.1rem;">
+          Next: Pick a District \u2192
+        </button>
+      </div>
     </div>`;
 }
 
@@ -1561,48 +1631,9 @@ function renderSelect(el) {
   el.innerHTML = `
     <div class="container anim-fade">
       <div class="select-header">
-        <h2>Choose Your Senate District</h2>
+        <h2 style="font-family: Georgia, 'Times New Roman', serif;">Choose Your Senate District</h2>
         <p>Each district offers different challenges based on real Texas political dynamics.</p>
       </div>
-
-      <div class="card" style="border-left: 4px solid var(--tcc-lime); margin-bottom: 24px;">
-        <h3 style="font-size:1.1rem; margin-bottom:12px;">\u{1F4CA} How You'll Be Graded</h3>
-        <p style="font-size:.9rem; color:var(--text-dim); margin-bottom:14px;">Your final grade is based on six dimensions of legislative performance. Every action you take in the game contributes to one or more of these categories:</p>
-        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:14px;">
-          <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center; border:1px solid var(--border);">
-            <div style="font-size:1.3rem; font-weight:700; color:var(--tcc-navy);">30</div>
-            <div style="font-size:.75rem; color:var(--text-dim); font-weight:600;">APPROVAL</div>
-            <div style="font-size:.72rem; color:var(--text-dim); margin-top:2px;">Casework, speeches, ads, voting with your district</div>
-          </div>
-          <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center; border:1px solid var(--border);">
-            <div style="font-size:1.3rem; font-weight:700; color:var(--tcc-navy);">20</div>
-            <div style="font-size:.75rem; color:var(--text-dim); font-weight:600;">LT. GOV INFLUENCE</div>
-            <div style="font-size:.72rem; color:var(--text-dim); margin-top:2px;">Voting with leadership, joining committees, speeches</div>
-          </div>
-          <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center; border:1px solid var(--border);">
-            <div style="font-size:1.3rem; font-weight:700; color:var(--tcc-navy);">15</div>
-            <div style="font-size:.75rem; color:var(--text-dim); font-weight:600;">CASEWORK</div>
-            <div style="font-size:.72rem; color:var(--text-dim); margin-top:2px;">Constituent service from the District Office (1 pt each, max 15)</div>
-          </div>
-          <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center; border:1px solid var(--border);">
-            <div style="font-size:1.3rem; font-weight:700; color:var(--tcc-navy);">15</div>
-            <div style="font-size:.75rem; color:var(--text-dim); font-weight:600;">COMMITTEES</div>
-            <div style="font-size:.72rem; color:var(--text-dim); margin-top:2px;">Join committees at the Capitol (5 pts each, max 3)</div>
-          </div>
-          <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center; border:1px solid var(--border);">
-            <div style="font-size:1.3rem; font-weight:700; color:var(--tcc-navy);">10</div>
-            <div style="font-size:.75rem; color:var(--text-dim); font-weight:600;">PARTY LOYALTY</div>
-            <div style="font-size:.72rem; color:var(--text-dim); margin-top:2px;">Voting WITH leadership on bills at the Capitol</div>
-          </div>
-          <div style="background:#f8f9fa; border-radius:8px; padding:12px; text-align:center; border:1px solid var(--border);">
-            <div style="font-size:1.3rem; font-weight:700; color:var(--tcc-navy);">10</div>
-            <div style="font-size:.75rem; color:var(--text-dim); font-weight:600;">FISCAL MANAGEMENT</div>
-            <div style="font-size:.72rem; color:var(--text-dim); margin-top:2px;">Fundraise and manage your campaign funds wisely</div>
-          </div>
-        </div>
-        <p style="font-size:.85rem; color:var(--text-dim); text-align:center;"><strong>100 total points</strong> \u2022 A = 90+ \u2022 B = 80-89 \u2022 C = 70-79 \u2022 D = 60-69 \u2022 F = below 60</p>
-      </div>
-
       <div class="district-grid">${cards}</div>
     </div>`;
 }
