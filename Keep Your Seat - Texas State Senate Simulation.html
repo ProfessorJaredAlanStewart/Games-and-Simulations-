@@ -1076,7 +1076,9 @@ function buildGradeRow(label, score, max, tip) {
 function calcGradePreview() {
   const partyVotes = S.voteHistory.filter(v => v.withLeadership).length;
   const loyalty = S.voteHistory.length > 0 ? Math.round((partyVotes / S.voteHistory.length) * 100) : 0;
-  const approvalScore = Math.min(30, Math.round((S.approval / 80) * 30));
+  // Realistic approval scoring: 55% = full 30 points (real senators rarely exceed this).
+  // Scales linearly from 30% (0 pts) to 55% (30 pts).
+  const approvalScore = Math.max(0, Math.min(30, Math.round(((S.approval - 30) / 25) * 30)));
   const ltGovScore = Math.min(20, Math.max(0, Math.round(((S.ltGov + 20) / 45) * 20)));
   const caseworkScore = Math.min(15, S.casework);
   const committeeScore = Math.min(15, S.committees.length * 5);
@@ -1108,13 +1110,18 @@ function calcApprovalBounds() {
   const d = S.district;
   const leanNum = parseInt((d.lean.match(/\d+/) || ['0'])[0]);
   const isAligned = d.lean.startsWith(d.party[0]);
-  if (d.lean === 'Competitive') { S.approvalFloor = 20; S.approvalCeiling = 70; return; }
+  // Realistic Texas senator approval ranges. Real Texas senators cluster 38-55%.
+  // Safe seats cap around 58%, hostile districts floor around 28%.
+  // 50% = win threshold, anything above 55% is genuinely popular.
+  if (d.lean === 'Competitive') { S.approvalFloor = 32; S.approvalCeiling = 54; return; }
   if (isAligned) {
-    S.approvalFloor = leanNum > 15 ? 35 : leanNum > 5 ? 30 : 25;
-    S.approvalCeiling = leanNum > 15 ? 80 : leanNum > 5 ? 75 : 70;
+    // Senator's party matches district lean — friendly territory
+    S.approvalFloor = leanNum > 15 ? 38 : leanNum > 5 ? 35 : 33;
+    S.approvalCeiling = leanNum > 15 ? 58 : leanNum > 5 ? 55 : 53;
   } else {
-    S.approvalFloor = leanNum > 15 ? 15 : leanNum > 5 ? 20 : 25;
-    S.approvalCeiling = leanNum > 15 ? 55 : leanNum > 5 ? 60 : 65;
+    // Cross-pressured senator — hostile territory (rare but possible)
+    S.approvalFloor = leanNum > 15 ? 28 : leanNum > 5 ? 30 : 32;
+    S.approvalCeiling = leanNum > 15 ? 46 : leanNum > 5 ? 48 : 50;
   }
 }
 
@@ -1181,7 +1188,7 @@ function getAdvisorMessage() {
 
     // Grade-focused advice based on location
     if (S.location === 'district') {
-      return "\u{1F4CA} Grade check: " + gp.grade + " (" + gp.pct + "%). Your weakest category is " + weakest.name + " (" + weakest.score + "/" + weakest.max + "). " + weakest.fix + (S.approval < 45 ? " Your approval is also dangerously low at " + S.approval + "%." : "");
+      return "\u{1F4CA} Grade check: " + gp.grade + " (" + gp.pct + "%). Your weakest category is " + weakest.name + " (" + weakest.score + "/" + weakest.max + "). " + weakest.fix + (S.approval < 42 ? " Your approval is also low at " + S.approval + "% \u2014 you need 50% to win re-election." : "");
     }
     if (S.location === 'capitol') {
       if (!S.sessionActive && !S.specialSession) return "Legislature not in session \u2014 switch to District Office. \u{1F4CA} Grade: " + gp.grade + " (" + gp.pct + "%). Weakest: " + weakest.name + " (" + weakest.score + "/" + weakest.max + "). " + weakest.fix;
@@ -1255,7 +1262,7 @@ function getAdvisorMessage() {
   if (S.primaryThreat && S.ltGov < 10 && a === 3) return "\u26A0\uFE0F The Lt. Gov is backing a primary challenger. Rebuild influence above 10 by voting with leadership, or ensure your approval stays above 55% to survive the challenge.";
 
   // Low approval emergency
-  if (S.approval < 38 && a === 3) return "Your approval is dangerously low at " + S.approval + "%. Focus on casework and speeches on popular issues. Every point matters.";
+  if (S.approval < 35 && a === 3) return "Your approval is dangerously low at " + S.approval + "%. Below 50% means you lose re-election. Focus on casework (guaranteed +) and speeches on popular issues. Every point matters \u2014 in Texas politics, the difference between winning and losing is just a few points.";
 
   // Session awareness
   if (!S.sessionActive && !S.specialSession && S.location === 'capitol' && a === 3) return "The Legislature isn't in session right now. Switch to your District Office — casework, speeches, and fundraising don't require a session.";
@@ -1283,7 +1290,8 @@ function selectDistrict(d) {
   S.district = d;
   S.screen = 'playing';
   calcApprovalBounds();
-  const startApproval = d.lean.startsWith(d.party[0]) ? 60 : (d.lean === 'Competitive' ? 50 : 45);
+  // Realistic starting approval: friendly seats start ~48%, competitive ~43%, hostile ~38%
+  const startApproval = d.lean.startsWith(d.party[0]) ? 48 : (d.lean === 'Competitive' ? 43 : 38);
   S.approval = constrainApproval(startApproval);
   S.approvalHistory = [S.approval];
   S.energy = d.industries.some(i => i.includes('Oil') || i.includes('Energy Sector') || i.includes('Energy HQ')) ? 70 :
@@ -1585,6 +1593,11 @@ function renderHowGraded(el) {
         <div style="background:var(--warning-bg); border:2px solid #f59e0b; border-radius:var(--radius-sm); padding:16px; margin-bottom:20px;">
           <p style="font-size:.95rem; margin-bottom:8px;"><strong>\u{1F4AF} Grade Scale:</strong> A = 90+ \u2022 B = 80-89 \u2022 C = 70-79 \u2022 D = 60-69 \u2022 F = below 60</p>
           <p style="font-size:.88rem; color:#78350f;">Your score out of 100 points determines your letter grade on the completion report you'll print and submit at the end.</p>
+        </div>
+
+        <div style="background:var(--info-bg); border:2px solid var(--tcc-blue); border-radius:var(--radius-sm); padding:16px; margin-bottom:20px;">
+          <p style="font-size:.95rem; margin-bottom:8px;"><strong>\u{1F1FA}\u{1F1F8} A Note on Realism:</strong></p>
+          <p style="font-size:.88rem; color:#1e40af;">Real Texas senators rarely exceed 55% approval \u2014 even popular ones like John Cornyn and Ted Cruz typically poll between 40-50%. Don't be discouraged if your approval feels stuck in the 40s; that's <em>actually accurate</em> for Texas politics. You only need 50% on Election Day to win, and the +2% incumbency bonus you earn every 3 rounds adds to your final total. The grade rewards reaching 55% (full marks) but you can still earn a high grade with realistic numbers.</p>
         </div>
 
         <div style="background:var(--info-bg); border:2px solid var(--tcc-blue); border-radius:var(--radius-sm); padding:16px; margin-bottom:20px;">
@@ -2129,8 +2142,9 @@ function renderReport(el) {
   const partyVotes = S.voteHistory.filter(v => v.withLeadership).length;
   const loyalty = S.voteHistory.length > 0 ? Math.round((partyVotes / S.voteHistory.length) * 100) : 0;
   // Score: composite of approval, ltGov, casework, committees, loyalty
+  // Approval scoring uses realistic bounds: 55% = full 30 pts (real senators rarely exceed this)
   const maxScore = 100;
-  const approvalScore = Math.min(30, Math.round((S.approval / 80) * 30));
+  const approvalScore = Math.max(0, Math.min(30, Math.round(((S.approval - 30) / 25) * 30)));
   const ltGovScore = Math.min(20, Math.max(0, Math.round(((S.ltGov + 20) / 45) * 20)));
   const caseworkScore = Math.min(15, S.casework);
   const committeeScore = Math.min(15, S.committees.length * 5);
