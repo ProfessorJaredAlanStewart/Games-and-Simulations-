@@ -1,91 +1,77 @@
-# Government Games & Simulations
+# Games, Simulations & Classroom Tools
 
-**Interactive, browser-based activities for American government and Texas government courses.**
+Free, open, browser-based tools for students and educators — no account, no sign-in, no cost. Built to be picked up, used, and shared.
 
-No logins. No installations. No cost. Just open and play.
-
-🌐 **[Launch the Resource Hub →](https://professorjaredalanstewart.github.io/Games-and-Simulations-/)**
+**Live site:** https://professorjaredalanstewart.github.io/Games-and-Simulations-/
 
 ---
 
-## 🥾 Trailblazer Treks
+## What's here
 
-| Resource | Level | Description |
-| --- | --- | --- |
-| [Federal Government Trailblazer Trek](https://professorjaredalanstewart.github.io/tcc-govt-modules/) | Federal | Interactive learning trek through American federal government — the Constitution, branches of government, civil liberties, and public policy. |
-| [Texas Government Trailblazer Trek](https://professorjaredalanstewart.github.io/texas-govt-modules/) | Texas | Interactive learning trek through Texas government — the Texas Constitution, the legislature, the executive branch, and local government. |
-
-## 📝 Study & Review Tools
-
-| Resource | Level | Description |
-| --- | --- | --- |
-| [Federal Government Crossword Generator](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Federal%20Government%20Crossword%20Generator.html) | Federal | Randomized crosswords covering the Constitution, Congress, the presidency, courts, and civil liberties. |
-| [Texas Government Crossword Generator](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Texas%20Government%20Crossword%20Generator.html) | Texas | Randomized crosswords on the Texas Constitution, legislature, governor's office, and local government. |
-| [Texas Government Quiz Builder](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Texas%20Government%20Quiz%20Builder.html) | Texas | Build and take custom quizzes on Texas government topics. Great for exam prep or quick knowledge checks. |
-| [Texas Jeopardy — Classroom Edition](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Texas%20Jeopardy%20Classroom%20Edition.html) | Texas | Full Jeopardy-style game board with Texas government categories for team-based review sessions. |
-| [Wheel of Fortune — Texas Government](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Wheel_of_Fortune_Texas_Government.html) | Texas | Spin the wheel and solve Texas government–themed puzzles. A fun, fast-paced review of key terms and concepts. |
-| [Wheel of Fortune — Federal Government](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Wheel_of_Fortune_Federal_Government.html) | Federal | Spin the wheel and solve federal government–themed puzzles covering the Constitution, Congress, the presidency, and civil liberties. |
-
-## 🛠 Instructor Tools
-
-| Resource | Description |
-| --- | --- |
-| [TCC Syllabus Generator](https://professorjaredalanstewart.github.io/Games-and-Simulations-/TCC%20Syllabus%20Generator.html) | Step-by-step syllabus builder for Tarrant County College courses. Generates a polished, print-ready PDF with all required institutional sections. |
-| [Generic Schedule Builder](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Generic%20Schedule%20Builder%20(For%20Dist%20to%20Chairs).html) | Flexible schedule builder for creating and distributing course schedules. Designed for department chairs. |
-
-## 🏛 Simulations
-
-| Resource | Level | Description |
-| --- | --- | --- |
-| [Keep Your Job — Congressional Simulation](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Keep%20Your%20Job%20-%20Congressional%20Simulation%20Game.html) | Federal | Students play as members of Congress, navigating committee assignments, floor votes, constituent demands, and reelection pressures. |
-| [Keep Your Seat — Texas State Senate Simulation](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Keep%20Your%20Seat%20-%20Texas%20State%20Senate%20Simulation.html) | Texas | Students serve as Texas State Senators, balancing constituent interests, party loyalty, and policy negotiations. |
-| [Presidential Primary Game](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Presidential%20Primary%20Game.html) | Federal | Students campaign through the presidential primary process, making strategic decisions about messaging, fundraising, and state races. |
-
-## 🎲 Bonus — Just for Fun
-
-> *Not a classroom resource. You've been warned.*
-
-| Resource | Description |
-| --- | --- |
-| [Wheel of Levi](https://professorjaredalanstewart.github.io/Games-and-Simulations-/Wheel_of_Levi.html) | A fun, wacky custom Wheel of Fortune–style game made for a very specific kid. Not educational. Not serious. Purely chaotic. |
+| File | What it is |
+|------|------------|
+| `index.html` | The landing page for the collection. |
+| `annotated-bibliography.html` | The Annotated Bibliography Desk (the tool below). |
+| `README.md` | This file. |
 
 ---
 
-## How to Use
+## Annotated Bibliography Desk (APA 7)
 
-Every resource is a **single HTML file** that runs entirely in the browser.
+Drop in a PDF or Word article and it reads the file, pulls verified citation data, and helps you write your annotation — then exports it however you need. The entire tool is a single self-contained HTML file: the PDF reader, Word reader, and fonts are all baked in, so it works with no internet connection once the page has loaded.
 
-1. **Click any link above** or visit the [Resource Hub](https://professorjaredalanstewart.github.io/Games-and-Simulations-/) to browse all activities.
-2. **Use in class** — project on screen, assign as homework, or use during review sessions.
-3. **Share freely** — send the direct link to students or colleagues. No accounts needed.
+### What it does
 
-## For Instructors
+- **Reads PDFs and Word files** in the browser and extracts the text.
+- **Builds an accurate APA 7 citation** by finding the article's DOI and looking it up in [CrossRef](https://www.crossref.org/), or by searching CrossRef by title. Every field stays editable.
+- **Handles seven source types** — journal article, book, book chapter, report, web page, conference paper, and dissertation/thesis.
+- **Guides the annotation** with a writing scaffold (summary, evaluative, reflective, or combined), an "insert the abstract" helper for raw material, and a live word counter against your target.
+- **Shows in-text citations** (parenthetical and narrative) for each reference.
+- **Exports** to Word (`.doc`), **RIS** and **BibTeX** (for Zotero, Mendeley, EndNote), a clean **print** layout, or copy-to-clipboard.
+- **Processes a stack at once** — drop several files and work through the queue one at a time.
+- **Saves your bibliography on the device** so it survives a refresh.
+- **Falls back gracefully** — paste raw text if a file won't read or a network blocks the reader, and fill any field by hand.
 
-These resources work well as:
+### Free and private
 
-* **In-class activities** projected on a screen with team competition
-* **Homework review tools** students can access on any device
-* **Exam prep sessions** using the crossword generators and quiz builders
-* **Experiential learning supplements** alongside the [Civic Action Project](https://professorjaredalanstewart.github.io/Civic-Action-Project/)
+- No account, no sign-in, nothing to install.
+- Everything runs locally in your browser. Files never leave the device.
+- Your saved bibliography is stored only in your own browser (local storage), not on any server.
 
-## Technical Details
+### One online step
 
-* **Zero dependencies** — each file is self-contained HTML/CSS/JS
-* **No server required** — runs client-side in any modern browser
-* **Mobile friendly** — responsive design works on phones and tablets
-* **Offline capable** — download any HTML file and it works without internet
+The only feature that touches the internet is the **CrossRef citation lookup** (a free, public, no-key database). Offline, that one auto-fill step is skipped and the tool tells you so — parsing, the annotation scaffold, manual entry, saving, and all exports keep working.
 
-## Related Projects
-
-* **[Civic Action Project (CAP)](https://professorjaredalanstewart.github.io/Civic-Action-Project/)** — An experiential learning framework replacing traditional government exams with hands-on civic engagement. Free instructor guides, tracking tools, and Canvas import packages.
+> **A note on AI-assisted writing.** The annotation tools are designed to help you write in your own words. An optional button copies a prompt you can paste into any AI assistant for a first pass, but the result should be revised and made your own. Check your program's policy on AI-assisted writing.
 
 ---
+
+## Use it
+
+Just open `annotated-bibliography.html` in any modern browser — double-click the file, or visit the live link above. Works on desktop and mobile.
+
+## Host it yourself (GitHub Pages)
+
+1. Put `index.html`, `annotated-bibliography.html`, and `README.md` in the repository.
+2. Go to **Settings → Pages**.
+3. Under **Build and deployment**, set **Source** to *Deploy from a branch*, choose the `main` branch and the `/ (root)` folder, and save.
+4. After a minute, the site is live at `https://<username>.github.io/<repo>/`.
+
+---
+
+## Built with
+
+This tool bundles a few excellent open-source libraries, included in the single HTML file:
+
+- [pdf.js](https://mozilla.github.io/pdf.js/) — Mozilla, Apache License 2.0 (PDF text extraction)
+- [Mammoth.js](https://github.com/mwilliamson/mammoth.js) — BSD 2-Clause (Word `.docx` text extraction)
+- [Spectral](https://fonts.google.com/specimen/Spectral) and [Inter](https://fonts.google.com/specimen/Inter) typefaces — SIL Open Font License 1.1
+- Citation data from the [CrossRef REST API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/)
 
 ## License
 
-Released as an **Open Educational Resource**. Free to use, share, and adapt for educational purposes.
+Free to use, adapt, and share. Add a `LICENSE` file (MIT or Creative Commons works well for classroom resources) if you'd like to make the terms explicit.
 
-## Author
+---
 
-**Professor Jared Alan Stewart**
-Government Faculty · Tarrant County College · Fort Worth, Texas
+*Built for students who shouldn't have to pay to do good work.*
