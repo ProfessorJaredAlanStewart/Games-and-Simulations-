@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Government Games & Simulations — Interactive Classroom Resources</title>
-<meta name="description" content="Free, browser-based government games and simulations for college and high school classrooms. Congressional simulations, crossword generators, quiz builders, and more.">
+<meta name="description" content="Free, browser-based government games and simulations for college and high school classrooms. Congressional simulations, crossword generators, quiz builders, an APA 7 annotated bibliography tool, and more.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -25,6 +25,7 @@
         --sim-color: #7c3aed;
         --study-color: #0369a1;
         --tool-color: #047857;
+        --research-color: #7c2d3a;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -170,6 +171,7 @@
     .category-icon.study { background: #e0f2fe; color: var(--study-color); }
     .category-icon.tool { background: #d1fae5; color: var(--tool-color); }
     .category-icon.trek { background: #fef3c7; color: var(--warm); }
+    .category-icon.research { background: #f6e7ea; color: var(--research-color); }
     .category-title {
         font-family: 'Libre Baskerville', Georgia, serif;
         font-size: 1.25rem;
@@ -223,6 +225,7 @@
     .game-icon.study { background: linear-gradient(135deg, #e0f2fe, #bae6fd); }
     .game-icon.tool { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
     .game-icon.trek { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+    .game-icon.research { background: linear-gradient(135deg, #f6e7ea, #ecd2d8); }
     .game-info h3 {
         font-family: 'Source Sans 3', sans-serif;
         font-size: 1.05rem;
@@ -254,6 +257,7 @@
     .tag.interactive { background: #ede9fe; color: #5b21b6; }
     .tag.generator { background: #d1fae5; color: #065f46; }
     .tag.trek { background: #fef3c7; color: #78350f; }
+    .tag.research { background: #f6e7ea; color: #7c2d3a; }
     .game-arrow {
         color: var(--muted);
         font-size: 1.2rem;
@@ -385,7 +389,7 @@
         </p>
         <div class="hero-stats">
             <div>
-                <div class="hero-stat-num">11</div>
+                <div class="hero-stat-num">12</div>
                 <div class="hero-stat-label">Activities</div>
             </div>
             <div>
@@ -551,7 +555,30 @@
             </div>
         </div>
 
-        <!-- 3. Instructor Tools -->
+        <!-- 3. Research & Writing -->
+        <div class="category">
+            <div class="category-header">
+                <div class="category-icon research">📚</div>
+                <div class="category-title">Research &amp; Writing</div>
+            </div>
+            <p class="category-desc">Tools that help students do the scholarly work &mdash; finding sources, citing them correctly, and writing about them.</p>
+            <div class="game-grid">
+                <a class="game-card" href="annotated-bibliography.html" target="_blank">
+                    <div class="game-icon research">📚</div>
+                    <div class="game-info">
+                        <h3>Annotated Bibliography Desk</h3>
+                        <p>Drop in a PDF or Word article and it pulls a verified APA 7 citation from CrossRef, guides the annotation with a writing scaffold, and exports to Word, RIS, BibTeX, or print &mdash; all in the browser.</p>
+                        <div class="game-tags">
+                            <span class="tag research">APA 7</span>
+                            <span class="tag generator">Citation Tool</span>
+                        </div>
+                    </div>
+                    <span class="game-arrow">&rarr;</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 4. Instructor Tools -->
         <div class="category">
             <div class="category-header">
                 <div class="category-icon tool">🛠</div>
@@ -584,7 +611,7 @@
             </div>
         </div>
 
-        <!-- 4. Simulations -->
+        <!-- 5. Simulations -->
         <div class="category">
             <div class="category-header">
                 <div class="category-icon sim">🏛</div>
@@ -631,7 +658,7 @@
             </div>
         </div>
 
-        <!-- 5. Bonus -->
+        <!-- 6. Bonus -->
         <div class="category" style="opacity: 0.85;">
             <div class="category-header">
                 <div class="category-icon" style="background: #fce7f3; color: #be185d;">🎲</div>
