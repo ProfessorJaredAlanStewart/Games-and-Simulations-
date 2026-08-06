@@ -6,7 +6,7 @@
 
 Released as an Open Educational Resource and designed to pair with the [Civic Action Project (CAP)](https://professorjaredalanstewart.github.io/Civic-Action-Project/).
 
----
+----
 
 ## What this is
 
