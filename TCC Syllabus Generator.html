@@ -223,7 +223,7 @@ body{background:#fff}
 
 <div class="card"><div class="card-title">Term & Dates</div>
 <div class="field-row cols-2">
-<div class="field"><label>Term <span class="req">*</span></label><select id="courseTerm"><option value="">Select…</option><option>2025 Fall</option><option>2025 Wintermester</option><option>2026 Spring</option><option>2026 Maymester</option><option>2026 Summer I</option><option>2026 Summer II</option><option>2026 Fall</option><option>2026 Wintermester</option><option>2027 Spring</option></select></div>
+<div class="field"><label>Term <span class="req">*</span></label><select id="courseTerm"><option value="">Select…</option></select></div>
 <div class="field"><label>Modality <span class="req">*</span></label><select id="courseModality"><option value="">Select…</option><option>Face-to-Face</option><option>Online (Asynchronous)</option><option>Online (Synchronous)</option><option>Hybrid</option><option>HyFlex</option></select></div>
 </div>
 <div class="field-row cols-3">
@@ -361,6 +361,25 @@ body{background:#fff}
 
 <script>
 let currentStep=1;const totalSteps=7;
+// ═══ TERM DROPDOWN (auto-generates, never goes stale) ═══
+function populateTerms(){
+const sel=document.getElementById('courseTerm');
+if(!sel)return;
+const now=new Date(),yr=now.getFullYear(),mo=now.getMonth(); // 0=Jan
+// Show previous year through 4 years out
+const terms=[];
+for(let y=yr-1;y<=yr+4;y++){
+terms.push(`${y} Spring`,`${y} Maymester`,`${y} Summer I`,`${y} Summer II`,`${y} Fall`,`${y} Wintermester`)}
+terms.forEach(t=>{const o=document.createElement('option');o.textContent=t;sel.appendChild(o)});
+// Preselect the most likely current/upcoming term
+let guess;
+if(mo<=3) guess=`${yr} Spring`;
+else if(mo===4) guess=`${yr} Maymester`;
+else if(mo<=6) guess=`${yr} Summer I`;
+else if(mo===7) guess=`${yr} Fall`;
+else if(mo<=10) guess=`${yr} Fall`;
+else guess=`${yr+1} Spring`;
+for(const o of sel.options){if(o.textContent===guess){sel.value=o.textContent;break}}}
 // ═══ AI POLICY (district-required, choose one) ═══
 let selectedAIPolicy='';
 const AI_POLICIES={
@@ -885,7 +904,7 @@ window.scrollTo({top:0,behavior:'smooth'})}
 
 function backToEdit(){document.getElementById('formContainer').style.display='block';document.getElementById('previewContainer').classList.remove('active');window.scrollTo({top:0,behavior:'smooth'})}
 
-async function copyToClipboard(){const c=document.getElementById('syllabusOutput');try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([c.innerHTML],{type:'text/html'}),'text/plain':new Blob([c.innerText],{type:'text/plain'})})])}catch(e){const r=document.createRange();r.selectNodeContents(c);const s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges()}const f=document.getElementById('copyFeedback');f.classList.add('show');setTimeout(()=>f.classList.remove('show'),2500)}
+async function copyToClipboard(){const c=document.getElementById('syllabusOutput');try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([c.innerHTML],{type:'text/html'}),'text/plain':new Blob([c.innerText],{type:'text/plain'})})])}catch(e){const r=document.createRange();r.selectNodeContents(c);const s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges()}const f=document.getElementById('copyFeedback');f.classList.add('show');setTimeout(()=>f.classList.remove('show'),2500)}populateTerms();
 </script>
 </body>
 </html>
