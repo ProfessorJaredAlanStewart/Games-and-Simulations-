@@ -1,2133 +1,2149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Schedule Builder - Setup</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Georgia, 'Times New Roman', serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1900px;
-            margin: 0 auto;
-        }
-        .header {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 15px;
-        }
-        h2 {
-            color: #667eea;
-            margin: 20px 0 10px 0;
-        }
-        button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            margin: 5px;
-        }
-        button:hover {
-            background: #764ba2;
-        }
-        button.danger {
-            background: #f44336;
-        }
-        button.danger:hover {
-            background: #d32f2f;
-        }
-        button.add-more {
-            background: #4caf50;
-            padding: 4px 8px;
-            font-size: 11px;
-            margin-top: 5px;
-        }
-        button.add-more:hover {
-            background: #45a049;
-        }
-        .setup-panel {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 500;
-        }
-        input[type="text"], input[type="number"], select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .instructor-entry {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            border-left: 3px solid #667eea;
-        }
-        .course-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 10px;
-        }
-        .course-tag {
-            background: #e3f2fd;
-            padding: 5px 10px;
-            border-radius: 3px;
-            font-size: 12px;
-        }
-        .course-tag.hybrid {
-            background: #fff3e0;
-        }
-        .course-tag.eight-week {
-            background: #e8f5e9;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th {
-            background: #764ba2;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-size: 14px;
-        }
-        td {
-            border: 1px solid #ddd;
-            padding: 5px;
-            vertical-align: top;
-        }
-        .time-header {
-            background: #667eea;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-        }
-        .dropzone {
-            min-height: 100px;
-            background: #f9f9f9;
-            padding: 5px;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            overflow-y: auto;
-            max-height: 200px;
-        }
-        .dropzone.drag-over {
-            background: #e8f5e9;
-            border: 2px dashed #4caf50;
-        }
-        .course-card {
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            padding: 4px;
-            margin: 2px 0;
-            cursor: move;
-            font-size: 10px;
-            position: relative;
-        }
-        .course-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            z-index: 100;
-        }
-        .course-card.dragging {
-            opacity: 0.5;
-        }
-        .course-card.early-eight-week {
-            background: #e8f5e9;
-            border-color: #4caf50;
-        }
-        .course-card.late-eight-week {
-            background: #fff3e0;
-            border-color: #ff9800;
-        }
-        .course-card.early-seven-week {
-            background: #e3f2fd;
-            border-color: #2196f3;
-        }
-        .course-card.late-seven-week {
-            background: #fce4ec;
-            border-color: #e91e63;
-        }
-        .course-card.fourteen-week {
-            background: #f1f8e9;
-            border-color: #689f38;
-        }
-        .course-card.dual-credit {
-            background: #f3e5f5;
-            border-color: #9c27b0;
-        }
-        .delete-course {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: #f44336;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            padding: 1px 4px;
-            font-size: 8px;
-            cursor: pointer;
-            display: none;
-        }
-        .course-card:hover .delete-course {
-            display: block;
-        }
-        .hidden {
-            display: none !important;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin: 15px 0;
-        }
-        .stat {
-            background: #f5f5f5;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .sidebar {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            max-height: 800px;
-            overflow-y: auto;
-        }
-        .main-layout {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 20px;
-        }
-        .faculty-section {
-            margin-bottom: 20px;
-        }
-        .faculty-header {
-            font-weight: bold;
-            padding: 8px;
-            background: #e3f2fd;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            color: #1565c0;
-        }
-        .faculty-item {
-            padding: 8px;
-            margin-bottom: 5px;
-            background: #f9f9f9;
-            border-radius: 5px;
-            font-size: 13px;
-            border-left: 3px solid #ddd;
-            transition: all 0.3s;
-        }
-        .faculty-item.has-courses {
-            border-left-color: #4caf50;
-            background: #f1f8e9;
-        }
-        .faculty-item.full-load {
-            border-left-color: #ff9800;
-            background: #fff3e0;
-        }
-        .faculty-item.over-load {
-            border-left-color: #f44336;
-            background: #ffebee;
-        }
-        .faculty-name {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 3px;
-        }
-        .faculty-load {
-            font-size: 11px;
-            color: #666;
-        }
-        .faculty-load-bar {
-            margin-top: 3px;
-            height: 4px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .faculty-load-fill {
-            height: 100%;
-            background: #4caf50;
-            transition: width 0.3s;
-        }
-        .faculty-load-fill.full {
-            background: #ff9800;
-        }
-        .faculty-load-fill.over {
-            background: #f44336;
-        }
-        .instructor-pool {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        .instructor-sections {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .instructor-group {
-            background: #f5f5f5;
-            border-radius: 8px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            min-height: 80px;
-        }
-        .instructor-group-name {
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 8px;
-            font-size: 12px;
-        }
-        .instructor-courses {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            min-height: 30px;
-        }
-        .instructor-courses.drag-over {
-            background: #e8f5e9;
-            border: 1px dashed #4caf50;
-            border-radius: 4px;
-        }
-        .course-generator {
-            background: #e3f2fd;
-            border-radius: 5px;
-            padding: 8px;
-            margin-top: 8px;
-            display: none;
-        }
-        .course-generator.active {
-            display: block;
-        }
-        .generator-row {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 5px;
-        }
-        .generator-row select {
-            flex: 1;
-            padding: 4px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            font-size: 12px;
-        }
-        .generator-row button {
-            padding: 4px 10px;
-            font-size: 12px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Schedule Builder</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS — academic catalog aesthetic, blue/teal brand
+   ============================================================ */
+:root {
+    --navy: #14344f;
+    --navy-2: #1d4a6b;
+    --teal: #0e6e73;
+    --teal-bright: #12868c;
+    --teal-wash: #e8f4f4;
+    --paper: #eef2f3;
+    --card: #ffffff;
+    --ink: #22303a;
+    --muted: #5b6b77;
+    --line: #d8e1e4;
+    --amber: #c77f1f;
+    --danger: #b3372f;
+    --ok: #2e7d4f;
+
+    /* Session accents (functional color, kept distinguishable) */
+    --s16-border: #64748b; --s16-bg: #f4f6f8;
+    --s14-border: #7a9a3d; --s14-bg: #f3f7ea;
+    --e8-border:  #2e7d4f; --e8-bg:  #eaf5ee;
+    --l8-border:  #c77f1f; --l8-bg:  #fdf3e3;
+    --e7-border:  #2a7fb8; --e7-bg:  #e9f3fa;
+    --l7-border:  #b0486b; --l7-bg:  #faedf1;
+    --dc-border:  #7b5ea7; --dc-bg:  #f2eef8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 24px 20px 60px;
+}
+
+.container { max-width: 1500px; margin: 0 auto; }
+
+/* Utility sans for dense data (cards, tables, chips) */
+.data, .course-card, .chip, .stat, table, .faculty-item, .toast,
+button, input, select, .banner, .generator-row {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ============================================================
+   MASTHEAD — printed-catalog header
+   ============================================================ */
+.masthead {
+    background: var(--card);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(20,52,79,0.08);
+    margin-bottom: 18px;
+    overflow: hidden;
+}
+.masthead-band {
+    height: 6px;
+    background: linear-gradient(90deg, var(--navy) 0%, var(--teal) 100%);
+}
+.masthead-inner {
+    padding: 18px 24px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.masthead h1 {
+    font-size: 26px;
+    color: var(--navy);
+    font-weight: normal;
+    letter-spacing: 0.2px;
+}
+.masthead .term-line {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+.masthead-rule {
+    margin: 0 24px;
+    border-top: 1px solid var(--navy);
+    border-bottom: 1px solid var(--line);
+    height: 3px;
+}
+.autosave-status {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+}
+.autosave-status .dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ok); margin-right: 5px; vertical-align: 1px;
+}
+
+/* ============================================================
+   PANELS, FORMS, BUTTONS
+   ============================================================ */
+.panel {
+    background: var(--card);
+    padding: 20px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 6px rgba(20,52,79,0.06);
+    margin-bottom: 18px;
+}
+h2 {
+    color: var(--teal);
+    font-size: 18px;
+    font-weight: normal;
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+}
+h3 { color: var(--navy); font-size: 16px; font-weight: normal; }
+
+label { display: block; margin-bottom: 5px; color: var(--muted); font-size: 13px; }
+.check-label { display: flex; align-items: center; gap: 6px; color: var(--ink); font-size: 13px; cursor: pointer; }
+
+input[type="text"], input[type="number"], select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    font-size: 14px;
+    background: #fff;
+    color: var(--ink);
+}
+input:focus-visible, select:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--teal-bright);
+    outline-offset: 1px;
+}
+
+button {
+    background: var(--teal);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.15s;
+}
+button:hover { background: var(--teal-bright); }
+button.secondary { background: #fff; color: var(--navy); border: 1px solid var(--navy-2); }
+button.secondary:hover { background: var(--teal-wash); }
+button.danger { background: var(--danger); }
+button.danger:hover { background: #962d26; }
+button.quiet { background: #fff; color: var(--muted); border: 1px solid var(--line); }
+button.quiet:hover { background: var(--paper); color: var(--ink); }
+button:disabled { opacity: 0.45; cursor: default; }
+button.primary-go { background: var(--navy); font-size: 14px; padding: 10px 20px; }
+button.primary-go:hover { background: var(--navy-2); }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { margin-bottom: 12px; }
+.options-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+/* ============================================================
+   SETUP — instructor roster
+   ============================================================ */
+.instructor-entry {
+    background: var(--paper);
+    padding: 13px 15px;
+    border-radius: 6px;
+    margin-bottom: 9px;
+    border-left: 3px solid var(--teal);
+}
+.instructor-entry .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.course-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.course-tag {
+    background: var(--teal-wash);
+    color: var(--navy);
+    padding: 3px 9px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* ============================================================
+   RESTORE BANNER + TOASTS
+   ============================================================ */
+.banner {
+    background: var(--navy);
+    color: #fff;
+    border-radius: 8px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 13px;
+}
+.banner button { padding: 6px 14px; }
+.banner .keep { background: var(--teal); }
+.banner .drop { background: transparent; border: 1px solid rgba(255,255,255,0.5); }
+.banner .drop:hover { background: rgba(255,255,255,0.12); }
+
+#toastHost { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 2000; }
+.toast {
+    background: var(--navy);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    max-width: 360px;
+    animation: toast-in 0.2s ease-out;
+}
+.toast.error { background: var(--danger); }
+.toast.warn { background: var(--amber); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ============================================================
+   BUILDER — toolbar, lens chips, stats
+   ============================================================ */
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.toolbar .spacer { flex: 1; }
+
+.lens-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+.lens-label { font-size: 12px; color: var(--muted); margin-right: 4px; font-family: 'Segoe UI', Arial, sans-serif; }
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.15s;
+}
+.chip .swatch { width: 9px; height: 9px; border-radius: 2px; border: 1.5px solid; }
+.chip:hover { border-color: var(--teal); }
+.chip.active {
+    background: var(--navy);
+    color: #fff;
+    border-color: var(--navy);
+}
+.chip.active .swatch { border-color: #fff !important; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.stat {
+    background: var(--card);
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 1px 5px rgba(20,52,79,0.06);
+}
+.stat-value { font-size: 24px; color: var(--teal); font-family: Georgia, serif; }
+.stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+/* ============================================================
+   BUILDER — layout, grid, dropzones, cards
+   ============================================================ */
+.main-layout { display: grid; grid-template-columns: 240px 1fr; gap: 18px; }
+@media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } .form-grid, .options-grid { grid-template-columns: 1fr; } }
+
+.sidebar {
+    background: var(--card);
+    padding: 14px;
+    border-radius: 10px;
+    max-height: 820px;
+    overflow-y: auto;
+    box-shadow: 0 1px 6px rgba(20,52,79,0.06);
+}
+.faculty-header {
+    font-weight: 600;
+    padding: 7px 10px;
+    background: var(--teal-wash);
+    border-radius: 5px;
+    margin-bottom: 8px;
+    color: var(--navy);
+    font-size: 13px;
+}
+.faculty-section { margin-bottom: 18px; }
+.faculty-item {
+    padding: 8px 10px;
+    margin-bottom: 5px;
+    background: var(--paper);
+    border-radius: 5px;
+    font-size: 12px;
+    border-left: 3px solid var(--line);
+}
+.faculty-item.has-courses { border-left-color: var(--ok); }
+.faculty-item.full-load { border-left-color: var(--amber); background: #fdf6e9; }
+.faculty-item.over-load { border-left-color: var(--danger); background: #faecea; }
+.faculty-name { font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.faculty-load { font-size: 11px; color: var(--muted); }
+.faculty-load-bar { margin-top: 4px; height: 4px; background: #e0e6e8; border-radius: 2px; overflow: hidden; }
+.faculty-load-fill { height: 100%; background: var(--ok); transition: width 0.3s; }
+.faculty-load-fill.full { background: var(--amber); }
+.faculty-load-fill.over { background: var(--danger); }
+
+.schedule-table { background: var(--card); padding: 16px; border-radius: 10px; box-shadow: 0 1px 6px rgba(20,52,79,0.06); }
+table { width: 100%; border-collapse: collapse; }
+th {
+    background: var(--navy);
+    color: #fff;
+    padding: 9px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+}
+td { border: 1px solid var(--line); padding: 4px; vertical-align: top; }
+.time-header {
+    background: var(--teal);
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.dropzone {
+    min-height: 88px;
+    max-height: 200px;
+    background: #fbfcfc;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow-y: auto;
+    border-radius: 3px;
+    transition: background 0.1s, box-shadow 0.1s;
+}
+.dropzone.drag-over { background: var(--teal-wash); box-shadow: inset 0 0 0 2px var(--teal); }
+.dropzone.valid { background: #f2faf4; box-shadow: inset 0 0 0 1px #bcd9c5; }
+.dropzone.invalid { background: #faf0ef; box-shadow: inset 0 0 0 1px #e2b8b3; }
+.dropzone.discouraged { background: #fdf8ec; box-shadow: inset 0 0 0 1px #e5cf9a; }
+
+/* Course cards */
+.course-card {
+    background: var(--s16-bg);
+    border: 2px solid var(--s16-border);
+    border-radius: 4px;
+    padding: 4px 5px;
+    cursor: grab;
+    font-size: 10px;
+    position: relative;
+    transition: transform 0.1s, box-shadow 0.1s, opacity 0.2s;
+}
+.course-card:hover { transform: scale(1.02); box-shadow: 0 2px 8px rgba(20,52,79,0.2); z-index: 50; }
+.course-card:active { cursor: grabbing; }
+.course-card.dragging { opacity: 0.45; }
+.course-card.selected { box-shadow: 0 0 0 2px var(--navy), 0 2px 8px rgba(20,52,79,0.3); }
+.course-card.dimmed { opacity: 0.22; }
+.course-card.hybrid-card { border-style: dashed; }
+.cc-title { font-weight: 600; font-size: 11px; }
+.cc-sub { font-size: 9px; color: var(--muted); }
+
+.course-card.s-16week   { background: var(--s16-bg); border-color: var(--s16-border); } .course-card.s-16week .cc-title { color: var(--s16-border); }
+.course-card.s-14week   { background: var(--s14-bg); border-color: var(--s14-border); } .course-card.s-14week .cc-title { color: #5d7a2a; }
+.course-card.s-early8   { background: var(--e8-bg);  border-color: var(--e8-border); }  .course-card.s-early8 .cc-title { color: var(--e8-border); }
+.course-card.s-late8    { background: var(--l8-bg);  border-color: var(--l8-border); }  .course-card.s-late8 .cc-title { color: #9c6317; }
+.course-card.s-early7   { background: var(--e7-bg);  border-color: var(--e7-border); }  .course-card.s-early7 .cc-title { color: var(--e7-border); }
+.course-card.s-late7    { background: var(--l7-bg);  border-color: var(--l7-border); }  .course-card.s-late7 .cc-title { color: var(--l7-border); }
+.course-card.s-dc       { background: var(--dc-bg);  border-color: var(--dc-border); }  .course-card.s-dc .cc-title { color: var(--dc-border); }
+
+.card-x {
+    position: absolute; top: 1px; right: 1px;
+    background: var(--danger); color: #fff;
+    border: none; border-radius: 3px;
+    padding: 0 4px; font-size: 9px; line-height: 14px;
+    cursor: pointer; display: none;
+}
+.course-card:hover .card-x { display: block; }
+
+/* Weekend section */
+.weekend-wrap { background: var(--paper); padding: 10px 12px; border-radius: 6px; margin-top: 18px; }
+.weekend-head { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.weekend-head h3 { display: flex; align-items: center; gap: 8px; }
+#weekendToggleIcon { display: inline-block; width: 16px; transition: transform 0.2s; font-size: 12px; color: var(--teal); }
+#weekendIndicator {
+    display: none; background: var(--amber); color: #fff;
+    padding: 2px 9px; border-radius: 10px; font-size: 11px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+.weekend-grids { display: none; margin-top: 12px; }
+.weekend-grids .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 700px) { .weekend-grids .two-col { grid-template-columns: 1fr; } }
+
+/* ============================================================
+   POOL + GENERATOR
+   ============================================================ */
+.instructor-pool { background: var(--card); padding: 16px; border-radius: 10px; margin-top: 18px; box-shadow: 0 1px 6px rgba(20,52,79,0.06); }
+.pool-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+.pool-hint { font-size: 12px; color: var(--muted); margin-bottom: 12px; font-family: 'Segoe UI', Arial, sans-serif; }
+.instructor-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    max-height: 420px;
+    overflow-y: auto;
+}
+.instructor-group { background: var(--paper); border-radius: 8px; padding: 10px; border: 1px solid var(--line); }
+.instructor-group.all-placed { opacity: 0.62; }
+.instructor-group-name { font-weight: 600; color: var(--navy); margin-bottom: 7px; font-size: 12px; font-family: 'Segoe UI', Arial, sans-serif; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.pool-count { font-weight: normal; color: var(--muted); font-size: 11px; }
+.instructor-courses { display: flex; flex-wrap: wrap; gap: 4px; min-height: 28px; }
+.instructor-courses .course-card { width: calc(50% - 2px); }
+.instructor-courses.drag-over { background: var(--teal-wash); border-radius: 4px; box-shadow: inset 0 0 0 1px var(--teal); }
+button.add-more { background: var(--ok); padding: 4px 9px; font-size: 11px; margin-top: 6px; }
+button.add-more:hover { background: #256a41; }
+.course-generator { background: var(--teal-wash); border-radius: 5px; padding: 8px; margin-top: 8px; display: none; }
+.course-generator.active { display: block; }
+.generator-row { display: flex; gap: 5px; margin-bottom: 5px; }
+.generator-row select { flex: 1; padding: 4px; font-size: 12px; }
+.generator-row button { padding: 4px 10px; font-size: 12px; }
+
+/* ============================================================
+   ANALYSIS
+   ============================================================ */
+.analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.analysis-card { padding: 12px; border-radius: 6px; border-left: 3px solid; font-family: 'Segoe UI', Arial, sans-serif; }
+.analysis-card h4 { margin: 0 0 9px 0; font-size: 13px; font-weight: 600; }
+.analysis-card .body { font-size: 12px; color: var(--muted); max-height: 210px; overflow-y: auto; }
+.bar-row { margin: 3px 0; display: flex; align-items: center; }
+.bar-row .bar-label { display: inline-block; width: 105px; font-size: 11px; flex-shrink: 0; }
+.bar-row .bar { display: inline-block; height: 13px; border-radius: 2px; }
+.bar-row .bar-val { margin-left: 6px; font-size: 11px; }
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(20,52,79,0.45); z-index: 999; }
+.modal {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: #fff; padding: 22px; border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3); z-index: 1000;
+    max-width: 620px; width: 92%; max-height: 82vh; overflow-y: auto;
+}
+.modal h2 { margin-bottom: 14px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+
+details.pairing-rules { margin-bottom: 12px; font-family: 'Segoe UI', Arial, sans-serif; }
+details.pairing-rules summary { cursor: pointer; font-size: 12px; color: var(--teal); }
+details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0 20px; }
+
+.hidden { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+}
+
+/* ============================================================
+   PRINT — clean deliverable: masthead + grids only
+   ============================================================ */
+.print-only { display: none; }
+@media print {
+    body { background: #fff; padding: 0; }
+    .no-print, .sidebar, .instructor-pool, .toolbar, .lens-row, .stats,
+    #needsPanel, .banner, #toastHost, .card-x, .weekend-head span.hint { display: none !important; }
+    .main-layout { display: block; }
+    .schedule-table, .masthead, .panel { box-shadow: none; border-radius: 0; }
+    .weekend-grids { display: block !important; }
+    #weekendToggleIcon, #weekendIndicator { display: none !important; }
+    .weekend-head { cursor: default; }
+    .dropzone { max-height: none; overflow: visible; min-height: 40px; }
+    .course-card { font-size: 8px; padding: 2px 3px; break-inside: avoid; }
+    .course-card.dimmed { opacity: 1; }
+    .print-only { display: block; text-align: right; font-size: 10px; color: #666; padding: 4px 24px; }
+    th { background: #eee !important; color: #000 !important; -webkit-print-color-adjust: exact; }
+    .time-header { background: #f5f5f5 !important; color: #000 !important; }
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- Setup Phase -->
-        <div id="setupPhase">
-            <div class="header">
-                <h1>Course Schedule Builder - Initial Setup</h1>
-                <p>Configure your department's instructors and courses before building the schedule.</p>
-            </div>
-            
-            <div class="setup-panel">
-                <h2>Department Information</h2>
-                <div class="form-group">
-                    <label>Department Name:</label>
-                    <input type="text" id="deptName" placeholder="e.g., History Department">
-                </div>
-                <div class="form-group">
-                    <label>Academic Term:</label>
-                    <input type="text" id="academicTerm" placeholder="e.g., Spring 2025">
-                </div>
-            </div>
+<div class="container">
 
-            <div class="setup-panel">
-                <h2>Add Instructor</h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <label>Instructor Name:</label>
-                        <input type="text" id="instructorName" placeholder="e.g., John Smith">
-                    </div>
-                    <div class="form-group">
-                        <label>Type:</label>
-                        <select id="instructorType">
-                            <option value="FT">Full-Time</option>
-                            <option value="ADJ">Adjunct</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Max Course Load:</label>
-                        <input type="number" id="maxLoad" value="5" min="1" max="20">
-                    </div>
-                    <div class="form-group">
-                        <label>Courses (comma-separated):</label>
-                        <input type="text" id="courses" placeholder="e.g., HIST-1301, HIST-1302">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Special Options:</label>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                        <label style="display: flex; align-items: center;">
-                            <input type="checkbox" id="has16Week" checked style="margin-right: 5px;">
-                            16-Week Courses
-                        </label>
-                        <label style="display: flex; align-items: center;">
-                            <input type="checkbox" id="has14Week" style="margin-right: 5px;">
-                            14-Week (Saturday)
-                        </label>
-                        <label style="display: flex; align-items: center;">
-                            <input type="checkbox" id="hasHybrid" style="margin-right: 5px;">
-                            Hybrid Courses
-                        </label>
-                        <label style="display: flex; align-items: center;">
-                            <input type="checkbox" id="has8Week" style="margin-right: 5px;">
-                            8-Week Courses
-                        </label>
-                        <label style="display: flex; align-items: center;">
-                            <input type="checkbox" id="has7Week" style="margin-right: 5px;">
-                            7-Week Courses
-                        </label>
-                        <label style="display: flex; align-items: center;">
-                            <input type="checkbox" id="hasDualCredit" style="margin-right: 5px;">
-                            Dual Credit
-                        </label>
-                    </div>
-                </div>
-                
-                <button onclick="addInstructor()">Add Instructor</button>
+    <!-- Masthead (shared by both phases) -->
+    <div class="masthead">
+        <div class="masthead-band"></div>
+        <div class="masthead-inner">
+            <div>
+                <h1 id="mastheadTitle">Course Schedule Builder</h1>
+                <div class="term-line" id="mastheadTerm">Department Setup</div>
             </div>
+            <div class="autosave-status no-print" id="autosaveStatus"></div>
+        </div>
+        <div class="masthead-rule"></div>
+        <div class="print-only" id="printStamp"></div>
+    </div>
 
-            <div class="setup-panel">
-                <h2>Current Instructors</h2>
-                <div id="instructorList"></div>
-                <div style="margin-top: 20px;">
-                    <button onclick="saveConfiguration()">Save Configuration</button>
-                    <button onclick="loadConfiguration()">Load Previous Configuration</button>
-                    <button onclick="startScheduleBuilder()" style="background: #4caf50;">Start Building Schedule →</button>
+    <div id="bannerHost"></div>
+
+    <!-- ================= SETUP PHASE ================= -->
+    <div id="setupPhase">
+        <div class="panel">
+            <h2>Department Information</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="deptName">Department name</label>
+                    <input type="text" id="deptName" placeholder="e.g., Social Sciences">
+                </div>
+                <div class="form-group">
+                    <label for="academicTerm">Academic term</label>
+                    <input type="text" id="academicTerm" placeholder="e.g., Fall 2026">
                 </div>
             </div>
         </div>
 
-        <!-- Schedule Builder Phase (Initially Hidden) -->
-        <div id="schedulePhase" class="hidden">
-            <div class="header">
-                <h1 id="scheduleTitle">Course Schedule Builder</h1>
-                <div class="instructions" style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
-                    <strong>Instructions:</strong>
-                    <ul style="font-size: 12px; margin: 5px 0 10px 20px;">
-                        <li>Drag sections from instructor pools to the schedule grid</li>
-                        <li>Monday-Thursday courses automatically pair on M/W or T/Th (unless hybrid)</li>
-                        <li>Friday and Saturday courses meet once per week</li>
-                        <li>Hybrid courses meet only once per week</li>
-                        <li>Click "Add More" under each instructor to generate additional course sections</li>
-                        <li>Use Export to CSV to save and Import CSV to load schedules</li>
-                    </ul>
-                    <div style="display: flex; gap: 10px; font-size: 12px; flex-wrap: wrap;">
-                        <span style="padding: 2px 8px; background: white; border: 2px solid #ddd; border-radius: 3px;">16-Week</span>
-                        <span style="padding: 2px 8px; background: #f1f8e9; border: 2px solid #689f38; border-radius: 3px;">14-Week</span>
-                        <span style="padding: 2px 8px; background: #e8f5e9; border: 2px solid #4caf50; border-radius: 3px;">Early 8</span>
-                        <span style="padding: 2px 8px; background: #fff3e0; border: 2px solid #ff9800; border-radius: 3px;">Late 8</span>
-                        <span style="padding: 2px 8px; background: #e3f2fd; border: 2px solid #2196f3; border-radius: 3px;">Early 7</span>
-                        <span style="padding: 2px 8px; background: #fce4ec; border: 2px solid #e91e63; border-radius: 3px;">Late 7</span>
-                        <span style="padding: 2px 8px; background: #f3e5f5; border: 2px solid #9c27b0; border-radius: 3px;">Dual Credit</span>
-                    </div>
+        <div class="panel">
+            <h2>Add Instructor</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="instructorName">Instructor name</label>
+                    <input type="text" id="instructorName" placeholder="e.g., Maria O'Brien">
                 </div>
-                <div class="controls">
-                    <button onclick="backToSetup()">← Back to Setup</button>
-                    <button onclick="clearSchedule()">Clear Schedule</button>
-                    <button onclick="exportToCSV()">Export to CSV</button>
-                    <button onclick="document.getElementById('csvFileInput').click()">Import CSV</button>
-                    <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="importCSV(event)">
+                <div class="form-group">
+                    <label for="instructorType">Type</label>
+                    <select id="instructorType">
+                        <option value="FT">Full-Time</option>
+                        <option value="ADJ">Adjunct</option>
+                    </select>
                 </div>
-                <div class="stats">
-                    <div class="stat">
-                        <div class="stat-value" id="totalScheduled">0</div>
-                        <div class="stat-label">Total Scheduled</div>
-                    </div>
+                <div class="form-group">
+                    <label for="maxLoad">Max course load</label>
+                    <input type="number" id="maxLoad" value="5" min="1" max="20">
+                </div>
+                <div class="form-group">
+                    <label for="courses">Courses (comma-separated)</label>
+                    <input type="text" id="courses" placeholder="e.g., GOVT-2305, GOVT-2306">
                 </div>
             </div>
-
-            <div class="main-layout">
-                <div class="sidebar">
-                    <div class="faculty-section">
-                        <div class="faculty-header">Full-Time Faculty</div>
-                        <div id="fullTimeList"></div>
-                    </div>
-                    <div class="faculty-section">
-                        <div class="faculty-header">Adjunct Faculty</div>
-                        <div id="adjunctList"></div>
-                    </div>
-                </div>
-
-                <div class="schedule-table">
-                    <h3 style="color: #667eea; margin-bottom: 10px;">Monday - Thursday Schedule</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th width="15%">Time</th>
-                                <th width="21.25%">Monday</th>
-                                <th width="21.25%">Tuesday</th>
-                                <th width="21.25%">Wednesday</th>
-                                <th width="21.25%">Thursday</th>
-                            </tr>
-                        </thead>
-                        <tbody id="scheduleGrid"></tbody>
-                    </table>
-                    
-                    <div style="background: #f5f5f5; padding: 10px; border-radius: 5px; margin-top: 20px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleWeekendSchedule()">
-                            <h3 style="color: #667eea; margin: 0;">
-                                <span id="weekendToggleIcon" style="display: inline-block; width: 20px; transition: transform 0.3s;">▶</span>
-                                Friday & Saturday Schedule
-                                <span id="weekendIndicator" style="display: none; margin-left: 10px; background: #ff9800; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;"></span>
-                            </h3>
-                            <span style="font-size: 12px; color: #666;">Click to expand/collapse</span>
-                        </div>
-                        <div id="weekendScheduleContent" style="display: none; margin-top: 15px;">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                <div>
-                                    <table style="width: 100%;">
-                                        <thead>
-                                            <tr>
-                                                <th colspan="2" style="background: #764ba2; color: white; padding: 10px;">Friday Evening</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="fridayGrid"></tbody>
-                                    </table>
-                                </div>
-                                <div>
-                                    <table style="width: 100%;">
-                                        <thead>
-                                            <tr>
-                                                <th colspan="2" style="background: #764ba2; color: white; padding: 10px;">Saturday</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="saturdayGrid"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="form-group">
+                <label>Teaching formats</label>
+                <div class="options-grid">
+                    <label class="check-label"><input type="checkbox" id="has16Week" checked> 16-Week</label>
+                    <label class="check-label"><input type="checkbox" id="has14Week"> 14-Week (Saturday)</label>
+                    <label class="check-label"><input type="checkbox" id="hasHybrid"> Hybrid</label>
+                    <label class="check-label"><input type="checkbox" id="has8Week"> 8-Week</label>
+                    <label class="check-label"><input type="checkbox" id="has7Week"> 7-Week</label>
+                    <label class="check-label"><input type="checkbox" id="hasDualCredit"> Dual Credit</label>
                 </div>
             </div>
+            <button id="addInstructorBtn">Add instructor</button>
+        </div>
 
-            <div class="instructor-pool">
-                <h3>Available Course Sections - Drag to Schedule</h3>
-                <div class="instructor-sections" id="instructorPool"></div>
-            </div>
-            
-            <div class="greatest-needs" style="background: white; padding: 15px; border-radius: 10px; margin-top: 20px;">
-                <h3 style="color: #333; margin-bottom: 10px;">Schedule Analysis & Needs Assessment</h3>
-                <div id="needsAnalysis" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
-                    <!-- Dynamic analysis will appear here -->
-                </div>
+        <div class="panel">
+            <h2>Current Instructors</h2>
+            <div id="instructorList"></div>
+            <div style="margin-top: 18px; display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="secondary" id="saveProjectBtnSetup">Save project file</button>
+                <button class="secondary" id="openProjectBtnSetup">Open project file</button>
+                <span style="flex:1"></span>
+                <button class="primary-go" id="startBuilderBtn">Start building schedule →</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // Global variables
-        let instructors = [];
-        let courseIdCounter = 1;
-        let draggedCourse = null;
-        const scheduledCourses = {};
-        const instructorCourses = {};
-        const departmentCatalog = new Set(); // Track all unique courses in department
-        
-        // Toggle weekend schedule visibility
-        function toggleWeekendSchedule() {
-            const content = document.getElementById('weekendScheduleContent');
-            const icon = document.getElementById('weekendToggleIcon');
-            
-            if (content.style.display === 'none') {
-                content.style.display = 'block';
-                icon.style.transform = 'rotate(90deg)';
-            } else {
-                content.style.display = 'none';
-                icon.style.transform = 'rotate(0deg)';
-            }
-        }
-        
-        // Update weekend indicator
-        function updateWeekendIndicator() {
-            const indicator = document.getElementById('weekendIndicator');
-            if (!indicator) return;
-            
-            let fridayCount = 0;
-            let saturdayCount = 0;
-            
-            // Count Friday courses
-            fridaySlots.forEach(time => {
-                const slotKey = `Friday|${time}`;
-                if (scheduledCourses[slotKey]) {
-                    fridayCount += scheduledCourses[slotKey].length;
-                }
-            });
-            
-            // Count Saturday courses
-            saturdaySlots.forEach(time => {
-                const slotKey = `Saturday|${time}`;
-                if (scheduledCourses[slotKey]) {
-                    saturdayCount += scheduledCourses[slotKey].length;
-                }
-            });
-            
-            const totalWeekend = fridayCount + saturdayCount;
-            
-            if (totalWeekend > 0) {
-                indicator.style.display = 'inline-block';
-                indicator.textContent = `${totalWeekend} class${totalWeekend !== 1 ? 'es' : ''} scheduled`;
-                
-                // Change color based on whether section is expanded or collapsed
-                const content = document.getElementById('weekendScheduleContent');
-                if (content && content.style.display === 'none') {
-                    indicator.style.background = '#ff9800'; // Orange when collapsed with classes
-                } else {
-                    indicator.style.background = '#4caf50'; // Green when expanded with classes
-                }
-            } else {
-                indicator.style.display = 'none';
-            }
-        }
-        
-        // Different time slots for different days
-        const weekdaySlots = [
-            '8:00-9:20', '9:30-10:50', '11:00-12:20', '12:30-1:50',
-            '2:00-3:20', '3:30-4:50', '5:00-6:20', '6:30-7:50'
-        ];
-        
-        const fridaySlots = [
-            '4:00-6:50', '7:00-9:50'
-        ];
-        
-        const saturdaySlots = [
-            '9:00-11:50', '12:00-2:50'
-        ];
-        
-        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const mainDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday'];
-        
-        // Helper function to get time slots for a specific day
-        function getTimeSlotsForDay(day) {
-            if (day === 'Friday') return fridaySlots;
-            if (day === 'Saturday') return saturdaySlots;
-            return weekdaySlots;
-        }
-        
-        // Get all unique time slots for various functions
-        const allTimeSlots = [...new Set([...weekdaySlots, ...fridaySlots, ...saturdaySlots])];
+    <!-- ================= BUILDER PHASE ================= -->
+    <div id="schedulePhase" class="hidden">
 
-        // Setup Phase Functions
-        function addInstructor() {
-            const name = document.getElementById('instructorName').value.trim();
-            const type = document.getElementById('instructorType').value;
-            const maxLoad = parseInt(document.getElementById('maxLoad').value);
-            const coursesInput = document.getElementById('courses').value.trim();
-            const hasHybrid = document.getElementById('hasHybrid').checked;
-            const has8Week = document.getElementById('has8Week').checked;
-            const has7Week = document.getElementById('has7Week').checked;
-            const has16Week = document.getElementById('has16Week').checked;
-            const has14Week = document.getElementById('has14Week').checked;
-            const hasDualCredit = document.getElementById('hasDualCredit').checked;
-            
-            if (!name || !coursesInput) {
-                alert('Please enter instructor name and courses.');
-                return;
-            }
-            
-            const courses = coursesInput.split(',').map(c => c.trim()).filter(c => c);
-            
-            // Add courses to department catalog
-            courses.forEach(course => departmentCatalog.add(course));
-            
-            instructors.push({
-                name: name,
-                type: type,
-                max: maxLoad,
-                courses: courses,
-                hybrid: hasHybrid,
-                eightWeek: has8Week,
-                sevenWeek: has7Week,
-                sixteenWeek: has16Week,
-                fourteenWeek: has14Week,
-                dualCredit: hasDualCredit
-            });
-            
-            // Clear form
-            document.getElementById('instructorName').value = '';
-            document.getElementById('courses').value = '';
-            document.getElementById('maxLoad').value = '5';
-            document.getElementById('hasHybrid').checked = false;
-            document.getElementById('has8Week').checked = false;
-            document.getElementById('has7Week').checked = false;
-            document.getElementById('has16Week').checked = true;
-            document.getElementById('has14Week').checked = false;
-            document.getElementById('hasDualCredit').checked = false;
-            
-            updateInstructorList();
-        }
+        <div class="toolbar no-print">
+            <button class="quiet" id="backToSetupBtn">← Setup</button>
+            <button class="quiet" id="undoBtn" title="Undo (Ctrl+Z)">↩ Undo</button>
+            <button class="quiet" id="redoBtn" title="Redo (Ctrl+Y)">↪ Redo</button>
+            <button class="quiet" id="clearScheduleBtn">Clear schedule</button>
+            <span class="spacer"></span>
+            <button class="secondary" id="openProjectBtnBuild">Open project</button>
+            <button class="secondary" id="saveProjectBtnBuild">Save project</button>
+            <button class="secondary" id="importCsvBtn">Import CSV</button>
+            <button class="secondary" id="exportCsvBtn">Export CSV</button>
+            <button id="printBtn">Print schedule</button>
+            <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+            <input type="file" id="projectFileInput" accept=".json" class="hidden">
+        </div>
 
-        function removeInstructor(index) {
-            instructors.splice(index, 1);
-            
-            // Rebuild department catalog
-            departmentCatalog.clear();
-            instructors.forEach(instructor => {
-                instructor.courses.forEach(course => {
-                    departmentCatalog.add(course);
-                });
-            });
-            
-            updateInstructorList();
-        }
+        <div class="lens-row no-print" id="lensRow">
+            <span class="lens-label">View:</span>
+            <!-- chips injected by JS -->
+        </div>
 
-        function updateInstructorList() {
-            const list = document.getElementById('instructorList');
-            list.innerHTML = '';
-            
-            instructors.forEach((instructor, index) => {
-                const div = document.createElement('div');
-                div.className = 'instructor-entry';
-                
-                let options = [];
-                if (instructor.sixteenWeek) options.push('16-Week');
-                if (instructor.fourteenWeek) options.push('14-Week');
-                if (instructor.hybrid) options.push('Hybrid');
-                if (instructor.eightWeek) options.push('8-Week');
-                if (instructor.sevenWeek) options.push('7-Week');
-                if (instructor.dualCredit) options.push('Dual Credit');
-                
-                div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                        <div style="flex: 1;">
-                            <strong>${instructor.name}</strong> (${instructor.type}, Max: ${instructor.max})
-                            ${options.length > 0 ? `<br><small>Options: ${options.join(', ')}</small>` : ''}
-                            <div class="course-list">
-                                ${instructor.courses.map(c => `<span class="course-tag">${c}</span>`).join('')}
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 5px;">
-                            <button onclick="editInstructor(${index})" style="background: #2196f3;">Edit</button>
-                            <button class="danger" onclick="removeInstructor(${index})">Remove</button>
-                        </div>
+        <details class="pairing-rules no-print">
+            <summary>How placement works</summary>
+            <ul>
+                <li>Drag a section to the grid, or click it once and then click a time slot.</li>
+                <li>Monday–Thursday sections auto-pair on M/W or T/Th. Hybrid, Friday, and Saturday sections meet once.</li>
+                <li>Early and late half-term sections (8-week, 7-week) may share a slot; anything else double-booking an instructor is blocked.</li>
+                <li>Click the × on a placed section to return it to the pool. Everything autosaves in this browser.</li>
+            </ul>
+        </details>
+
+        <div class="stats no-print">
+            <div class="stat"><div class="stat-value" id="statScheduled">0</div><div class="stat-label">Sections scheduled</div></div>
+            <div class="stat"><div class="stat-value" id="statPool">0</div><div class="stat-label">Awaiting placement</div></div>
+            <div class="stat"><div class="stat-value" id="statCapacity">0%</div><div class="stat-label">Faculty capacity used</div></div>
+        </div>
+
+        <div class="main-layout">
+            <div class="sidebar no-print">
+                <div class="faculty-section">
+                    <div class="faculty-header">Full-Time Faculty</div>
+                    <div id="fullTimeList"></div>
+                </div>
+                <div class="faculty-section">
+                    <div class="faculty-header">Adjunct Faculty</div>
+                    <div id="adjunctList"></div>
+                </div>
+            </div>
+
+            <div class="schedule-table">
+                <h3 style="margin-bottom: 10px;">Monday – Thursday</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:13%">Time</th>
+                            <th style="width:21.75%">Monday</th>
+                            <th style="width:21.75%">Tuesday</th>
+                            <th style="width:21.75%">Wednesday</th>
+                            <th style="width:21.75%">Thursday</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleGrid"></tbody>
+                </table>
+
+                <div class="weekend-wrap">
+                    <div class="weekend-head" id="weekendHead">
+                        <h3><span id="weekendToggleIcon">▶</span> Friday &amp; Saturday <span id="weekendIndicator"></span></h3>
+                        <span class="hint" style="font-size:12px;color:var(--muted);font-family:'Segoe UI',Arial,sans-serif;">Click to expand</span>
                     </div>
-                `;
-                list.appendChild(div);
-            });
-        }
-        
-        // Edit instructor function
-        function editInstructor(index) {
-            const instructor = instructors[index];
-            
-            // Create edit modal
-            const modal = document.createElement('div');
-            modal.style = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: white;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                z-index: 1000;
-                max-width: 600px;
-                width: 90%;
-                max-height: 80vh;
-                overflow-y: auto;
-            `;
-            
-            modal.innerHTML = `
-                <h2 style="color: #667eea; margin-bottom: 15px;">Edit Instructor</h2>
-                <div style="display: grid; gap: 15px;">
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; color: #555;">Instructor Name:</label>
-                        <input type="text" id="edit-name" value="${instructor.name}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; color: #555;">Type:</label>
-                            <select id="edit-type" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="FT" ${instructor.type === 'FT' ? 'selected' : ''}>Full-Time</option>
-                                <option value="ADJ" ${instructor.type === 'ADJ' ? 'selected' : ''}>Adjunct</option>
-                            </select>
+                    <div class="weekend-grids" id="weekendScheduleContent">
+                        <div class="two-col">
+                            <table>
+                                <thead><tr><th colspan="2">Friday Evening</th></tr></thead>
+                                <tbody id="fridayGrid"></tbody>
+                            </table>
+                            <table>
+                                <thead><tr><th colspan="2">Saturday</th></tr></thead>
+                                <tbody id="saturdayGrid"></tbody>
+                            </table>
                         </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 5px; color: #555;">Max Course Load:</label>
-                            <input type="number" id="edit-max" value="${instructor.max}" min="1" max="20" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        </div>
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; color: #555;">Courses (comma-separated):</label>
-                        <input type="text" id="edit-courses" value="${instructor.courses.join(', ')}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; color: #555;">Teaching Modalities:</label>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                            <label style="display: flex; align-items: center;">
-                                <input type="checkbox" id="edit-16week" ${instructor.sixteenWeek ? 'checked' : ''} style="margin-right: 5px;">
-                                16-Week Courses
-                            </label>
-                            <label style="display: flex; align-items: center;">
-                                <input type="checkbox" id="edit-14week" ${instructor.fourteenWeek ? 'checked' : ''} style="margin-right: 5px;">
-                                14-Week (Saturday)
-                            </label>
-                            <label style="display: flex; align-items: center;">
-                                <input type="checkbox" id="edit-hybrid" ${instructor.hybrid ? 'checked' : ''} style="margin-right: 5px;">
-                                Hybrid Courses
-                            </label>
-                            <label style="display: flex; align-items: center;">
-                                <input type="checkbox" id="edit-8week" ${instructor.eightWeek ? 'checked' : ''} style="margin-right: 5px;">
-                                8-Week Courses
-                            </label>
-                            <label style="display: flex; align-items: center;">
-                                <input type="checkbox" id="edit-7week" ${instructor.sevenWeek ? 'checked' : ''} style="margin-right: 5px;">
-                                7-Week Courses
-                            </label>
-                            <label style="display: flex; align-items: center;">
-                                <input type="checkbox" id="edit-dualcredit" ${instructor.dualCredit ? 'checked' : ''} style="margin-right: 5px;">
-                                Dual Credit
-                            </label>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
-                        <button onclick="saveInstructorEdit(${index})" style="background: #4caf50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Save Changes</button>
-                        <button onclick="cancelInstructorEdit()" style="background: #999; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Cancel</button>
                     </div>
                 </div>
-            `;
-            
-            // Create backdrop
-            const backdrop = document.createElement('div');
-            backdrop.id = 'edit-backdrop';
-            backdrop.style = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.5);
-                z-index: 999;
-            `;
-            backdrop.onclick = cancelInstructorEdit;
-            
-            document.body.appendChild(backdrop);
-            document.body.appendChild(modal);
-            modal.id = 'edit-modal';
+            </div>
+        </div>
+
+        <div class="instructor-pool no-print">
+            <div class="pool-head">
+                <h3>Available Sections</h3>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <label for="subjectFilter" style="margin:0;font-size:13px;">Subject:</label>
+                    <select id="subjectFilter" style="width:auto;padding:5px 10px;">
+                        <option value="all">All subjects</option>
+                    </select>
+                    <span id="filterCount" style="font-size:12px;color:var(--muted);"></span>
+                </div>
+            </div>
+            <div class="pool-hint">Drag a section onto the grid, or click to select it and then click a time slot. Use “Add section” to generate more.</div>
+            <div class="instructor-sections" id="instructorPool"></div>
+        </div>
+
+        <div class="panel no-print" id="needsPanel" style="margin-top: 18px;">
+            <h2>Schedule Analysis &amp; Needs Assessment</h2>
+            <div class="analysis-grid" id="needsAnalysis"></div>
+        </div>
+    </div>
+</div>
+
+<div id="toastHost"></div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let instructors = [];              // { name, type, max, courses[], hybrid, eightWeek, sevenWeek, sixteenWeek, fourteenWeek, dualCredit }
+let instructorCourses = {};        // name -> [ { id, type, instructor, session, hybrid, dualCredit } ]
+let scheduledCourses = {};         // "Day|Time" -> [ course ]
+let courseIdCounter = 1;
+
+let draggedCourse = null;          // { ...course, fromSlot? }
+let selectedCourse = null;         // click-to-place: { ...course, fromSlot? }
+let activeLens = 'all';
+
+const undoStack = [];
+const redoStack = [];
+const UNDO_LIMIT = 50;
+
+const LS_KEY = 'tccScheduleBuilderV2';
+
+const weekdaySlots = ['8:00-9:20','9:30-10:50','11:00-12:20','12:30-1:50','2:00-3:20','3:30-4:50','5:00-6:20','6:30-7:50'];
+const fridaySlots = ['4:00-6:50','7:00-9:50'];
+const saturdaySlots = ['9:00-11:50','12:00-2:50'];
+const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const PRIME_TIMES = ['9:30-10:50','11:00-12:20','12:30-1:50','9:00-11:50','12:00-2:50'];
+
+const SESSION_LABELS = {
+    '16week': '16-Week', '14week': '14-Week',
+    'early8': 'Early 8', 'late8': 'Late 8',
+    'early7': 'Early 7', 'late7': 'Late 7'
+};
+const SESSION_FROM_LABEL = {};
+Object.entries(SESSION_LABELS).forEach(([k, v]) => { SESSION_FROM_LABEL[v] = k; SESSION_FROM_LABEL[v.toLowerCase()] = k; });
+SESSION_FROM_LABEL['16-week'] = '16week';
+
+const SESSION_ABBR = { '16week': '', '14week': '14W', 'early8': 'E8', 'late8': 'L8', 'early7': 'E7', 'late7': 'L7' };
+
+/* ============================================================
+   SMALL UTILITIES
+   ============================================================ */
+function esc(s) {
+    return String(s ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function toast(msg, kind) {
+    const host = document.getElementById('toastHost');
+    const t = document.createElement('div');
+    t.className = 'toast' + (kind ? ' ' + kind : '');
+    t.textContent = msg;
+    host.appendChild(t);
+    setTimeout(() => t.remove(), kind === 'error' ? 5200 : 2800);
+}
+
+function getTimeSlotsForDay(day) {
+    if (day === 'Friday') return fridaySlots;
+    if (day === 'Saturday') return saturdaySlots;
+    return weekdaySlots;
+}
+
+function canonicalSlotOrder() {
+    return [...weekdaySlots, ...fridaySlots, ...saturdaySlots];
+}
+
+function sessionHalf(session) {
+    if (session === 'early8' || session === 'early7') return 'first';
+    if (session === 'late8' || session === 'late7') return 'second';
+    return 'full';
+}
+
+function pairedDays(course, day) {
+    if (course.hybrid) return [day];
+    if (day === 'Friday' || day === 'Saturday') return [day];
+    if (day === 'Monday' || day === 'Wednesday') return ['Monday', 'Wednesday'];
+    if (day === 'Tuesday' || day === 'Thursday') return ['Tuesday', 'Thursday'];
+    return [day];
+}
+
+function scheduledIdsFor(name) {
+    const ids = new Set();
+    Object.values(scheduledCourses).forEach(list => {
+        list.forEach(c => { if (c.instructor === name) ids.add(c.id); });
+    });
+    return ids;
+}
+
+function departmentCatalog() {
+    const set = new Set();
+    instructors.forEach(i => i.courses.forEach(c => set.add(c)));
+    Object.values(scheduledCourses).forEach(list => list.forEach(c => set.add(c.type)));
+    return set;
+}
+
+function findInstructor(name) { return instructors.find(i => i.name === name); }
+
+/* ============================================================
+   UNDO / REDO
+   ============================================================ */
+function snapshot() {
+    return JSON.stringify({ scheduledCourses, instructorCourses, courseIdCounter });
+}
+function pushUndo() {
+    undoStack.push(snapshot());
+    if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+    redoStack.length = 0;
+    updateUndoButtons();
+}
+function restore(snap) {
+    const s = JSON.parse(snap);
+    scheduledCourses = s.scheduledCourses;
+    instructorCourses = s.instructorCourses;
+    courseIdCounter = s.courseIdCounter;
+}
+function doUndo() {
+    if (!undoStack.length) return;
+    redoStack.push(snapshot());
+    restore(undoStack.pop());
+    clearSelection();
+    renderAll();
+    updateUndoButtons();
+}
+function doRedo() {
+    if (!redoStack.length) return;
+    undoStack.push(snapshot());
+    restore(redoStack.pop());
+    clearSelection();
+    renderAll();
+    updateUndoButtons();
+}
+function updateUndoButtons() {
+    document.getElementById('undoBtn').disabled = undoStack.length === 0;
+    document.getElementById('redoBtn').disabled = redoStack.length === 0;
+}
+
+/* ============================================================
+   AUTOSAVE (localStorage) + PROJECT FILES
+   ============================================================ */
+function currentPhase() {
+    return document.getElementById('schedulePhase').classList.contains('hidden') ? 'setup' : 'builder';
+}
+
+function stateObject() {
+    return {
+        version: 2,
+        savedAt: Date.now(),
+        phase: currentPhase(),
+        department: document.getElementById('deptName').value,
+        term: document.getElementById('academicTerm').value,
+        instructors, instructorCourses, scheduledCourses, courseIdCounter
+    };
+}
+
+function applyState(s) {
+    instructors = s.instructors || [];
+    instructorCourses = s.instructorCourses || {};
+    scheduledCourses = s.scheduledCourses || {};
+    courseIdCounter = s.courseIdCounter || 1;
+    document.getElementById('deptName').value = s.department || '';
+    document.getElementById('academicTerm').value = s.term || '';
+    updateInstructorList();
+    if (s.phase === 'builder' && instructors.length) {
+        enterBuilder(false);
+    } else {
+        enterSetup();
+    }
+}
+
+function saveLocal() {
+    try {
+        localStorage.setItem(LS_KEY, JSON.stringify(stateObject()));
+        const el = document.getElementById('autosaveStatus');
+        el.innerHTML = '<span class="dot"></span>Autosaved ' +
+            new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    } catch (e) { /* storage unavailable; silently skip */ }
+}
+
+function checkRestore() {
+    let saved = null;
+    try { saved = localStorage.getItem(LS_KEY); } catch (e) { return; }
+    if (!saved) return;
+    let s;
+    try { s = JSON.parse(saved); } catch (e) { return; }
+    if (!s.instructors || !s.instructors.length) return;
+
+    const host = document.getElementById('bannerHost');
+    const when = s.savedAt ? new Date(s.savedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'earlier';
+    const banner = document.createElement('div');
+    banner.className = 'banner no-print';
+    const label = document.createElement('span');
+    label.textContent = 'Autosaved work found (' + (s.department || 'untitled') + (s.term ? ', ' + s.term : '') + ' — ' + when + ').';
+    const btns = document.createElement('span');
+    const keep = document.createElement('button');
+    keep.className = 'keep'; keep.textContent = 'Resume';
+    keep.addEventListener('click', () => { applyState(s); banner.remove(); toast('Restored autosaved work'); });
+    const drop = document.createElement('button');
+    drop.className = 'drop'; drop.textContent = 'Start fresh';
+    drop.addEventListener('click', () => {
+        try { localStorage.removeItem(LS_KEY); } catch (e) {}
+        banner.remove();
+    });
+    btns.append(keep, drop);
+    banner.append(label, btns);
+    host.appendChild(banner);
+}
+
+function saveProjectFile() {
+    const s = stateObject();
+    const dept = (s.department || 'Schedule').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') || 'Schedule';
+    const term = (s.term || '').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_');
+    const blob = new Blob([JSON.stringify(s, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = dept + (term ? '_' + term : '') + '_project.json';
+    link.click();
+    URL.revokeObjectURL(link.href);
+    toast('Project file saved');
+}
+
+function openProjectFile() {
+    document.getElementById('projectFileInput').click();
+}
+
+function handleProjectFile(ev) {
+    const file = ev.target.files[0];
+    ev.target.value = '';
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const s = JSON.parse(e.target.result);
+            if (!s.instructors) throw new Error('missing instructors');
+            pushUndo();
+            applyState(s);
+            saveLocal();
+            toast('Project loaded');
+        } catch (err) {
+            toast('That file is not a valid project file.', 'error');
         }
-        
-        function saveInstructorEdit(index) {
-            const name = document.getElementById('edit-name').value.trim();
-            const type = document.getElementById('edit-type').value;
-            const maxLoad = parseInt(document.getElementById('edit-max').value);
-            const coursesInput = document.getElementById('edit-courses').value.trim();
-            const has16Week = document.getElementById('edit-16week').checked;
-            const has14Week = document.getElementById('edit-14week').checked;
-            const hasHybrid = document.getElementById('edit-hybrid').checked;
-            const has8Week = document.getElementById('edit-8week').checked;
-            const has7Week = document.getElementById('edit-7week').checked;
-            const hasDualCredit = document.getElementById('edit-dualcredit').checked;
-            
-            if (!name || !coursesInput) {
-                alert('Please enter instructor name and courses.');
-                return;
+    };
+    reader.readAsText(file);
+}
+
+/* ============================================================
+   SETUP PHASE
+   ============================================================ */
+function readFormatChecks(prefix) {
+    const g = id => document.getElementById(prefix + id).checked;
+    return {
+        sixteenWeek: g('16Week') ?? true, fourteenWeek: g('14Week'),
+        hybrid: g('Hybrid'), eightWeek: g('8Week'),
+        sevenWeek: g('7Week'), dualCredit: g('DualCredit')
+    };
+}
+
+function addInstructor() {
+    const name = document.getElementById('instructorName').value.trim();
+    const type = document.getElementById('instructorType').value;
+    const maxLoad = parseInt(document.getElementById('maxLoad').value, 10) || 5;
+    const coursesInput = document.getElementById('courses').value.trim();
+
+    if (!name || !coursesInput) { toast('Enter an instructor name and at least one course.', 'warn'); return; }
+    if (findInstructor(name)) { toast('An instructor with that name already exists.', 'warn'); return; }
+
+    const courses = coursesInput.split(',').map(c => c.trim()).filter(Boolean);
+    const f = {
+        sixteenWeek: document.getElementById('has16Week').checked,
+        fourteenWeek: document.getElementById('has14Week').checked,
+        hybrid: document.getElementById('hasHybrid').checked,
+        eightWeek: document.getElementById('has8Week').checked,
+        sevenWeek: document.getElementById('has7Week').checked,
+        dualCredit: document.getElementById('hasDualCredit').checked
+    };
+
+    instructors.push({ name, type, max: maxLoad, courses, ...f });
+
+    document.getElementById('instructorName').value = '';
+    document.getElementById('courses').value = '';
+    document.getElementById('maxLoad').value = '5';
+    ['has16Week'].forEach(id => document.getElementById(id).checked = true);
+    ['has14Week','hasHybrid','has8Week','has7Week','hasDualCredit'].forEach(id => document.getElementById(id).checked = false);
+
+    updateInstructorList();
+    saveLocal();
+    document.getElementById('instructorName').focus();
+}
+
+function removeInstructorAt(index) {
+    const inst = instructors[index];
+    const scheduled = scheduledIdsFor(inst.name).size;
+    const pooled = (instructorCourses[inst.name] || []).length;
+    let msg = 'Remove ' + inst.name + '?';
+    if (scheduled || pooled) msg += ' Their ' + scheduled + ' scheduled and ' + pooled + ' pooled section(s) will be removed too.';
+    if (!confirm(msg)) return;
+
+    pushUndo();
+    instructors.splice(index, 1);
+    delete instructorCourses[inst.name];
+    Object.keys(scheduledCourses).forEach(key => {
+        scheduledCourses[key] = scheduledCourses[key].filter(c => c.instructor !== inst.name);
+        if (!scheduledCourses[key].length) delete scheduledCourses[key];
+    });
+    updateInstructorList();
+    saveLocal();
+}
+
+function updateInstructorList() {
+    const list = document.getElementById('instructorList');
+    list.innerHTML = '';
+    if (!instructors.length) {
+        const p = document.createElement('p');
+        p.style.cssText = 'color:var(--muted);font-size:13px;';
+        p.textContent = 'No instructors yet. Add your roster above — it only has to be done once, then save the project file for reuse each term.';
+        list.appendChild(p);
+        return;
+    }
+
+    instructors.forEach((inst, index) => {
+        const div = document.createElement('div');
+        div.className = 'instructor-entry';
+
+        const options = [];
+        if (inst.sixteenWeek) options.push('16-Week');
+        if (inst.fourteenWeek) options.push('14-Week');
+        if (inst.hybrid) options.push('Hybrid');
+        if (inst.eightWeek) options.push('8-Week');
+        if (inst.sevenWeek) options.push('7-Week');
+        if (inst.dualCredit) options.push('Dual Credit');
+
+        div.innerHTML =
+            '<div class="row"><div style="flex:1;">' +
+            '<strong>' + esc(inst.name) + '</strong> <span style="color:var(--muted);font-size:13px;">(' + esc(inst.type) + ', max ' + inst.max + ')</span>' +
+            (options.length ? '<br><small style="color:var(--muted);">' + esc(options.join(', ')) + '</small>' : '') +
+            '<div class="course-list">' + inst.courses.map(c => '<span class="course-tag">' + esc(c) + '</span>').join('') + '</div>' +
+            '</div><div style="display:flex;gap:5px;"></div></div>';
+
+        const btnBox = div.querySelector('.row > div:last-child');
+        const editBtn = document.createElement('button');
+        editBtn.className = 'secondary'; editBtn.textContent = 'Edit';
+        editBtn.addEventListener('click', () => openEditModal(index));
+        const rmBtn = document.createElement('button');
+        rmBtn.className = 'danger'; rmBtn.textContent = 'Remove';
+        rmBtn.addEventListener('click', () => removeInstructorAt(index));
+        btnBox.append(editBtn, rmBtn);
+
+        list.appendChild(div);
+    });
+}
+
+/* ---------- Edit modal (DOM-built; name-safe) ---------- */
+let modalCleanup = null;
+
+function openEditModal(index) {
+    const inst = instructors[index];
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-label', 'Edit instructor');
+
+    modal.innerHTML =
+        '<h2>Edit Instructor</h2>' +
+        '<div class="form-group"><label>Instructor name</label><input type="text" id="editName"></div>' +
+        '<div class="form-grid">' +
+        '<div class="form-group"><label>Type</label><select id="editType"><option value="FT">Full-Time</option><option value="ADJ">Adjunct</option></select></div>' +
+        '<div class="form-group"><label>Max course load</label><input type="number" id="editMax" min="1" max="20"></div>' +
+        '</div>' +
+        '<div class="form-group"><label>Courses (comma-separated)</label><input type="text" id="editCourses"></div>' +
+        '<div class="form-group"><label>Teaching formats</label><div class="options-grid">' +
+        '<label class="check-label"><input type="checkbox" id="edit16Week"> 16-Week</label>' +
+        '<label class="check-label"><input type="checkbox" id="edit14Week"> 14-Week (Saturday)</label>' +
+        '<label class="check-label"><input type="checkbox" id="editHybrid"> Hybrid</label>' +
+        '<label class="check-label"><input type="checkbox" id="edit8Week"> 8-Week</label>' +
+        '<label class="check-label"><input type="checkbox" id="edit7Week"> 7-Week</label>' +
+        '<label class="check-label"><input type="checkbox" id="editDualCredit"> Dual Credit</label>' +
+        '</div></div>' +
+        '<div class="modal-actions"><button class="quiet" id="editCancel">Cancel</button><button id="editSave">Save changes</button></div>';
+
+    document.body.append(backdrop, modal);
+
+    // Values set via properties — safe for quotes/apostrophes
+    modal.querySelector('#editName').value = inst.name;
+    modal.querySelector('#editType').value = inst.type;
+    modal.querySelector('#editMax').value = inst.max;
+    modal.querySelector('#editCourses').value = inst.courses.join(', ');
+    modal.querySelector('#edit16Week').checked = !!inst.sixteenWeek;
+    modal.querySelector('#edit14Week').checked = !!inst.fourteenWeek;
+    modal.querySelector('#editHybrid').checked = !!inst.hybrid;
+    modal.querySelector('#edit8Week').checked = !!inst.eightWeek;
+    modal.querySelector('#edit7Week').checked = !!inst.sevenWeek;
+    modal.querySelector('#editDualCredit').checked = !!inst.dualCredit;
+
+    const close = () => { backdrop.remove(); modal.remove(); modalCleanup = null; };
+    modalCleanup = close;
+    backdrop.addEventListener('click', close);
+    modal.querySelector('#editCancel').addEventListener('click', close);
+
+    modal.querySelector('#editSave').addEventListener('click', () => {
+        const newName = modal.querySelector('#editName').value.trim();
+        const coursesInput = modal.querySelector('#editCourses').value.trim();
+        if (!newName || !coursesInput) { toast('Name and courses are required.', 'warn'); return; }
+        if (newName !== inst.name && findInstructor(newName)) { toast('Another instructor already has that name.', 'warn'); return; }
+
+        pushUndo();
+        const oldName = inst.name;
+        inst.name = newName;
+        inst.type = modal.querySelector('#editType').value;
+        inst.max = parseInt(modal.querySelector('#editMax').value, 10) || inst.max;
+        inst.courses = coursesInput.split(',').map(c => c.trim()).filter(Boolean);
+        inst.sixteenWeek = modal.querySelector('#edit16Week').checked;
+        inst.fourteenWeek = modal.querySelector('#edit14Week').checked;
+        inst.hybrid = modal.querySelector('#editHybrid').checked;
+        inst.eightWeek = modal.querySelector('#edit8Week').checked;
+        inst.sevenWeek = modal.querySelector('#edit7Week').checked;
+        inst.dualCredit = modal.querySelector('#editDualCredit').checked;
+
+        // Rename ripples through pool and schedule so nothing orphans
+        if (newName !== oldName) {
+            if (instructorCourses[oldName]) {
+                instructorCourses[newName] = instructorCourses[oldName];
+                delete instructorCourses[oldName];
+                instructorCourses[newName].forEach(c => c.instructor = newName);
             }
-            
-            const courses = coursesInput.split(',').map(c => c.trim()).filter(c => c);
-            
-            // Update the instructor
-            instructors[index] = {
-                name: name,
-                type: type,
-                max: maxLoad,
-                courses: courses,
-                hybrid: hasHybrid,
-                eightWeek: has8Week,
-                sevenWeek: has7Week,
-                sixteenWeek: has16Week,
-                fourteenWeek: has14Week,
-                dualCredit: hasDualCredit
-            };
-            
-            // Rebuild department catalog
-            departmentCatalog.clear();
-            instructors.forEach(instructor => {
-                instructor.courses.forEach(course => {
-                    departmentCatalog.add(course);
-                });
-            });
-            
-            // Close modal
-            cancelInstructorEdit();
-            
-            // Update display
-            updateInstructorList();
-        }
-        
-        function cancelInstructorEdit() {
-            const modal = document.getElementById('edit-modal');
-            const backdrop = document.getElementById('edit-backdrop');
-            if (modal) modal.remove();
-            if (backdrop) backdrop.remove();
+            Object.values(scheduledCourses).forEach(list =>
+                list.forEach(c => { if (c.instructor === oldName) c.instructor = newName; }));
         }
 
-        function saveConfiguration() {
-            const config = {
-                department: document.getElementById('deptName').value,
-                term: document.getElementById('academicTerm').value,
-                instructors: instructors
-            };
-            
-            const blob = new Blob([JSON.stringify(config, null, 2)], {type: 'application/json'});
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'schedule_config.json';
-            link.click();
-        }
+        close();
+        updateInstructorList();
+        saveLocal();
+        toast('Instructor updated');
+    });
 
-        function loadConfiguration() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = function(e) {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    try {
-                        const config = JSON.parse(event.target.result);
-                        document.getElementById('deptName').value = config.department || '';
-                        document.getElementById('academicTerm').value = config.term || '';
-                        instructors = config.instructors || [];
-                        
-                        // Rebuild department catalog from loaded instructors
-                        departmentCatalog.clear();
-                        instructors.forEach(instructor => {
-                            instructor.courses.forEach(course => {
-                                departmentCatalog.add(course);
-                            });
-                        });
-                        
-                        updateInstructorList();
-                    } catch(err) {
-                        alert('Error loading configuration file.');
-                    }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
-        }
+    modal.querySelector('#editName').focus();
+}
 
-        function startScheduleBuilder() {
-            if (instructors.length === 0) {
-                alert('Please add at least one instructor before starting.');
-                return;
+/* ============================================================
+   PHASE TRANSITIONS — nothing is destroyed crossing over
+   ============================================================ */
+function enterBuilder(seedNew = true) {
+    if (!instructors.length) { toast('Add at least one instructor first.', 'warn'); return; }
+
+    if (seedNew) seedPools();
+    pruneRemovedInstructors();
+
+    const dept = document.getElementById('deptName').value.trim() || 'Course Schedule';
+    const term = document.getElementById('academicTerm').value.trim();
+    document.getElementById('mastheadTitle').textContent = dept;
+    document.getElementById('mastheadTerm').textContent = term ? term + ' — Schedule Builder' : 'Schedule Builder';
+    document.getElementById('printStamp').textContent =
+        dept + (term ? ' — ' + term : '') + ' · printed ' + new Date().toLocaleDateString();
+
+    document.getElementById('setupPhase').classList.add('hidden');
+    document.getElementById('schedulePhase').classList.remove('hidden');
+
+    createGrid();
+    createInstructorPool();
+    buildLensChips();
+    renderAll();
+    updateUndoButtons();
+}
+
+function enterSetup() {
+    // State stays intact — going back is always safe.
+    clearSelection();
+    document.getElementById('mastheadTitle').textContent = 'Course Schedule Builder';
+    document.getElementById('mastheadTerm').textContent = 'Department Setup';
+    document.getElementById('schedulePhase').classList.add('hidden');
+    document.getElementById('setupPhase').classList.remove('hidden');
+    updateInstructorList();
+    saveLocal();
+}
+
+function seedPools() {
+    // Seed starter sections ONLY for instructors who have no pool yet.
+    instructors.forEach(inst => {
+        if (instructorCourses[inst.name]) return;
+        instructorCourses[inst.name] = [];
+        const initial = Math.min(2, inst.courses.length);
+        for (let i = 0; i < initial; i++) {
+            const type = inst.courses[i];
+            if (inst.sixteenWeek) {
+                instructorCourses[inst.name].push({ id: courseIdCounter++, type, instructor: inst.name, session: '16week', hybrid: false, dualCredit: false });
             }
-            
-            // Initialize instructor courses with minimal initial cards
-            initializeInstructorCourses();
-            
-            // Update title
-            const dept = document.getElementById('deptName').value || 'Department';
-            const term = document.getElementById('academicTerm').value || '';
-            document.getElementById('scheduleTitle').textContent = `${dept} Schedule Builder${term ? ' - ' + term : ''}`;
-            
-            // Switch views
-            document.getElementById('setupPhase').classList.add('hidden');
-            document.getElementById('schedulePhase').classList.remove('hidden');
-            
-            // Initialize schedule builder
-            createGrid();
-            createInstructorPool();
-            updateSubjectFilter();  // Initialize the subject filter
-            renderAll();
-            
-            // Start with weekend section collapsed
-            const weekendContent = document.getElementById('weekendScheduleContent');
-            if (weekendContent) {
-                weekendContent.style.display = 'none';
-            }
-        }
-
-        function backToSetup() {
-            if (Object.keys(scheduledCourses).length > 0) {
-                if (!confirm('You have courses scheduled. Going back will clear the schedule. Continue?')) {
-                    return;
+            if (i === 0) {
+                if (inst.dualCredit) {
+                    instructorCourses[inst.name].push({ id: courseIdCounter++, type, instructor: inst.name, session: '16week', hybrid: false, dualCredit: true });
+                } else if (inst.hybrid && inst.sixteenWeek) {
+                    instructorCourses[inst.name].push({ id: courseIdCounter++, type, instructor: inst.name, session: '16week', hybrid: true, dualCredit: false });
+                } else if (inst.eightWeek) {
+                    instructorCourses[inst.name].push({ id: courseIdCounter++, type, instructor: inst.name, session: 'early8', hybrid: false, dualCredit: false });
                 }
             }
-            
-            // Clear schedule
-            Object.keys(scheduledCourses).forEach(key => {
-                delete scheduledCourses[key];
-            });
-            
-            // Switch views
-            document.getElementById('setupPhase').classList.remove('hidden');
-            document.getElementById('schedulePhase').classList.add('hidden');
         }
+        if (!instructorCourses[inst.name].length && inst.courses.length) {
+            instructorCourses[inst.name].push({ id: courseIdCounter++, type: inst.courses[0], instructor: inst.name, session: '16week', hybrid: false, dualCredit: false });
+        }
+    });
+}
 
-        // Initialize instructor courses with minimal initial display
-        function initializeInstructorCourses() {
-            instructors.forEach(instructor => {
-                instructorCourses[instructor.name] = [];
-                
-                // Create only 1-2 initial courses per instructor
-                const initialCourseCount = Math.min(2, instructor.courses.length);
-                
-                for (let i = 0; i < initialCourseCount; i++) {
-                    const courseType = instructor.courses[i];
-                    
-                    // Create one standard 16-week course if applicable
-                    if (instructor.sixteenWeek) {
-                        instructorCourses[instructor.name].push({
-                            id: courseIdCounter++,
-                            type: courseType,
-                            instructor: instructor.name,
-                            session: '16week',
-                            hybrid: false,
-                            dualCredit: false
-                        });
-                    }
-                    
-                    // If they teach special formats, add one example
-                    if (i === 0) {  // Only for the first course type
-                        if (instructor.dualCredit) {
-                            instructorCourses[instructor.name].push({
-                                id: courseIdCounter++,
-                                type: courseType,
-                                instructor: instructor.name,
-                                session: '16week',
-                                hybrid: false,
-                                dualCredit: true
-                            });
-                        } else if (instructor.hybrid && instructor.sixteenWeek) {
-                            instructorCourses[instructor.name].push({
-                                id: courseIdCounter++,
-                                type: courseType,
-                                instructor: instructor.name,
-                                session: '16week',
-                                hybrid: true,
-                                dualCredit: false
-                            });
-                        } else if (instructor.eightWeek) {
-                            instructorCourses[instructor.name].push({
-                                id: courseIdCounter++,
-                                type: courseType,
-                                instructor: instructor.name,
-                                session: 'early8',
-                                hybrid: false,
-                                dualCredit: false
-                            });
-                        }
-                    }
-                }
-                
-                // Ensure at least one course exists
-                if (instructorCourses[instructor.name].length === 0 && instructor.courses.length > 0) {
-                    instructorCourses[instructor.name].push({
-                        id: courseIdCounter++,
-                        type: instructor.courses[0],
-                        instructor: instructor.name,
-                        session: '16week',
-                        hybrid: false,
-                        dualCredit: false
-                    });
-                }
-            });
-        }
+function pruneRemovedInstructors() {
+    const names = new Set(instructors.map(i => i.name));
+    let removed = 0;
+    Object.keys(instructorCourses).forEach(name => {
+        if (!names.has(name)) { removed += instructorCourses[name].length; delete instructorCourses[name]; }
+    });
+    Object.keys(scheduledCourses).forEach(key => {
+        const before = scheduledCourses[key].length;
+        scheduledCourses[key] = scheduledCourses[key].filter(c => names.has(c.instructor));
+        removed += before - scheduledCourses[key].length;
+        if (!scheduledCourses[key].length) delete scheduledCourses[key];
+    });
+    if (removed) toast('Removed sections belonging to deleted instructors.');
+}
 
-        // Function to extract subject from course code (e.g., "HIST" from "HIST-1301")
-        function extractSubject(courseCode) {
-            const parts = courseCode.split('-');
-            return parts[0] || courseCode;
+/* ============================================================
+   GRID CONSTRUCTION
+   ============================================================ */
+function makeDropzone(day, time) {
+    const dz = document.createElement('div');
+    dz.className = 'dropzone';
+    dz.dataset.day = day;
+    dz.dataset.time = time;
+    dz.addEventListener('drop', handleDrop);
+    dz.addEventListener('dragover', handleDragOver);
+    dz.addEventListener('dragleave', handleDragLeave);
+    dz.addEventListener('click', () => {
+        if (selectedCourse) {
+            const ok = placeCourse(selectedCourse, day, time);
+            if (ok) clearSelection();
         }
-        
-        // Function to get all unique subjects from instructors
-        function getAllSubjects() {
-            const subjects = new Set();
-            instructors.forEach(instructor => {
-                instructor.courses.forEach(course => {
-                    subjects.add(extractSubject(course));
-                });
-            });
-            return Array.from(subjects).sort();
-        }
-        
-        // Function to update subject filter dropdown
-        function updateSubjectFilter() {
-            const filterSelect = document.getElementById('subjectFilter');
-            if (!filterSelect) return;
-            
-            // Keep current selection if it exists
-            const currentSelection = filterSelect.value;
-            
-            // Clear and rebuild options
-            filterSelect.innerHTML = '<option value="all">All Subjects</option>';
-            
-            const subjects = getAllSubjects();
-            subjects.forEach(subject => {
-                // Count instructors who can teach this subject
-                const count = instructors.filter(inst => 
-                    inst.courses.some(course => extractSubject(course) === subject)
-                ).length;
-                
-                const option = document.createElement('option');
-                option.value = subject;
-                option.textContent = `${subject} (${count} instructors)`;
-                filterSelect.appendChild(option);
-            });
-            
-            // Restore selection if it still exists
-            if (currentSelection && Array.from(filterSelect.options).some(opt => opt.value === currentSelection)) {
-                filterSelect.value = currentSelection;
-            }
-        }
-        
-        // Function to filter instructors by subject
-        function filterInstructorsBySubject() {
-            const filterValue = document.getElementById('subjectFilter').value;
-            const pool = document.getElementById('instructorPool');
-            
-            // Get all instructor groups
-            const instructorGroups = pool.querySelectorAll('.instructor-group');
-            
-            let visibleCount = 0;
-            let totalCount = instructorGroups.length;
-            
-            instructorGroups.forEach(group => {
-                const instructorName = group.querySelector('.instructor-group-name').textContent.split(' (')[0];
-                const instructor = instructors.find(inst => inst.name === instructorName);
-                
-                if (!instructor) {
-                    group.style.display = 'none';
-                    return;
-                }
-                
-                // Check if instructor teaches the selected subject
-                if (filterValue === 'all') {
-                    group.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    const teachesSubject = instructor.courses.some(course => 
-                        extractSubject(course) === filterValue
-                    );
-                    group.style.display = teachesSubject ? 'block' : 'none';
-                    if (teachesSubject) visibleCount++;
-                }
-            });
-            
-            // Update count display
-            const countDisplay = document.getElementById('filterCount');
-            if (!countDisplay) {
-                // Create count display if it doesn't exist
-                const filterContainer = document.querySelector('#subjectFilter').parentElement;
-                const span = document.createElement('span');
-                span.id = 'filterCount';
-                span.style = 'font-size: 12px; color: #666; margin-left: 10px;';
-                filterContainer.appendChild(span);
-            }
-            
-            if (filterValue !== 'all') {
-                document.getElementById('filterCount').textContent = `(Showing ${visibleCount} of ${totalCount} instructors)`;
-            } else {
-                document.getElementById('filterCount').textContent = '';
-            }
-            
-            // Update the pool grid layout to avoid gaps
-            pool.style.display = 'grid';
-        }
+    });
+    return dz;
+}
 
-        // Function to toggle course generator for an instructor
-        function toggleCourseGenerator(instructorName) {
-            const generator = document.getElementById(`generator-${instructorName}`);
-            if (generator) {
-                generator.classList.toggle('active');
-            }
-        }
+function createGrid() {
+    const mainGrid = document.getElementById('scheduleGrid');
+    mainGrid.innerHTML = '';
+    weekdaySlots.forEach(time => {
+        const row = document.createElement('tr');
+        const timeCell = document.createElement('td');
+        timeCell.className = 'time-header';
+        timeCell.textContent = time;
+        row.appendChild(timeCell);
+        ['Monday','Tuesday','Wednesday','Thursday'].forEach(day => {
+            const cell = document.createElement('td');
+            cell.appendChild(makeDropzone(day, time));
+            row.appendChild(cell);
+        });
+        mainGrid.appendChild(row);
+    });
 
-        // Function to add a course from the generator
-        function addCourseFromGenerator(instructorName) {
-            const courseSelect = document.getElementById(`course-select-${instructorName}`);
-            const formatSelect = document.getElementById(`format-select-${instructorName}`);
-            
-            if (!courseSelect || !formatSelect) {
-                console.error('Could not find course or format select for', instructorName);
-                return;
+    const buildSingle = (gridId, day, slots) => {
+        const grid = document.getElementById(gridId);
+        grid.innerHTML = '';
+        slots.forEach(time => {
+            const row = document.createElement('tr');
+            const timeCell = document.createElement('td');
+            timeCell.className = 'time-header';
+            timeCell.textContent = time;
+            timeCell.style.width = '38%';
+            row.appendChild(timeCell);
+            const cell = document.createElement('td');
+            cell.appendChild(makeDropzone(day, time));
+            row.appendChild(cell);
+            grid.appendChild(row);
+        });
+    };
+    buildSingle('fridayGrid', 'Friday', fridaySlots);
+    buildSingle('saturdayGrid', 'Saturday', saturdaySlots);
+}
+
+/* ============================================================
+   LENS CHIPS (functional legend)
+   ============================================================ */
+const LENSES = [
+    { key: 'all',    label: 'All' },
+    { key: '16week', label: '16-Week',  border: 'var(--s16-border)', bg: 'var(--s16-bg)' },
+    { key: '14week', label: '14-Week',  border: 'var(--s14-border)', bg: 'var(--s14-bg)' },
+    { key: 'early8', label: 'Early 8',  border: 'var(--e8-border)',  bg: 'var(--e8-bg)' },
+    { key: 'late8',  label: 'Late 8',   border: 'var(--l8-border)',  bg: 'var(--l8-bg)' },
+    { key: 'early7', label: 'Early 7',  border: 'var(--e7-border)',  bg: 'var(--e7-bg)' },
+    { key: 'late7',  label: 'Late 7',   border: 'var(--l7-border)',  bg: 'var(--l7-bg)' },
+    { key: 'dc',     label: 'Dual Credit', border: 'var(--dc-border)', bg: 'var(--dc-bg)' },
+    { key: 'hybrid', label: 'Hybrid',   border: 'var(--s16-border)', bg: '#fff' }
+];
+
+function buildLensChips() {
+    const row = document.getElementById('lensRow');
+    row.querySelectorAll('.chip').forEach(c => c.remove());
+    LENSES.forEach(l => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'chip' + (activeLens === l.key ? ' active' : '');
+        chip.dataset.lens = l.key;
+        if (l.border) {
+            const sw = document.createElement('span');
+            sw.className = 'swatch';
+            sw.style.borderColor = l.border;
+            sw.style.background = l.bg;
+            if (l.key === 'hybrid') sw.style.borderStyle = 'dashed';
+            chip.appendChild(sw);
+        }
+        chip.appendChild(document.createTextNode(l.label));
+        chip.addEventListener('click', () => {
+            activeLens = (activeLens === l.key) ? 'all' : l.key;
+            row.querySelectorAll('.chip').forEach(c =>
+                c.classList.toggle('active', c.dataset.lens === activeLens));
+            applyLens();
+        });
+        row.appendChild(chip);
+    });
+}
+
+function cardMatchesLens(course) {
+    if (activeLens === 'all') return true;
+    if (activeLens === 'dc') return !!course.dualCredit;
+    if (activeLens === 'hybrid') return !!course.hybrid;
+    return course.session === activeLens;
+}
+
+function applyLens() {
+    document.querySelectorAll('.course-card').forEach(el => {
+        const id = parseInt(el.dataset.courseId, 10);
+        const course = findCourseAnywhere(id);
+        el.classList.toggle('dimmed', course ? !cardMatchesLens(course) : false);
+    });
+}
+
+function findCourseAnywhere(id) {
+    for (const key in scheduledCourses) {
+        const c = scheduledCourses[key].find(x => x.id === id);
+        if (c) return c;
+    }
+    for (const name in instructorCourses) {
+        const c = instructorCourses[name].find(x => x.id === id);
+        if (c) return c;
+    }
+    return null;
+}
+
+/* ============================================================
+   COURSE CARDS
+   ============================================================ */
+function sessionClass(course) {
+    if (course.dualCredit) return 's-dc';
+    return 's-' + course.session;
+}
+
+function createCourseCard(course, context) {
+    // context: 'pool' | 'grid'
+    const card = document.createElement('div');
+    card.className = 'course-card ' + sessionClass(course) + (course.hybrid ? ' hybrid-card' : '');
+    card.draggable = true;
+    card.dataset.courseId = course.id;
+    card.tabIndex = 0;
+
+    let tag = '';
+    if (course.dualCredit) tag = ' (DC)';
+    else if (SESSION_ABBR[course.session]) tag = ' (' + SESSION_ABBR[course.session] + ')';
+    else if (course.hybrid) tag = ' (Hy)';
+
+    const title = document.createElement('div');
+    title.className = 'cc-title';
+    title.textContent = course.type + tag;
+    const sub = document.createElement('div');
+    sub.className = 'cc-sub';
+    sub.textContent = course.instructor;
+    card.append(title, sub);
+
+    const x = document.createElement('button');
+    x.className = 'card-x';
+    x.textContent = '×';
+    x.setAttribute('aria-label', context === 'grid' ? 'Return section to pool' : 'Delete section');
+    x.addEventListener('click', e => {
+        e.stopPropagation();
+        if (context === 'grid') unscheduleCourse(course.id);
+        else deletePoolCourse(course.id);
+    });
+    card.appendChild(x);
+
+    card.addEventListener('dragstart', e => handleDragStart(e, course.id));
+    card.addEventListener('dragend', handleDragEnd);
+    card.addEventListener('click', e => {
+        e.stopPropagation();
+        toggleSelection(course.id);
+    });
+    card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSelection(course.id); }
+    });
+
+    return card;
+}
+
+/* ============================================================
+   SELECTION (click-to-place) + VALIDITY HIGHLIGHTS
+   ============================================================ */
+function locateCourse(id) {
+    for (const slotKey in scheduledCourses) {
+        const c = scheduledCourses[slotKey].find(x => x.id === id);
+        if (c) return { ...c, fromSlot: slotKey };
+    }
+    for (const name in instructorCourses) {
+        const c = instructorCourses[name].find(x => x.id === id);
+        if (c) return { ...c };
+    }
+    return null;
+}
+
+function toggleSelection(id) {
+    if (selectedCourse && selectedCourse.id === id) { clearSelection(); return; }
+    clearSelection();
+    selectedCourse = locateCourse(id);
+    if (!selectedCourse) return;
+    const el = document.querySelector('.course-card[data-course-id="' + id + '"]');
+    if (el) el.classList.add('selected');
+    showValidity(selectedCourse);
+    maybeExpandWeekendFor(selectedCourse);
+}
+
+function clearSelection() {
+    selectedCourse = null;
+    document.querySelectorAll('.course-card.selected').forEach(el => el.classList.remove('selected'));
+    clearValidity();
+}
+
+function wouldConflict(course, day, time) {
+    const daysToCheck = pairedDays(course, day);
+    for (const d of daysToCheck) {
+        const list = scheduledCourses[d + '|' + time];
+        if (!list) continue;
+        for (const existing of list) {
+            if (existing.instructor !== course.instructor || existing.id === course.id) continue;
+            const hA = sessionHalf(existing.session), hB = sessionHalf(course.session);
+            const disjoint = hA !== 'full' && hB !== 'full' && hA !== hB;
+            if (!disjoint) return existing;
+        }
+    }
+    return null;
+}
+
+function showValidity(course) {
+    document.querySelectorAll('.dropzone').forEach(dz => {
+        const day = dz.dataset.day, time = dz.dataset.time;
+        dz.classList.remove('valid', 'invalid', 'discouraged');
+        if (wouldConflict(course, day, time)) {
+            dz.classList.add('invalid');
+        } else if (course.session === '14week' && day !== 'Saturday') {
+            dz.classList.add('discouraged');
+        } else {
+            dz.classList.add('valid');
+        }
+    });
+}
+
+function clearValidity() {
+    document.querySelectorAll('.dropzone').forEach(dz =>
+        dz.classList.remove('valid', 'invalid', 'discouraged', 'drag-over'));
+}
+
+function maybeExpandWeekendFor(course) {
+    if (course.session === '14week' || course.session === undefined) {
+        const content = document.getElementById('weekendScheduleContent');
+        if (content.style.display !== 'block') toggleWeekendSchedule(true);
+    }
+}
+
+/* ============================================================
+   PLACEMENT — shared by drag-drop and click-to-place
+   ============================================================ */
+function placeCourse(courseWithOrigin, day, time) {
+    const course = courseWithOrigin;
+
+    // 1. Instructor double-booking
+    const clash = wouldConflict(course, day, time);
+    if (clash) {
+        const hA = sessionHalf(clash.session), hB = sessionHalf(course.session);
+        let why = course.instructor + ' already has ' + clash.type + ' at ' + time + ' on ' + pairedDays(course, day).join('/') + '.';
+        if (hA === hB && hA !== 'full') why += ' Both sections run in the same half of the term.';
+        toast('Conflict — ' + why, 'error');
+        return false;
+    }
+
+    // 2. Load ceiling (compliance line for adjuncts)
+    const inst = findInstructor(course.instructor);
+    if (inst) {
+        const ids = scheduledIdsFor(inst.name);
+        ids.delete(course.id); // moving doesn't add load
+        if (ids.size + 1 > inst.max) {
+            const msg = inst.type === 'ADJ'
+                ? '⚠ COMPLIANCE — ' + inst.name + ' is an adjunct at ' + ids.size + '/' + inst.max + ' sections. Exceeding an adjunct\'s max load may violate district policy. Schedule anyway?'
+                : inst.name + ' is at ' + ids.size + '/' + inst.max + ' sections. Exceed their max load?';
+            if (!confirm(msg)) return false;
+        }
+    }
+
+    pushUndo();
+
+    // 3. Remove from prior slot if moving
+    if (course.fromSlot) {
+        const [oldDay, oldTime] = course.fromSlot.split('|');
+        pairedDays(course, oldDay).forEach(d => {
+            const key = d + '|' + oldTime;
+            if (scheduledCourses[key]) {
+                scheduledCourses[key] = scheduledCourses[key].filter(c => c.id !== course.id);
+                if (!scheduledCourses[key].length) delete scheduledCourses[key];
             }
-            
-            const courseType = courseSelect.value;
-            const format = formatSelect.value;
-            
-            let sessionType = '16week';
-            let isHybrid = false;
-            let isDualCredit = false;
-            
-            if (format === 'early8') sessionType = 'early8';
-            else if (format === 'late8') sessionType = 'late8';
-            else if (format === 'early7') sessionType = 'early7';
-            else if (format === 'late7') sessionType = 'late7';
-            else if (format === '14week') sessionType = '14week';
-            else if (format === 'hybrid') isHybrid = true;
-            else if (format === 'dualcredit') isDualCredit = true;
-            
-            // Ensure instructorCourses array exists
-            if (!instructorCourses[instructorName]) {
-                instructorCourses[instructorName] = [];
-            }
-            
-            // Generate the new course
-            const newCourse = {
+        });
+    }
+
+    // 4. Place (auto-pairing)
+    pairedDays(course, day).forEach(d => {
+        const key = d + '|' + time;
+        if (!scheduledCourses[key]) scheduledCourses[key] = [];
+        if (!scheduledCourses[key].find(c => c.id === course.id)) {
+            const clean = { ...course };
+            delete clean.fromSlot;
+            scheduledCourses[key].push(clean);
+        }
+    });
+
+    renderAll();
+    return true;
+}
+
+function unscheduleCourse(id) {
+    pushUndo();
+    let removed = false;
+    Object.keys(scheduledCourses).forEach(key => {
+        const before = scheduledCourses[key].length;
+        scheduledCourses[key] = scheduledCourses[key].filter(c => c.id !== id);
+        if (scheduledCourses[key].length !== before) removed = true;
+        if (!scheduledCourses[key].length) delete scheduledCourses[key];
+    });
+    if (removed) renderAll();
+}
+
+function deletePoolCourse(id) {
+    pushUndo();
+    for (const name in instructorCourses) {
+        const idx = instructorCourses[name].findIndex(c => c.id === id);
+        if (idx !== -1) { instructorCourses[name].splice(idx, 1); renderAll(); return; }
+    }
+}
+
+/* ============================================================
+   DRAG AND DROP
+   ============================================================ */
+function handleDragStart(e, id) {
+    draggedCourse = locateCourse(id);
+    if (!draggedCourse) return;
+    clearSelection();
+    e.currentTarget.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', String(id)); } catch (err) {}
+    showValidity(draggedCourse);
+    maybeExpandWeekendFor(draggedCourse);
+}
+
+function handleDragEnd(e) {
+    e.currentTarget.classList.remove('dragging');
+    draggedCourse = null;
+    clearValidity();
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.currentTarget.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+    e.currentTarget.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    if (!draggedCourse) return;
+    placeCourse(draggedCourse, e.currentTarget.dataset.day, e.currentTarget.dataset.time);
+    draggedCourse = null;
+    clearValidity();
+}
+
+function handleDropToPool(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    if (draggedCourse && draggedCourse.fromSlot) {
+        unscheduleCourse(draggedCourse.id);
+    }
+    draggedCourse = null;
+    clearValidity();
+}
+
+/* ============================================================
+   POOL RENDERING + SECTION GENERATOR
+   ============================================================ */
+function createInstructorPool() {
+    const pool = document.getElementById('instructorPool');
+    pool.innerHTML = '';
+
+    instructors.forEach(inst => {
+        const group = document.createElement('div');
+        group.className = 'instructor-group';
+        group.dataset.instructor = inst.name;
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'instructor-group-name';
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = inst.name + ' (' + inst.type + ')';
+        const countSpan = document.createElement('span');
+        countSpan.className = 'pool-count';
+        nameDiv.append(nameSpan, countSpan);
+        group.appendChild(nameDiv);
+
+        const coursesDiv = document.createElement('div');
+        coursesDiv.className = 'instructor-courses';
+        coursesDiv.dataset.instructor = inst.name;
+        coursesDiv.addEventListener('drop', handleDropToPool);
+        coursesDiv.addEventListener('dragover', handleDragOver);
+        coursesDiv.addEventListener('dragleave', handleDragLeave);
+        group.appendChild(coursesDiv);
+
+        // Generator — built with closures, no name-derived ids
+        const addBtn = document.createElement('button');
+        addBtn.className = 'add-more';
+        addBtn.textContent = 'Add section';
+        const gen = document.createElement('div');
+        gen.className = 'course-generator';
+
+        const row1 = document.createElement('div');
+        row1.className = 'generator-row';
+        const courseSel = document.createElement('select');
+        inst.courses.forEach(c => {
+            const o = document.createElement('option');
+            o.value = c; o.textContent = c;
+            courseSel.appendChild(o);
+        });
+        const fmtSel = document.createElement('select');
+        const fmts = [];
+        if (inst.sixteenWeek) fmts.push(['16week', '16-Week']);
+        if (inst.fourteenWeek) fmts.push(['14week', '14-Week (Saturday)']);
+        if (inst.hybrid) fmts.push(['hybrid', 'Hybrid (once/week)']);
+        if (inst.eightWeek) { fmts.push(['early8', 'Early 8-Week'], ['late8', 'Late 8-Week']); }
+        if (inst.sevenWeek) { fmts.push(['early7', 'Early 7-Week'], ['late7', 'Late 7-Week']); }
+        if (inst.dualCredit) fmts.push(['dualcredit', 'Dual Credit']);
+        fmts.forEach(([v, l]) => {
+            const o = document.createElement('option');
+            o.value = v; o.textContent = l;
+            fmtSel.appendChild(o);
+        });
+        row1.append(courseSel, fmtSel);
+
+        const row2 = document.createElement('div');
+        row2.className = 'generator-row';
+        const createBtn = document.createElement('button');
+        createBtn.textContent = 'Create section';
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'quiet';
+        cancelBtn.textContent = 'Cancel';
+        row2.append(createBtn, cancelBtn);
+        gen.append(row1, row2);
+
+        addBtn.addEventListener('click', () => gen.classList.toggle('active'));
+        cancelBtn.addEventListener('click', () => gen.classList.remove('active'));
+        createBtn.addEventListener('click', () => {
+            const fmt = fmtSel.value;
+            const course = {
                 id: courseIdCounter++,
-                type: courseType,
-                instructor: instructorName,
-                session: sessionType,
-                hybrid: isHybrid,
-                dualCredit: isDualCredit
+                type: courseSel.value,
+                instructor: inst.name,
+                session: (fmt === 'hybrid' || fmt === 'dualcredit') ? '16week' : fmt,
+                hybrid: fmt === 'hybrid',
+                dualCredit: fmt === 'dualcredit'
             };
-            
-            instructorCourses[instructorName].push(newCourse);
-            
-            // Close the generator
-            toggleCourseGenerator(instructorName);
-            
-            // Re-render the pool to show the new course
-            renderInstructorPool();
-            
-            // Reapply filter if one is active
-            const filterValue = document.getElementById('subjectFilter')?.value;
-            if (filterValue && filterValue !== 'all') {
-                filterInstructorsBySubject();
-            }
-        }
+            pushUndo();
+            if (!instructorCourses[inst.name]) instructorCourses[inst.name] = [];
+            instructorCourses[inst.name].push(course);
+            gen.classList.remove('active');
+            renderAll();
+        });
 
-        // Delete a course from the pool
-        function deleteCourse(courseId) {
-            for (const instructor in instructorCourses) {
-                const index = instructorCourses[instructor].findIndex(c => c.id === courseId);
-                if (index !== -1) {
-                    instructorCourses[instructor].splice(index, 1);
-                    renderInstructorPool();
-                    break;
+        group.append(addBtn, gen);
+        pool.appendChild(group);
+    });
+}
+
+function renderInstructorPool() {
+    instructors.forEach(inst => {
+        const group = document.querySelector('.instructor-group[data-instructor="' + CSS.escape(inst.name) + '"]');
+        if (!group) return;
+        const coursesDiv = group.querySelector('.instructor-courses');
+        coursesDiv.innerHTML = '';
+
+        const scheduled = scheduledIdsFor(inst.name);
+        const poolList = (instructorCourses[inst.name] || []).filter(c => !scheduled.has(c.id));
+        poolList.forEach(c => coursesDiv.appendChild(createCourseCard(c, 'pool')));
+
+        const countSpan = group.querySelector('.pool-count');
+        countSpan.textContent = poolList.length ? poolList.length + ' to place' : 'all placed';
+        group.classList.toggle('all-placed', poolList.length === 0);
+    });
+    updateSubjectFilter();
+    filterInstructorsBySubject();
+}
+
+/* ---------- Subject filter ---------- */
+function extractSubject(code) { return (code.split('-')[0] || code).trim(); }
+
+function updateSubjectFilter() {
+    const sel = document.getElementById('subjectFilter');
+    const current = sel.value;
+    sel.innerHTML = '';
+    const all = document.createElement('option');
+    all.value = 'all'; all.textContent = 'All subjects';
+    sel.appendChild(all);
+
+    const subjects = new Set();
+    instructors.forEach(i => i.courses.forEach(c => subjects.add(extractSubject(c))));
+    [...subjects].sort().forEach(s => {
+        const n = instructors.filter(i => i.courses.some(c => extractSubject(c) === s)).length;
+        const o = document.createElement('option');
+        o.value = s; o.textContent = s + ' (' + n + ')';
+        sel.appendChild(o);
+    });
+    if ([...sel.options].some(o => o.value === current)) sel.value = current;
+}
+
+function filterInstructorsBySubject() {
+    const val = document.getElementById('subjectFilter').value;
+    let visible = 0, total = 0;
+    document.querySelectorAll('.instructor-group').forEach(group => {
+        total++;
+        const inst = findInstructor(group.dataset.instructor);
+        const show = val === 'all' || (inst && inst.courses.some(c => extractSubject(c) === val));
+        group.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    document.getElementById('filterCount').textContent =
+        val === 'all' ? '' : 'Showing ' + visible + ' of ' + total;
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+function renderSchedule() {
+    document.querySelectorAll('.dropzone').forEach(z => z.innerHTML = '');
+    for (const slotKey in scheduledCourses) {
+        const [day, time] = slotKey.split('|');
+        const dz = document.querySelector('.dropzone[data-day="' + day + '"][data-time="' + time + '"]');
+        if (dz) scheduledCourses[slotKey].forEach(c => dz.appendChild(createCourseCard(c, 'grid')));
+    }
+}
+
+function updateFacultyPanel() {
+    const ftDiv = document.getElementById('fullTimeList');
+    const adjDiv = document.getElementById('adjunctList');
+    ftDiv.innerHTML = '';
+    adjDiv.innerHTML = '';
+
+    instructors.forEach(inst => {
+        const count = scheduledIdsFor(inst.name).size;
+        const pct = Math.min(100, Math.round((count / inst.max) * 100));
+
+        const div = document.createElement('div');
+        div.className = 'faculty-item';
+        if (count > 0) div.classList.add('has-courses');
+        if (count === inst.max) div.classList.add('full-load');
+        if (count > inst.max) div.classList.add('over-load');
+
+        const barClass = count > inst.max ? 'over' : count === inst.max ? 'full' : '';
+        const nameEl = document.createElement('div');
+        nameEl.className = 'faculty-name';
+        nameEl.textContent = inst.name;
+        const loadEl = document.createElement('div');
+        loadEl.className = 'faculty-load';
+        loadEl.textContent = count + '/' + inst.max + ' sections (' + pct + '%)' + (count > inst.max ? ' — OVER' : '');
+        const bar = document.createElement('div');
+        bar.className = 'faculty-load-bar';
+        bar.innerHTML = '<div class="faculty-load-fill ' + barClass + '" style="width:' + pct + '%"></div>';
+        div.append(nameEl, loadEl, bar);
+
+        (inst.type === 'FT' ? ftDiv : adjDiv).appendChild(div);
+    });
+}
+
+function updateStats() {
+    const ids = new Set();
+    Object.values(scheduledCourses).forEach(list => list.forEach(c => ids.add(c.id)));
+    document.getElementById('statScheduled').textContent = ids.size;
+
+    let pool = 0;
+    for (const name in instructorCourses) {
+        const scheduled = scheduledIdsFor(name);
+        pool += instructorCourses[name].filter(c => !scheduled.has(c.id)).length;
+    }
+    document.getElementById('statPool').textContent = pool;
+
+    const totalCap = instructors.reduce((s, i) => s + i.max, 0);
+    document.getElementById('statCapacity').textContent =
+        totalCap ? Math.round((ids.size / totalCap) * 100) + '%' : '—';
+}
+
+function updateWeekendIndicator() {
+    const indicator = document.getElementById('weekendIndicator');
+    let n = 0;
+    [...fridaySlots.map(t => 'Friday|' + t), ...saturdaySlots.map(t => 'Saturday|' + t)]
+        .forEach(k => { if (scheduledCourses[k]) n += scheduledCourses[k].length; });
+    if (n > 0) {
+        indicator.style.display = 'inline-block';
+        indicator.textContent = n + ' section' + (n !== 1 ? 's' : '');
+        const open = document.getElementById('weekendScheduleContent').style.display === 'block';
+        indicator.style.background = open ? 'var(--ok)' : 'var(--amber)';
+    } else {
+        indicator.style.display = 'none';
+    }
+}
+
+function toggleWeekendSchedule(forceOpen) {
+    const content = document.getElementById('weekendScheduleContent');
+    const icon = document.getElementById('weekendToggleIcon');
+    const open = content.style.display === 'block';
+    const next = forceOpen === true ? true : !open;
+    content.style.display = next ? 'block' : 'none';
+    icon.style.transform = next ? 'rotate(90deg)' : 'rotate(0deg)';
+    updateWeekendIndicator();
+}
+
+function renderAll() {
+    renderSchedule();
+    renderInstructorPool();
+    updateFacultyPanel();
+    updateStats();
+    updateNeedsAnalysis();
+    updateWeekendIndicator();
+    applyLens();
+    saveLocal();
+}
+
+/* ============================================================
+   NEEDS ANALYSIS
+   ============================================================ */
+function updateNeedsAnalysis() {
+    const host = document.getElementById('needsAnalysis');
+    if (!host) return;
+
+    const courseCounts = {};
+    departmentCatalog().forEach(c => courseCounts[c] = 0);
+    const dayTotals = { Monday: 0, Tuesday: 0, Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0 };
+    const seenIds = new Set();
+
+    Object.entries(scheduledCourses).forEach(([slotKey, list]) => {
+        const [day] = slotKey.split('|');
+        dayTotals[day] += list.length;
+        list.forEach(c => {
+            if (!seenIds.has(c.id)) {
+                seenIds.add(c.id);
+                if (courseCounts.hasOwnProperty(c.type)) courseCounts[c.type]++;
+            }
+        });
+    });
+
+    const emptySlots = [];
+    days.forEach(day => {
+        getTimeSlotsForDay(day).forEach(time => {
+            const key = day + '|' + time;
+            if (!scheduledCourses[key] || !scheduledCourses[key].length) {
+                emptySlots.push({ day, time, isPrime: PRIME_TIMES.includes(time) });
+            }
+        });
+    });
+    emptySlots.sort((a, b) => (b.isPrime ? 1 : 0) - (a.isPrime ? 1 : 0));
+
+    const barRow = (label, count, maxCount, color, valText) => {
+        const w = Math.max(5, (count / Math.max(maxCount, 1)) * 150);
+        return '<div class="bar-row"><span class="bar-label">' + esc(label) + '</span>' +
+               '<span class="bar" style="width:' + w + 'px;background:' + color + ';"></span>' +
+               '<span class="bar-val">' + esc(valText) + '</span></div>';
+    };
+
+    let html = '';
+
+    // Course distribution
+    html += '<div class="analysis-card" style="background:var(--teal-wash);border-left-color:var(--teal);">' +
+            '<h4 style="color:var(--teal);">Course Section Distribution</h4><div class="body">';
+    const sorted = Object.entries(courseCounts).sort((a, b) => a[1] - b[1]);
+    if (sorted.length) {
+        const maxC = Math.max(...sorted.map(([, n]) => n), 1);
+        sorted.forEach(([type, n]) => {
+            const color = n === 0 ? 'var(--danger)' : n < 3 ? 'var(--amber)' : 'var(--ok)';
+            html += barRow(type, n, maxC, color, n + ' section' + (n !== 1 ? 's' : ''));
+        });
+        const zero = sorted.filter(([, n]) => n === 0).map(([t]) => t);
+        if (zero.length) {
+            html += '<div style="margin-top:8px;color:var(--danger);font-weight:600;">⚠ No sections scheduled: ' + esc(zero.join(', ')) + '</div>';
+        }
+    } else {
+        html += 'No courses defined yet.';
+    }
+    html += '</div></div>';
+
+    // Instructor utilization
+    html += '<div class="analysis-card" style="background:#f4f1f9;border-left-color:var(--dc-border);">' +
+            '<h4 style="color:var(--dc-border);">Instructor Utilization</h4><div class="body">';
+    const utils = instructors.map(i => ({ name: i.name, n: scheduledIdsFor(i.name).size, max: i.max }))
+        .sort((a, b) => (a.n / a.max) - (b.n / b.max));
+    utils.forEach(u => {
+        const pct = Math.round((u.n / u.max) * 100);
+        const color = pct === 0 ? 'var(--danger)' : pct < 50 ? 'var(--amber)' : pct <= 100 ? 'var(--ok)' : 'var(--danger)';
+        html += barRow(u.name, Math.min(pct, 100), 100, color, u.n + '/' + u.max + ' (' + pct + '%)');
+    });
+    html += '</div></div>';
+
+    // Empty slots
+    html += '<div class="analysis-card" style="background:#faf0ef;border-left-color:var(--danger);">' +
+            '<h4 style="color:var(--danger);">Empty Time Slots (' + emptySlots.length + ')</h4><div class="body">';
+    if (emptySlots.length) {
+        emptySlots.slice(0, 10).forEach(s => {
+            html += esc(s.day + ' ' + s.time) + (s.isPrime ? ' <strong style="color:var(--danger);">(prime time)</strong>' : '') + '<br>';
+        });
+        if (emptySlots.length > 10) html += '<em>…and ' + (emptySlots.length - 10) + ' more</em>';
+    } else {
+        html += '<span style="color:var(--ok);">Every time slot has at least one section.</span>';
+    }
+    html += '</div></div>';
+
+    // Day balance
+    html += '<div class="analysis-card" style="background:#fdf6e9;border-left-color:var(--amber);">' +
+            '<h4 style="color:var(--amber);">Daily Distribution</h4><div class="body">';
+    const maxDay = Math.max(...Object.values(dayTotals), 1);
+    Object.entries(dayTotals).forEach(([day, n]) => {
+        html += barRow(day, n, maxDay, n === 0 ? 'var(--danger)' : 'var(--amber)', n + ' section' + (n !== 1 ? 's' : ''));
+    });
+    html += '</div></div>';
+
+    host.innerHTML = html;
+}
+
+/* ============================================================
+   CSV — export/import with FULL session fidelity
+   ============================================================ */
+function csvField(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }
+
+function exportToCSV() {
+    let out = 'Time,Days,Course,Instructor,Session,Hybrid,DualCredit\n';
+    const exported = new Set();
+    const slotOrder = canonicalSlotOrder();
+
+    slotOrder.forEach(time => {
+        // Pairing anchors first
+        ['Monday', 'Tuesday'].forEach(startDay => {
+            const list = scheduledCourses[startDay + '|' + time];
+            if (!list) return;
+            list.forEach(course => {
+                if (exported.has(course.id)) return;
+                let dayDisplay = startDay;
+                if (!course.hybrid) {
+                    const pairDay = startDay === 'Monday' ? 'Wednesday' : 'Thursday';
+                    const pairList = scheduledCourses[pairDay + '|' + time];
+                    if (pairList && pairList.find(c => c.id === course.id)) {
+                        dayDisplay = startDay === 'Monday' ? 'M/W' : 'T/Th';
+                    }
                 }
-            }
-        }
+                exported.add(course.id);
+                out += [csvField(time), csvField(dayDisplay), csvField(course.type), csvField(course.instructor),
+                        csvField(SESSION_LABELS[course.session] || '16-Week'),
+                        csvField(course.hybrid ? 'Yes' : 'No'),
+                        csvField(course.dualCredit ? 'Yes' : 'No')].join(',') + '\n';
+            });
+        });
+        // Everything not part of a pair anchor
+        ['Wednesday', 'Thursday', 'Friday', 'Saturday'].forEach(day => {
+            const list = scheduledCourses[day + '|' + time];
+            if (!list) return;
+            list.forEach(course => {
+                if (exported.has(course.id)) return;
+                exported.add(course.id);
+                out += [csvField(time), csvField(day), csvField(course.type), csvField(course.instructor),
+                        csvField(SESSION_LABELS[course.session] || '16-Week'),
+                        csvField(course.hybrid ? 'Yes' : 'No'),
+                        csvField(course.dualCredit ? 'Yes' : 'No')].join(',') + '\n';
+            });
+        });
+    });
 
-        // Schedule Builder Functions
-        function createGrid() {
-            // Create main Monday-Thursday grid
-            const mainGrid = document.getElementById('scheduleGrid');
-            mainGrid.innerHTML = '';
-            
-            weekdaySlots.forEach(time => {
-                const row = document.createElement('tr');
-                
-                const timeCell = document.createElement('td');
-                timeCell.className = 'time-header';
-                timeCell.textContent = time;
-                row.appendChild(timeCell);
-                
-                ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
-                    const cell = document.createElement('td');
-                    const dropzone = document.createElement('div');
-                    dropzone.className = 'dropzone';
-                    dropzone.dataset.day = day;
-                    dropzone.dataset.time = time;
-                    
-                    dropzone.ondrop = handleDrop;
-                    dropzone.ondragover = handleDragOver;
-                    dropzone.ondragleave = handleDragLeave;
-                    
-                    cell.appendChild(dropzone);
-                    row.appendChild(cell);
-                });
-                
-                mainGrid.appendChild(row);
-            });
-            
-            // Create Friday grid
-            const fridayGrid = document.getElementById('fridayGrid');
-            fridayGrid.innerHTML = '';
-            
-            fridaySlots.forEach(time => {
-                const row = document.createElement('tr');
-                
-                const timeCell = document.createElement('td');
-                timeCell.className = 'time-header';
-                timeCell.textContent = time;
-                timeCell.style.width = '40%';
-                row.appendChild(timeCell);
-                
-                const cell = document.createElement('td');
-                const dropzone = document.createElement('div');
-                dropzone.className = 'dropzone';
-                dropzone.dataset.day = 'Friday';
-                dropzone.dataset.time = time;
-                
-                dropzone.ondrop = handleDrop;
-                dropzone.ondragover = handleDragOver;
-                dropzone.ondragleave = handleDragLeave;
-                
-                cell.appendChild(dropzone);
-                row.appendChild(cell);
-                
-                fridayGrid.appendChild(row);
-            });
-            
-            // Create Saturday grid
-            const saturdayGrid = document.getElementById('saturdayGrid');
-            saturdayGrid.innerHTML = '';
-            
-            saturdaySlots.forEach(time => {
-                const row = document.createElement('tr');
-                
-                const timeCell = document.createElement('td');
-                timeCell.className = 'time-header';
-                timeCell.textContent = time;
-                timeCell.style.width = '40%';
-                row.appendChild(timeCell);
-                
-                const cell = document.createElement('td');
-                const dropzone = document.createElement('div');
-                dropzone.className = 'dropzone';
-                dropzone.dataset.day = 'Saturday';
-                dropzone.dataset.time = time;
-                
-                dropzone.ondrop = handleDrop;
-                dropzone.ondragover = handleDragOver;
-                dropzone.ondragleave = handleDragLeave;
-                
-                cell.appendChild(dropzone);
-                row.appendChild(cell);
-                
-                saturdayGrid.appendChild(row);
-            });
-        }
+    const blob = new Blob([out], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    const term = (document.getElementById('academicTerm').value || '').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_');
+    link.download = 'Schedule' + (term ? '_' + term : '') + '_' + new Date().toISOString().split('T')[0] + '.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+    toast('CSV exported');
+}
 
-        function createInstructorPool() {
-            // First, create or update the filter header if it doesn't exist
-            const poolContainer = document.querySelector('.instructor-pool');
-            let filterHeader = poolContainer.querySelector('.filter-header');
-            
-            if (!filterHeader) {
-                // Create the filter header
-                filterHeader = document.createElement('div');
-                filterHeader.className = 'filter-header';
-                filterHeader.style = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;';
-                filterHeader.innerHTML = `
-                    <h3 style="margin: 0;">Available Course Sections - Drag to Schedule</h3>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <label style="font-size: 14px; color: #666;">Filter by Subject:</label>
-                        <select id="subjectFilter" onchange="filterInstructorsBySubject()" style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                            <option value="all">All Subjects</option>
-                        </select>
-                        <span id="filterCount" style="font-size: 12px; color: #666;"></span>
-                    </div>
-                `;
-                
-                // Replace the existing h3 or insert the new header
-                const existingH3 = poolContainer.querySelector('h3');
-                if (existingH3) {
-                    existingH3.replaceWith(filterHeader);
+function parseCsvLine(line) {
+    const fields = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (inQ) {
+            if (ch === '"') {
+                if (line[i + 1] === '"') { cur += '"'; i++; }
+                else inQ = false;
+            } else cur += ch;
+        } else {
+            if (ch === '"') inQ = true;
+            else if (ch === ',') { fields.push(cur); cur = ''; }
+            else cur += ch;
+        }
+    }
+    fields.push(cur);
+    return fields.map(f => f.trim());
+}
+
+function importCSV(ev) {
+    const file = ev.target.files[0];
+    ev.target.value = '';
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const lines = e.target.result.split(/\r?\n/).filter(l => l.trim());
+            if (!lines.length) throw new Error('empty');
+
+            const header = parseCsvLine(lines[0]).map(h => h.toLowerCase());
+            const col = name => header.indexOf(name);
+            const iTime = col('time'), iDays = Math.max(col('days'), col('day')),
+                  iCourse = col('course'), iInst = col('instructor'),
+                  iSession = Math.max(col('session'), col('session type')),
+                  iHybrid = col('hybrid'), iDC = Math.max(col('dualcredit'), col('dual credit'));
+            if (iTime < 0 || iDays < 0 || iCourse < 0 || iInst < 0) throw new Error('missing columns');
+
+            pushUndo();
+            Object.keys(scheduledCourses).forEach(k => delete scheduledCourses[k]);
+
+            const newInstructors = new Set();
+
+            for (let i = 1; i < lines.length; i++) {
+                const v = parseCsvLine(lines[i]);
+                if (v.length <= Math.max(iTime, iDays, iCourse, iInst)) continue;
+
+                const time = v[iTime], dayField = v[iDays], type = v[iCourse], name = v[iInst];
+                if (!time || !dayField || !type || !name) continue;
+
+                const sessionLabel = iSession >= 0 ? v[iSession] : '16-Week';
+                const session = SESSION_FROM_LABEL[sessionLabel] || SESSION_FROM_LABEL[sessionLabel.toLowerCase()] || '16week';
+                const hybrid = iHybrid >= 0 && /^yes$/i.test(v[iHybrid] || '');
+                const dualCredit = iDC >= 0 && /^yes$/i.test(v[iDC] || '');
+
+                let scheduleDays;
+                if (/^m\/w$/i.test(dayField)) scheduleDays = ['Monday', 'Wednesday'];
+                else if (/^t\/th$/i.test(dayField)) scheduleDays = ['Tuesday', 'Thursday'];
+                else scheduleDays = [dayField];
+
+                // Auto-create unknown instructors so loads and unscheduling still work
+                if (!findInstructor(name)) {
+                    instructors.push({
+                        name, type: 'ADJ', max: 5, courses: [type],
+                        sixteenWeek: true, fourteenWeek: false, hybrid: false,
+                        eightWeek: false, sevenWeek: false, dualCredit: false
+                    });
+                    newInstructors.add(name);
                 } else {
-                    poolContainer.insertBefore(filterHeader, poolContainer.firstChild);
+                    const inst = findInstructor(name);
+                    if (!inst.courses.includes(type)) inst.courses.push(type);
                 }
-            }
-            
-            const pool = document.getElementById('instructorPool');
-            pool.innerHTML = '';
-            
-            instructors.forEach(instructor => {
-                const group = document.createElement('div');
-                group.className = 'instructor-group';
-                
-                const nameDiv = document.createElement('div');
-                nameDiv.className = 'instructor-group-name';
-                nameDiv.textContent = `${instructor.name} (${instructor.type})`;
-                group.appendChild(nameDiv);
-                
-                const coursesDiv = document.createElement('div');
-                coursesDiv.className = 'instructor-courses';
-                coursesDiv.dataset.instructor = instructor.name;
-                
-                coursesDiv.ondrop = handleDropToInstructor;
-                coursesDiv.ondragover = handleDragOver;
-                coursesDiv.ondragleave = handleDragLeave;
-                
-                group.appendChild(coursesDiv);
-                
-                // Add the "Add More" button
-                const addMoreBtn = document.createElement('button');
-                addMoreBtn.className = 'add-more';
-                addMoreBtn.textContent = 'Add More';
-                addMoreBtn.onclick = () => toggleCourseGenerator(instructor.name);
-                group.appendChild(addMoreBtn);
-                
-                // Add the course generator (initially hidden)
-                const generator = document.createElement('div');
-                generator.className = 'course-generator';
-                generator.id = `generator-${instructor.name}`;
-                
-                // Build course options
-                const courseOptions = instructor.courses.map(c => 
-                    `<option value="${c}">${c}</option>`
-                ).join('');
-                
-                // Build format options based on instructor capabilities
-                let formatOptions = '';
-                if (instructor.sixteenWeek) {
-                    formatOptions += '<option value="16week">16-Week</option>';
-                }
-                if (instructor.fourteenWeek) {
-                    formatOptions += '<option value="14week">14-Week (Saturday)</option>';
-                }
-                if (instructor.hybrid) {
-                    formatOptions += '<option value="hybrid">Hybrid (Once/Week)</option>';
-                }
-                if (instructor.eightWeek) {
-                    formatOptions += '<option value="early8">Early 8-Week</option>';
-                    formatOptions += '<option value="late8">Late 8-Week</option>';
-                }
-                if (instructor.sevenWeek) {
-                    formatOptions += '<option value="early7">Early 7-Week</option>';
-                    formatOptions += '<option value="late7">Late 7-Week</option>';
-                }
-                if (instructor.dualCredit) {
-                    formatOptions += '<option value="dualcredit">Dual Credit</option>';
-                }
-                
-                generator.innerHTML = `
-                    <div class="generator-row">
-                        <select id="course-select-${instructor.name}">
-                            ${courseOptions}
-                        </select>
-                        <select id="format-select-${instructor.name}">
-                            ${formatOptions}
-                        </select>
-                    </div>
-                    <div class="generator-row">
-                        <button onclick="addCourseFromGenerator('${instructor.name}')">Create Course</button>
-                        <button onclick="toggleCourseGenerator('${instructor.name}')" style="background: #999;">Cancel</button>
-                    </div>
-                `;
-                
-                group.appendChild(generator);
-                pool.appendChild(group);
-            });
-        }
 
-        function createCourseCard(course, inPool = false) {
-            const card = document.createElement('div');
-            card.className = 'course-card';
-            
-            // Apply styling based on session type and dual credit status
-            if (course.dualCredit) {
-                card.classList.add('dual-credit');
-            } else if (course.session === 'early8') {
-                card.classList.add('early-eight-week');
-            } else if (course.session === 'late8') {
-                card.classList.add('late-eight-week');
-            } else if (course.session === 'early7') {
-                card.classList.add('early-seven-week');
-            } else if (course.session === 'late7') {
-                card.classList.add('late-seven-week');
-            } else if (course.session === '14week') {
-                card.classList.add('fourteen-week');
-            }
-            
-            card.draggable = true;
-            card.id = `course-${course.id}`;
-            
-            let sessionDisplay = '';
-            if (course.dualCredit) {
-                sessionDisplay = ' (DC)';
-            } else if (course.session === 'early8') {
-                sessionDisplay = ' (E8)';
-            } else if (course.session === 'late8') {
-                sessionDisplay = ' (L8)';
-            } else if (course.session === 'early7') {
-                sessionDisplay = ' (E7)';
-            } else if (course.session === 'late7') {
-                sessionDisplay = ' (L7)';
-            } else if (course.session === '14week') {
-                sessionDisplay = ' (14W)';
-            } else if (course.hybrid) {
-                sessionDisplay = ' (Hybrid)';
-            }
-            
-            // Set text color based on type
-            let textColor = '#1976d2';
-            if (course.dualCredit) textColor = '#9c27b0';
-            else if (course.session === '14week') textColor = '#689f38';
-            else if (course.session === 'early7' || course.session === 'late7') textColor = '#e91e63';
-            
-            card.innerHTML = `
-                <div style="font-weight: bold; color: ${textColor}; font-size: 11px;">${course.type}${sessionDisplay}</div>
-                <div style="font-size: 9px; color: #666;">${course.instructor}</div>
-                ${inPool ? `<button class="delete-course" onclick="event.stopPropagation(); deleteCourse(${course.id})">×</button>` : ''}
-            `;
-            
-            card.ondragstart = handleDragStart;
-            card.ondragend = handleDragEnd;
-            
-            return card;
-        }
+                const course = { id: courseIdCounter++, type, instructor: name, session, hybrid, dualCredit };
 
-        // Update Faculty Panel to show instructor loads
-        function updateFacultyPanel() {
-            const ftDiv = document.getElementById('fullTimeList');
-            const adjDiv = document.getElementById('adjunctList');
-            ftDiv.innerHTML = '';
-            adjDiv.innerHTML = '';
-            
-            instructors.forEach(instructor => {
-                const div = document.createElement('div');
-                div.className = 'faculty-item';
-                
-                // Count scheduled courses (unique IDs to avoid double-counting)
-                const scheduledIds = new Set();
-                Object.values(scheduledCourses).forEach(courses => {
-                    courses.filter(c => c.instructor === instructor.name)
-                           .forEach(c => scheduledIds.add(c.id));
+                // Register in the pool so unscheduling returns the card instead of orphaning it
+                if (!instructorCourses[name]) instructorCourses[name] = [];
+                instructorCourses[name].push(course);
+
+                scheduleDays.forEach(d => {
+                    const key = d + '|' + time;
+                    if (!scheduledCourses[key]) scheduledCourses[key] = [];
+                    scheduledCourses[key].push(course);
                 });
-                const count = scheduledIds.size;
-                const percentage = Math.min(100, Math.round((count / instructor.max) * 100));
-                
-                // Add status classes
-                if (count > 0) div.classList.add('has-courses');
-                if (count === instructor.max) div.classList.add('full-load');
-                if (count > instructor.max) div.classList.add('over-load');
-                
-                // Determine bar color
-                let barClass = '';
-                if (count > instructor.max) barClass = 'over';
-                else if (count === instructor.max) barClass = 'full';
-                
-                div.innerHTML = `
-                    <div class="faculty-name">${instructor.name}</div>
-                    <div class="faculty-load">${count}/${instructor.max} sections (${percentage}%)</div>
-                    <div class="faculty-load-bar">
-                        <div class="faculty-load-fill ${barClass}" style="width: ${percentage}%"></div>
-                    </div>
-                `;
-                
-                if (instructor.type === 'FT') {
-                    ftDiv.appendChild(div);
-                } else {
-                    adjDiv.appendChild(div);
-                }
-            });
-        }
-
-        // Drag and Drop Handlers
-        function handleDragStart(e) {
-            const courseId = parseInt(e.target.id.replace('course-', ''));
-            
-            for (const slotKey in scheduledCourses) {
-                const course = scheduledCourses[slotKey].find(c => c.id === courseId);
-                if (course) {
-                    draggedCourse = {...course, fromSlot: slotKey};
-                    break;
-                }
             }
-            
-            if (!draggedCourse) {
-                for (const instructor in instructorCourses) {
-                    const course = instructorCourses[instructor].find(c => c.id === courseId);
-                    if (course) {
-                        draggedCourse = {...course};
-                        break;
-                    }
-                }
-            }
-            
-            e.target.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-        }
 
-        function handleDragEnd(e) {
-            e.target.classList.remove('dragging');
-            draggedCourse = null;
+            createInstructorPool();
+            renderAll();
+            let msg = 'Schedule imported';
+            if (newInstructors.size) msg += ' — added ' + newInstructors.size + ' instructor(s) from the file (marked ADJ, max 5; review in Setup)';
+            toast(msg);
+        } catch (err) {
+            toast('Could not read that CSV. Expected columns: Time, Days, Course, Instructor.', 'error');
         }
+    };
+    reader.readAsText(file);
+}
 
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.currentTarget.classList.add('drag-over');
-            return false;
-        }
+/* ============================================================
+   MISC ACTIONS
+   ============================================================ */
+function clearSchedule() {
+    if (!Object.keys(scheduledCourses).length) return;
+    if (!confirm('Return every scheduled section to the pool? (Undo is available afterward.)')) return;
+    pushUndo();
+    Object.keys(scheduledCourses).forEach(k => delete scheduledCourses[k]);
+    renderAll();
+    toast('Schedule cleared — Undo to restore');
+}
 
-        function handleDragLeave(e) {
-            e.currentTarget.classList.remove('drag-over');
-        }
+/* ============================================================
+   WIRE-UP
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+    // Setup phase
+    document.getElementById('addInstructorBtn').addEventListener('click', addInstructor);
+    document.getElementById('courses').addEventListener('keydown', e => { if (e.key === 'Enter') addInstructor(); });
+    document.getElementById('startBuilderBtn').addEventListener('click', () => enterBuilder(true));
+    document.getElementById('saveProjectBtnSetup').addEventListener('click', saveProjectFile);
+    document.getElementById('openProjectBtnSetup').addEventListener('click', openProjectFile);
+    document.getElementById('deptName').addEventListener('change', saveLocal);
+    document.getElementById('academicTerm').addEventListener('change', saveLocal);
 
-        function handleDrop(e) {
-            e.preventDefault();
-            e.currentTarget.classList.remove('drag-over');
-            
-            if (draggedCourse) {
-                const day = e.currentTarget.dataset.day;
-                const time = e.currentTarget.dataset.time;
-                const slotKey = `${day}|${time}`;
-                
-                // Check for instructor conflicts BEFORE scheduling
-                // Friday and Saturday classes don't pair, only M-Th classes pair
-                const daysToSchedule = draggedCourse.hybrid ? [day] : 
-                    (day === 'Friday' || day === 'Saturday') ? [day] :
-                    (day === 'Monday' || day === 'Wednesday') ? ['Monday', 'Wednesday'] :
-                    (day === 'Tuesday' || day === 'Thursday') ? ['Tuesday', 'Thursday'] : [day];
-                
-                // Check each day for conflicts
-                let hasConflict = false;
-                let conflictMessage = '';
-                
-                daysToSchedule.forEach(checkDay => {
-                    const checkSlot = `${checkDay}|${time}`;
-                    if (scheduledCourses[checkSlot]) {
-                        scheduledCourses[checkSlot].forEach(existingCourse => {
-                            // Check if same instructor at same time
-                            if (existingCourse.instructor === draggedCourse.instructor && 
-                                existingCourse.id !== draggedCourse.id) {
-                                
-                                // Allow early/late 8-week combinations
-                                const bothAre8Week = (existingCourse.session === 'early8' || existingCourse.session === 'late8') &&
-                                                    (draggedCourse.session === 'early8' || draggedCourse.session === 'late8');
-                                const differentSessions = existingCourse.session !== draggedCourse.session;
-                                
-                                if (!(bothAre8Week && differentSessions)) {
-                                    hasConflict = true;
-                                    conflictMessage = `${draggedCourse.instructor} is already scheduled for ${existingCourse.type} on ${checkDay} at ${time}. `;
-                                    if (bothAre8Week && !differentSessions) {
-                                        conflictMessage += `(Both are ${draggedCourse.session} courses)`;
-                                    } else {
-                                        conflictMessage += `Faculty cannot be in two places at the same time.`;
-                                    }
-                                }
-                            }
-                        });
-                    }
-                });
-                
-                if (hasConflict) {
-                    alert(`Schedule Conflict!\n\n${conflictMessage}\n\nPlease choose a different time slot.`);
-                    return;
-                }
-                
-                // Remove from previous location if exists
-                if (draggedCourse.fromSlot) {
-                    const [oldDay, oldTime] = draggedCourse.fromSlot.split('|');
-                    const daysToRemove = draggedCourse.hybrid ? [oldDay] :
-                        (oldDay === 'Friday' || oldDay === 'Saturday') ? [oldDay] :
-                        (oldDay === 'Monday' || oldDay === 'Wednesday') ? ['Monday', 'Wednesday'] :
-                        (oldDay === 'Tuesday' || oldDay === 'Thursday') ? ['Tuesday', 'Thursday'] : [oldDay];
-                    
-                    daysToRemove.forEach(removeDay => {
-                        const removeSlot = `${removeDay}|${oldTime}`;
-                        if (scheduledCourses[removeSlot]) {
-                            scheduledCourses[removeSlot] = 
-                                scheduledCourses[removeSlot].filter(c => c.id !== draggedCourse.id);
-                            if (scheduledCourses[removeSlot].length === 0) {
-                                delete scheduledCourses[removeSlot];
-                            }
-                        }
-                    });
-                }
-                
-                // Add to new location
-                daysToSchedule.forEach(scheduleDay => {
-                    const scheduleSlot = `${scheduleDay}|${time}`;
-                    if (!scheduledCourses[scheduleSlot]) {
-                        scheduledCourses[scheduleSlot] = [];
-                    }
-                    
-                    if (!scheduledCourses[scheduleSlot].find(c => c.id === draggedCourse.id)) {
-                        const courseToAdd = {...draggedCourse};
-                        delete courseToAdd.fromSlot;
-                        scheduledCourses[scheduleSlot].push(courseToAdd);
-                    }
-                });
-                
-                renderAll();
-            }
-            return false;
-        }
+    // Builder toolbar
+    document.getElementById('backToSetupBtn').addEventListener('click', enterSetup);
+    document.getElementById('undoBtn').addEventListener('click', doUndo);
+    document.getElementById('redoBtn').addEventListener('click', doRedo);
+    document.getElementById('clearScheduleBtn').addEventListener('click', clearSchedule);
+    document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
+    document.getElementById('importCsvBtn').addEventListener('click', () => document.getElementById('csvFileInput').click());
+    document.getElementById('csvFileInput').addEventListener('change', importCSV);
+    document.getElementById('saveProjectBtnBuild').addEventListener('click', saveProjectFile);
+    document.getElementById('openProjectBtnBuild').addEventListener('click', openProjectFile);
+    document.getElementById('projectFileInput').addEventListener('change', handleProjectFile);
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+    document.getElementById('weekendHead').addEventListener('click', () => toggleWeekendSchedule());
+    document.getElementById('subjectFilter').addEventListener('change', filterInstructorsBySubject);
 
-        function handleDropToInstructor(e) {
-            e.preventDefault();
-            e.currentTarget.classList.remove('drag-over');
-            
-            if (draggedCourse && draggedCourse.fromSlot) {
-                // Remove from all locations
-                const [day, time] = draggedCourse.fromSlot.split('|');
-                const daysToRemove = draggedCourse.hybrid ? [day] :
-                    (day === 'Friday' || day === 'Saturday') ? [day] :
-                    (day === 'Monday' || day === 'Wednesday') ? ['Monday', 'Wednesday'] :
-                    (day === 'Tuesday' || day === 'Thursday') ? ['Tuesday', 'Thursday'] : [day];
-                
-                daysToRemove.forEach(removeDay => {
-                    const removeSlot = `${removeDay}|${time}`;
-                    if (scheduledCourses[removeSlot]) {
-                        scheduledCourses[removeSlot] = 
-                            scheduledCourses[removeSlot].filter(c => c.id !== draggedCourse.id);
-                        if (scheduledCourses[removeSlot].length === 0) {
-                            delete scheduledCourses[removeSlot];
-                        }
-                    }
-                });
-                
-                renderAll();
-            }
-            return false;
+    // Global keys
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            clearSelection();
+            if (modalCleanup) modalCleanup();
+            return;
         }
+        const inField = /^(input|select|textarea)$/i.test(document.activeElement?.tagName || '');
+        if (inField) return;
+        if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); doUndo(); }
+        else if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) { e.preventDefault(); doRedo(); }
+    });
 
-        // Rendering Functions
-        function renderAll() {
-            renderSchedule();
-            renderInstructorPool();
-            updateFacultyPanel();
-            updateStats();
-            updateNeedsAnalysis();
-            updateWeekendIndicator();  // Add this to update the indicator
+    // Clicking empty page space cancels a pending click-to-place selection
+    document.body.addEventListener('click', e => {
+        if (selectedCourse && !e.target.closest('.course-card') && !e.target.closest('.dropzone')) {
+            clearSelection();
         }
-        
-        function updateNeedsAnalysis() {
-            const needsDiv = document.getElementById('needsAnalysis');
-            if (!needsDiv) return;
-            
-            // Initialize analysis data structures
-            const courseTypeCounts = {};
-            const dayTotals = { Monday: 0, Tuesday: 0, Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0 };
-            const timeSlotTotals = {};
-            const emptySlots = [];
-            const instructorUtilization = {};
-            
-            // Initialize counters for all time slots
-            allTimeSlots.forEach(time => {
-                timeSlotTotals[time] = 0;
-            });
-            
-            // Initialize course counts for all courses in catalog
-            departmentCatalog.forEach(course => {
-                courseTypeCounts[course] = 0;
-            });
-            
-            // Initialize instructor utilization
-            instructors.forEach(instructor => {
-                instructorUtilization[instructor.name] = { scheduled: 0, max: instructor.max };
-            });
-            
-            // Count scheduled courses
-            Object.entries(scheduledCourses).forEach(([slotKey, courses]) => {
-                const [day, time] = slotKey.split('|');
-                const uniqueCourses = new Set();
-                
-                courses.forEach(course => {
-                    if (!uniqueCourses.has(course.id)) {
-                        uniqueCourses.add(course.id);
-                        
-                        // Count course types
-                        if (courseTypeCounts.hasOwnProperty(course.type)) {
-                            courseTypeCounts[course.type]++;
-                        }
-                        
-                        // Count instructor utilization
-                        if (instructorUtilization[course.instructor]) {
-                            const currentCount = new Set();
-                            Object.values(scheduledCourses).forEach(slotCourses => {
-                                slotCourses.filter(c => c.instructor === course.instructor)
-                                          .forEach(c => currentCount.add(c.id));
-                            });
-                            instructorUtilization[course.instructor].scheduled = currentCount.size;
-                        }
-                    }
-                });
-                
-                dayTotals[day] += courses.length;
-                timeSlotTotals[time] += courses.length;
-            });
-            
-            // Find empty slots
-            days.forEach(day => {
-                const timeSlotsForDay = getTimeSlotsForDay(day);
-                timeSlotsForDay.forEach(time => {
-                    const slotKey = `${day}|${time}`;
-                    if (!scheduledCourses[slotKey] || scheduledCourses[slotKey].length === 0) {
-                        const isPrime = ['9:30-10:50', '11:00-12:20', '12:30-1:50', '9:00-11:50', '12:00-2:50'].includes(time);
-                        emptySlots.push({ day, time, isPrime });
-                    }
-                });
-            });
-            
-            // Sort empty slots to prioritize prime times
-            emptySlots.sort((a, b) => {
-                if (a.isPrime && !b.isPrime) return -1;
-                if (!a.isPrime && b.isPrime) return 1;
-                return 0;
-            });
-            
-            // Generate HTML report
-            let needsHTML = '';
-            
-            // Course Distribution Section
-            needsHTML += '<div style="background: #e3f2fd; padding: 10px; border-radius: 5px; border-left: 3px solid #2196f3;">';
-            needsHTML += '<h4 style="margin: 0 0 10px 0; color: #1565c0;">Course Section Distribution</h4>';
-            needsHTML += '<div style="font-size: 12px; color: #666;">';
-            
-            const sortedCourses = Object.entries(courseTypeCounts).sort((a, b) => a[1] - b[1]);
-            if (sortedCourses.length > 0) {
-                sortedCourses.forEach(([type, count]) => {
-                    const maxCount = Math.max(...Object.values(courseTypeCounts), 1);
-                    const barWidth = Math.max(5, (count / maxCount) * 150);
-                    const color = count === 0 ? '#f44336' : count < 3 ? '#ff9800' : '#4caf50';
-                    needsHTML += `<div style="margin: 3px 0;">
-                        <span style="display: inline-block; width: 100px; font-weight: ${count === 0 ? 'bold' : 'normal'};">${type}:</span>
-                        <span style="display: inline-block; background: ${color}; height: 15px; width: ${barWidth}px;"></span>
-                        <span style="margin-left: 5px; font-weight: ${count === 0 ? 'bold' : 'normal'};">${count} sections</span>
-                    </div>`;
-                });
-                
-                // Highlight courses with no sections
-                const unscheduledCourses = sortedCourses.filter(([type, count]) => count === 0);
-                if (unscheduledCourses.length > 0) {
-                    needsHTML += '<div style="margin-top: 10px; color: #d32f2f; font-weight: bold;">⚠ Courses with NO sections scheduled:</div>';
-                    needsHTML += '<div style="color: #d32f2f;">' + unscheduledCourses.map(([type]) => type).join(', ') + '</div>';
-                }
-            } else {
-                needsHTML += 'No courses defined yet';
-            }
-            needsHTML += '</div></div>';
-            
-            // Instructor Utilization
-            needsHTML += '<div style="background: #f3e5f5; padding: 10px; border-radius: 5px; border-left: 3px solid #9c27b0;">';
-            needsHTML += '<h4 style="margin: 0 0 10px 0; color: #6a1b9a;">Instructor Utilization</h4>';
-            needsHTML += '<div style="font-size: 12px; color: #666; max-height: 200px; overflow-y: auto;">';
-            
-            const sortedInstructors = Object.entries(instructorUtilization)
-                .sort((a, b) => (a[1].scheduled / a[1].max) - (b[1].scheduled / b[1].max));
-            
-            sortedInstructors.forEach(([name, data]) => {
-                const percentage = Math.round((data.scheduled / data.max) * 100);
-                const barWidth = Math.max(5, percentage * 1.5);
-                const color = percentage === 0 ? '#f44336' : percentage < 50 ? '#ff9800' : percentage < 100 ? '#4caf50' : '#2196f3';
-                needsHTML += `<div style="margin: 3px 0;">
-                    <span style="display: inline-block; width: 120px; font-size: 11px;">${name}:</span>
-                    <span style="display: inline-block; background: ${color}; height: 12px; width: ${barWidth}px;"></span>
-                    <span style="margin-left: 5px; font-size: 11px;">${data.scheduled}/${data.max} (${percentage}%)</span>
-                </div>`;
-            });
-            
-            needsHTML += '</div></div>';
-            
-            // Empty Time Slots
-            needsHTML += '<div style="background: #ffebee; padding: 10px; border-radius: 5px; border-left: 3px solid #f44336;">';
-            needsHTML += '<h4 style="margin: 0 0 10px 0; color: #c62828;">Empty Time Slots (' + emptySlots.length + ' total)</h4>';
-            
-            if (emptySlots.length > 0) {
-                needsHTML += '<div style="font-size: 12px; color: #666; max-height: 150px; overflow-y: auto;">';
-                const slotsToShow = emptySlots.slice(0, 10);
-                slotsToShow.forEach(slot => {
-                    const primeLabel = slot.isPrime ? ' <strong style="color: #f44336;">(PRIME TIME)</strong>' : '';
-                    needsHTML += `${slot.day} ${slot.time}${primeLabel}<br>`;
-                });
-                if (emptySlots.length > 10) {
-                    needsHTML += `<em>...and ${emptySlots.length - 10} more empty slots</em>`;
-                }
-                needsHTML += '</div>';
-            } else {
-                needsHTML += '<div style="font-size: 12px; color: #4caf50;">All time slots have at least one course!</div>';
-            }
-            needsHTML += '</div>';
-            
-            // Day Distribution
-            needsHTML += '<div style="background: #fff3e0; padding: 10px; border-radius: 5px; border-left: 3px solid #ff9800;">';
-            needsHTML += '<h4 style="margin: 0 0 10px 0; color: #e65100;">Daily Distribution Balance</h4>';
-            needsHTML += '<div style="font-size: 12px; color: #666;">';
-            
-            const maxDayCount = Math.max(...Object.values(dayTotals), 1);
-            Object.entries(dayTotals).forEach(([day, count]) => {
-                const barWidth = Math.max(5, (count / maxDayCount) * 150);
-                const color = count === 0 ? '#f44336' : '#ff9800';
-                needsHTML += `<div style="margin: 2px 0;">
-                    <span style="display: inline-block; width: 80px;">${day}:</span>
-                    <span style="display: inline-block; background: ${color}; height: 15px; width: ${barWidth}px;"></span>
-                    <span style="margin-left: 5px;">${count} sections</span>
-                </div>`;
-            });
-            
-            needsHTML += '</div></div>';
-            
-            needsDiv.innerHTML = needsHTML;
-        }
+    });
 
-        function renderSchedule() {
-            // Clear all dropzones
-            document.querySelectorAll('.dropzone').forEach(zone => {
-                zone.innerHTML = '';
-            });
-            
-            // Render courses in their scheduled slots
-            for (const slotKey in scheduledCourses) {
-                const [day, time] = slotKey.split('|');
-                const dropzone = document.querySelector(`.dropzone[data-day="${day}"][data-time="${time}"]`);
-                
-                if (dropzone && scheduledCourses[slotKey]) {
-                    scheduledCourses[slotKey].forEach(course => {
-                        dropzone.appendChild(createCourseCard(course, false));
-                    });
-                }
-            }
-        }
-
-        function renderInstructorPool() {
-            // Preserve the filter if it exists
-            const currentFilter = document.getElementById('subjectFilter')?.value;
-            
-            instructors.forEach(instructor => {
-                const poolDiv = document.querySelector(`.instructor-courses[data-instructor="${instructor.name}"]`);
-                if (poolDiv) {
-                    poolDiv.innerHTML = '';
-                    
-                    const scheduledIds = new Set();
-                    Object.values(scheduledCourses).forEach(courses => {
-                        courses.filter(c => c.instructor === instructor.name)
-                               .forEach(c => scheduledIds.add(c.id));
-                    });
-                    
-                    instructorCourses[instructor.name]
-                        .filter(c => !scheduledIds.has(c.id))
-                        .forEach(course => {
-                            poolDiv.appendChild(createCourseCard(course, true));
-                        });
-                }
-            });
-            
-            // Update filter options and reapply filter if needed
-            updateSubjectFilter();
-            if (currentFilter && currentFilter !== 'all') {
-                const filterSelect = document.getElementById('subjectFilter');
-                if (filterSelect) {
-                    filterSelect.value = currentFilter;
-                    filterInstructorsBySubject();
-                }
-            }
-        }
-
-        function updateStats() {
-            const uniqueCourses = new Set();
-            Object.values(scheduledCourses).forEach(courses => {
-                courses.forEach(course => uniqueCourses.add(course.id));
-            });
-            document.getElementById('totalScheduled').textContent = uniqueCourses.size;
-        }
-
-        function clearSchedule() {
-            if (confirm('Clear all scheduled courses?')) {
-                Object.keys(scheduledCourses).forEach(key => {
-                    delete scheduledCourses[key];
-                });
-                renderAll();
-            }
-        }
-
-        function exportToCSV() {
-            let csvContent = "Time,Day,Course,Instructor,Session Type,Hybrid\n";
-            
-            // Track which courses have been exported to avoid duplicates
-            const exportedCourseIds = new Set();
-            
-            // Get all unique time slots sorted by time
-            const allUniqueSlots = [...new Set([...weekdaySlots, ...fridaySlots, ...saturdaySlots])];
-            allUniqueSlots.sort((a, b) => {
-                const aHour = parseInt(a.split(':')[0]);
-                const bHour = parseInt(b.split(':')[0]);
-                return aHour - bHour;
-            });
-            
-            allUniqueSlots.forEach(time => {
-                // Process Monday and Tuesday first to handle pairing
-                ['Monday', 'Tuesday'].forEach(startDay => {
-                    const slotKey = `${startDay}|${time}`;
-                    const courses = scheduledCourses[slotKey];
-                    
-                    if (courses && courses.length > 0) {
-                        courses.forEach(course => {
-                            // Skip if already exported
-                            if (exportedCourseIds.has(course.id)) return;
-                            
-                            // Check if this is a paired course (not hybrid)
-                            let dayDisplay = startDay;
-                            if (!course.hybrid) {
-                                // Check for pairing on Wednesday or Thursday
-                                const pairDay = startDay === 'Monday' ? 'Wednesday' : 'Thursday';
-                                const pairSlotKey = `${pairDay}|${time}`;
-                                const pairCourses = scheduledCourses[pairSlotKey];
-                                
-                                if (pairCourses && pairCourses.find(c => c.id === course.id)) {
-                                    // This is a paired course
-                                    dayDisplay = startDay === 'Monday' ? 'M/W' : 'T/Th';
-                                    exportedCourseIds.add(course.id);
-                                }
-                            } else {
-                                exportedCourseIds.add(course.id);
-                            }
-                            
-                            let sessionType = '16-week';
-                            if (course.session === 'early8') sessionType = 'Early 8';
-                            if (course.session === 'late8') sessionType = 'Late 8';
-                            
-                            const hybridStatus = course.hybrid ? 'Yes' : 'No';
-                            csvContent += `"${time}","${dayDisplay}","${course.type}","${course.instructor}","${sessionType}","${hybridStatus}"\n`;
-                        });
-                    }
-                });
-                
-                // Process Wednesday, Thursday, Friday, and Saturday (unpaired days)
-                ['Wednesday', 'Thursday', 'Friday', 'Saturday'].forEach(day => {
-                    const slotKey = `${day}|${time}`;
-                    const courses = scheduledCourses[slotKey];
-                    
-                    if (courses && courses.length > 0) {
-                        courses.forEach(course => {
-                            // Only export if not already exported as part of a pair
-                            if (!exportedCourseIds.has(course.id)) {
-                                let sessionType = '16-week';
-                                if (course.session === 'early8') sessionType = 'Early 8';
-                                if (course.session === 'late8') sessionType = 'Late 8';
-                                
-                                const hybridStatus = course.hybrid ? 'Yes' : 'No';
-                                csvContent += `"${time}","${day}","${course.type}","${course.instructor}","${sessionType}","${hybridStatus}"\n`;
-                                exportedCourseIds.add(course.id);
-                            }
-                        });
-                    }
-                });
-            });
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `Schedule_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
-        }
-
-        function importCSV(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const csvContent = e.target.result;
-                    const lines = csvContent.split('\n');
-                    
-                    // Clear current schedule
-                    for (let key in scheduledCourses) {
-                        delete scheduledCourses[key];
-                    }
-                    
-                    let processingSchedule = false;
-                    for (let i = 0; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        
-                        if (line.includes('Time') && line.includes('Day')) {
-                            processingSchedule = true;
-                            continue;
-                        }
-                        
-                        if (processingSchedule && line && !line.includes('Faculty')) {
-                            const regex = /(".*?"|[^,]+)(?=\s*,|\s*$)/g;
-                            const matches = line.match(regex);
-                            if (matches && matches.length >= 6) {
-                                const values = matches.map(m => m.replace(/^"|"$/g, '').trim());
-                                
-                                const time = values[0];
-                                const day = values[1];
-                                const courseType = values[2];
-                                const instructorName = values[3];
-                                const sessionType = values[4];
-                                const hybridStatus = values[5] === 'Yes';
-                                const dualCreditStatus = values.length > 6 ? values[6] === 'Yes' : false;
-                                
-                                let session = '16week';
-                                if (sessionType === 'Early 8') session = 'early8';
-                                if (sessionType === 'Late 8') session = 'late8';
-                                
-                                // Handle M/W and T/Th paired courses
-                                let daysToSchedule = [];
-                                if (day === 'M/W') {
-                                    daysToSchedule = ['Monday', 'Wednesday'];
-                                } else if (day === 'T/Th') {
-                                    daysToSchedule = ['Tuesday', 'Thursday'];
-                                } else {
-                                    daysToSchedule = [day];
-                                }
-                                
-                                const courseId = courseIdCounter++;
-                                daysToSchedule.forEach(scheduleDay => {
-                                    const slotKey = `${scheduleDay}|${time}`;
-                                    if (!scheduledCourses[slotKey]) {
-                                        scheduledCourses[slotKey] = [];
-                                    }
-                                    
-                                    scheduledCourses[slotKey].push({
-                                        id: courseId,
-                                        type: courseType,
-                                        instructor: instructorName,
-                                        session: session,
-                                        hybrid: hybridStatus,
-                                        dualCredit: dualCreditStatus
-                                    });
-                                });
-                            }
-                        }
-                    }
-                    
-                    renderAll();
-                    alert('Schedule imported successfully!');
-                } catch (error) {
-                    alert('Error importing CSV file.');
-                }
-                
-                event.target.value = '';
-            };
-            
-            reader.readAsText(file);
-        }
-    </script>
+    updateInstructorList();
+    updateUndoButtons();
+    checkRestore();
+});
+</script>
 </body>
 </html>
