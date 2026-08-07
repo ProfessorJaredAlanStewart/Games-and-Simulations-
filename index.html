@@ -40,9 +40,23 @@
         background: var(--navy);
         color: rgba(255,255,255,0.7);
         font-size: 13px;
-        padding: 8px 0;
+        padding: 8px 20px;
         letter-spacing: 0.04em;
-        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+    .topbar-home {
+        font-weight: 700;
+        color: #fbbf24;
+        white-space: nowrap;
+    }
+    .topbar-sep { opacity: 0.35; }
+    @media (max-width: 560px) {
+        .topbar { flex-direction: column; gap: 4px; text-align: center; }
+        .topbar-sep { display: none; }
     }
     .topbar a {
         color: #fbbf24;
@@ -357,6 +371,76 @@
         .game-icon { width: 44px; height: 44px; font-size: 20px; }
         .steps { grid-template-columns: 1fr; }
     }
+    /* ── Filter bar ── */
+    .filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 8px;
+        margin: -8px 0 30px;
+        padding-bottom: 22px;
+        border-bottom: 1px solid var(--rule);
+    }
+    .filter-label {
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-right: 2px;
+    }
+    .filter-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filter-divider {
+        width: 1px;
+        height: 22px;
+        background: var(--rule);
+        margin: 0 6px;
+    }
+    .filter-btn {
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--ink);
+        background: #fff;
+        border: 1.5px solid var(--rule);
+        border-radius: 999px;
+        padding: 5px 14px;
+        cursor: pointer;
+        transition: background 0.18s, border-color 0.18s, color 0.18s;
+    }
+    .filter-btn:hover { border-color: var(--amber); }
+    .filter-btn[aria-pressed="true"] {
+        background: var(--navy);
+        border-color: var(--navy);
+        color: #fff;
+    }
+    .filter-count {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-left: auto;
+        white-space: nowrap;
+    }
+    .filter-empty {
+        display: none;
+        padding: 30px 0 10px;
+        color: var(--muted);
+    }
+    .filter-empty.is-shown { display: block; }
+    .category.is-hidden, .game-card.is-hidden { display: none; }
+    /* ── Usage line ── */
+    .game-use {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 4px 8px;
+        margin-top: 7px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--warm);
+        letter-spacing: 0.01em;
+    }
+    .game-use .use-dot { opacity: 0.4; font-weight: 400; }
+    .game-use .use-soft { font-weight: 400; color: var(--muted); }
     /* ── Animations ── */
     @keyframes fadeUp {
         from { opacity: 0; transform: translateY(16px); }
@@ -371,12 +455,22 @@
     .game-card:nth-child(4) { animation-delay: 0.2s; }
     .game-card:nth-child(5) { animation-delay: 0.25s; }
     .game-card:nth-child(6) { animation-delay: 0.3s; }
+    @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-    Open Educational Resource&ensp;&middot;&ensp;Part of the <a href="https://professorjaredalanstewart.github.io/Civic-Action-Project/">Civic Action Project</a>
+    <a class="topbar-home" href="https://jaredalanstewart.com/">&larr; jaredalanstewart.com</a>
+    <span class="topbar-sep" aria-hidden="true">&middot;</span>
+    <span>Open Educational Resource&ensp;&middot;&ensp;Part of the <a href="https://professorjaredalanstewart.github.io/Civic-Action-Project/">Civic Action Project</a></span>
 </div>
 
 <header class="hero">
@@ -389,19 +483,15 @@
         </p>
         <div class="hero-stats">
             <div>
-                <div class="hero-stat-num">12</div>
-                <div class="hero-stat-label">Activities</div>
+                <div class="hero-stat-num">15</div>
+                <div class="hero-stat-label">Resources</div>
             </div>
             <div>
-                <div class="hero-stat-num">3</div>
-                <div class="hero-stat-label">Simulations</div>
+                <div class="hero-stat-num">6</div>
+                <div class="hero-stat-label">Categories</div>
             </div>
             <div>
-                <div class="hero-stat-num">2</div>
-                <div class="hero-stat-label">Treks</div>
-            </div>
-            <div>
-                <div class="hero-stat-num">0</div>
+                <div class="hero-stat-num">$0</div>
                 <div class="hero-stat-label">Cost</div>
             </div>
         </div>
@@ -435,21 +525,41 @@
 <section>
     <div class="container">
         <h2>All <span class="accent">Resources</span></h2>
-        <p class="section-lead">Browse by category. Click any card to launch the activity.</p>
+        <p class="section-lead">Browse by category, or narrow the list by course and by how you plan to use it. Click any card to launch the activity.</p>
+
+        <div class="filters" role="group" aria-label="Filter resources">
+            <span class="filter-label">Course</span>
+            <div class="filter-group" data-facet="course">
+                <button class="filter-btn" type="button" data-value="all" aria-pressed="true">All</button>
+                <button class="filter-btn" type="button" data-value="federal" aria-pressed="false">Federal</button>
+                <button class="filter-btn" type="button" data-value="texas" aria-pressed="false">Texas</button>
+            </div>
+            <span class="filter-divider" aria-hidden="true"></span>
+            <span class="filter-label">Use</span>
+            <div class="filter-group" data-facet="use">
+                <button class="filter-btn" type="button" data-value="all" aria-pressed="true">All</button>
+                <button class="filter-btn" type="button" data-value="inclass" aria-pressed="false">In class</button>
+                <button class="filter-btn" type="button" data-value="outside" aria-pressed="false">Outside class</button>
+                <button class="filter-btn" type="button" data-value="instructor" aria-pressed="false">Instructor prep</button>
+            </div>
+            <span class="filter-count" id="filterCount" role="status" aria-live="polite">Showing all 15</span>
+        </div>
+        <p class="filter-empty" id="filterEmpty">No resources match that combination yet. Try widening one of the filters.</p>
 
         <!-- 1. Trailblazer Treks -->
         <div class="category">
             <div class="category-header">
-                <div class="category-icon trek">🥾</div>
+                <div class="category-icon trek" aria-hidden="true">🥾</div>
                 <div class="category-title">Trailblazer Treks</div>
             </div>
             <p class="category-desc">Self-paced interactive learning modules that guide students through government concepts with built-in checkpoints and progress tracking.</p>
             <div class="game-grid">
-                <a class="game-card" href="https://professorjaredalanstewart.github.io/tcc-govt-modules/" target="_blank">
-                    <div class="game-icon trek">🏛</div>
+                <a class="game-card" data-course="federal" data-use="outside" href="https://professorjaredalanstewart.github.io/tcc-govt-modules/" target="_blank" rel="noopener">
+                    <div class="game-icon trek" aria-hidden="true">🏛</div>
                     <div class="game-info">
                         <h3>Federal Government Trailblazer Trek</h3>
                         <p>An interactive learning trek through American federal government &mdash; covering the Constitution, branches of government, civil liberties, and public policy.</p>
+                        <div class="game-use"><span>Outside class</span><span class="use-dot" aria-hidden="true">&middot;</span><span>Self-paced</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">Assign as a unit walkthrough; works on a phone</span></div>
                         <div class="game-tags">
                             <span class="tag federal">Federal</span>
                             <span class="tag trek">Trek</span>
@@ -457,11 +567,12 @@
                     </div>
                     <span class="game-arrow">&rarr;</span>
                 </a>
-                <a class="game-card" href="https://professorjaredalanstewart.github.io/texas-govt-modules/" target="_blank">
-                    <div class="game-icon trek">⭐</div>
+                <a class="game-card" data-course="texas" data-use="outside" href="https://professorjaredalanstewart.github.io/texas-govt-modules/" target="_blank" rel="noopener">
+                    <div class="game-icon trek" aria-hidden="true">⭐</div>
                     <div class="game-info">
                         <h3>Texas Government Trailblazer Trek</h3>
                         <p>An interactive learning trek through Texas government &mdash; covering the Texas Constitution, the legislature, the executive branch, and local government.</p>
+                        <div class="game-use"><span>Outside class</span><span class="use-dot" aria-hidden="true">&middot;</span><span>Self-paced</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">Assign as a unit walkthrough; works on a phone</span></div>
                         <div class="game-tags">
                             <span class="tag texas">Texas</span>
                             <span class="tag trek">Trek</span>
@@ -475,16 +586,17 @@
         <!-- 2. Study & Review Tools -->
         <div class="category">
             <div class="category-header">
-                <div class="category-icon study">📝</div>
+                <div class="category-icon study" aria-hidden="true">📝</div>
                 <div class="category-title">Study &amp; Review Tools</div>
             </div>
             <p class="category-desc">Interactive generators and games for reviewing key concepts before exams or as in-class activities.</p>
             <div class="game-grid">
-                <a class="game-card" href="Federal%20Government%20Crossword%20Generator.html" target="_blank">
-                    <div class="game-icon study">✏️</div>
+                <a class="game-card" data-course="federal" data-use="outside" href="Federal%20Government%20Crossword%20Generator.html" target="_blank" rel="noopener">
+                    <div class="game-icon study" aria-hidden="true">✏️</div>
                     <div class="game-info">
                         <h3>Federal Government Crossword Generator</h3>
                         <p>Generates randomized crossword puzzles covering federal government concepts &mdash; the Constitution, Congress, the presidency, courts, and civil liberties.</p>
+                        <div class="game-use"><span>Outside class</span><span class="use-dot" aria-hidden="true">&middot;</span><span>Extra credit or LMS post</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">Randomized every time, so no two students get the same puzzle</span></div>
                         <div class="game-tags">
                             <span class="tag federal">Federal</span>
                             <span class="tag generator">Generator</span>
@@ -492,11 +604,12 @@
                     </div>
                     <span class="game-arrow">&rarr;</span>
                 </a>
-                <a class="game-card" href="Texas%20Government%20Crossword%20Generator.html" target="_blank">
-                    <div class="game-icon study">✏️</div>
+                <a class="game-card" data-course="texas" data-use="outside" href="Texas%20Government%20Crossword%20Generator.html" target="_blank" rel="noopener">
+                    <div class="game-icon study" aria-hidden="true">✏️</div>
                     <div class="game-info">
                         <h3>Texas Government Crossword Generator</h3>
                         <p>Randomized crossword puzzles focused on Texas government topics &mdash; the Texas Constitution, the legislature, the governor's office, and local government.</p>
+                        <div class="game-use"><span>Outside class</span><span class="use-dot" aria-hidden="true">&middot;</span><span>Extra credit or LMS post</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">Randomized every time, so no two students get the same puzzle</span></div>
                         <div class="game-tags">
                             <span class="tag texas">Texas</span>
                             <span class="tag generator">Generator</span>
@@ -504,11 +617,12 @@
                     </div>
                     <span class="game-arrow">&rarr;</span>
                 </a>
-                <a class="game-card" href="Texas%20Government%20Quiz%20Builder.html" target="_blank">
-                    <div class="game-icon study">❓</div>
+                <a class="game-card" data-course="texas" data-use="inclass outside" href="Texas%20Government%20Quiz%20Builder.html" target="_blank" rel="noopener">
+                    <div class="game-icon study" aria-hidden="true">❓</div>
                     <div class="game-info">
                         <h3>Texas Government Quiz Builder</h3>
                         <p>Build and take custom quizzes on Texas government topics. Great for exam prep or as a quick classroom knowledge check.</p>
+                        <div class="game-use"><span>Either way</span><span class="use-dot" aria-hidden="true">&middot;</span><span>Quick knowledge check or solo exam prep</span></div>
                         <div class="game-tags">
                             <span class="tag texas">Texas</span>
                             <span class="tag generator">Generator</span>
@@ -516,11 +630,12 @@
                     </div>
                     <span class="game-arrow">&rarr;</span>
                 </a>
-                <a class="game-card" href="Texas%20Jeopardy%20Classroom%20Edition.html" target="_blank">
-                    <div class="game-icon study">🏆</div>
+                <a class="game-card" data-course="texas" data-use="inclass" href="Texas%20Jeopardy%20Classroom%20Edition.html" target="_blank" rel="noopener">
+                    <div class="game-icon study" aria-hidden="true">🏆</div>
                     <div class="game-info">
                         <h3>Texas Jeopardy &mdash; Classroom Edition</h3>
                         <p>A full Jeopardy-style game board with Texas government categories. Perfect for team-based review sessions.</p>
+                        <div class="game-use"><span>In class</span><span class="use-dot" aria-hidden="true">&middot;</span><span>One class meeting</span><span class="use-dot" aria-hidden="true">&middot;</span><span>Team review</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">Students can also replay it solo before the exam</span></div>
                         <div class="game-tags">
                             <span class="tag texas">Texas</span>
                             <span class="tag interactive">Interactive</span>
@@ -528,11 +643,12 @@
                     </div>
                     <span class="game-arrow">&rarr;</span>
                 </a>
-                <a class="game-card" href="Wheel_of_Fortune_Texas_Government.html" target="_blank">
-                    <div class="game-icon study">🎡</div>
+                <a class="game-card" data-course="texas" data-use="inclass" href="Wheel_of_Fortune_Texas_Government.html" target="_blank" rel="noopener">
+                    <div class="game-icon study" aria-hidden="true">🎡</div>
                     <div class="game-info">
                         <h3>Wheel of Fortune &mdash; Texas Government</h3>
                         <p>Spin the wheel and solve Texas government&ndash;themed puzzles. A fun, fast-paced way to review key terms and concepts.</p>
+                        <div class="game-use"><span>In class</span><span class="use-dot" aria-hidden="true">&middot;</span><span>One class meeting</span><span class="use-dot" aria-hidden="true">&middot;</span><span>Team review</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">Students can also replay it solo before the exam</span></div>
                         <div class="game-tags">
                             <span class="tag texas">Texas</span>
                             <span class="tag interactive">Interactive</span>
@@ -540,11 +656,12 @@
                     </div>
                     <span class="game-arrow">&rarr;</span>
                 </a>
-                <a class="game-card" href="Wheel_of_Fortune_Federal_Government.html" target="_blank">
-                    <div class="game-icon study">🎡</div>
+                <a class="game-card" data-course="federal" data-use="inclass" href="Wheel_of_Fortune_Federal_Government.html" target="_blank" rel="noopener">
+                    <div class="game-icon study" aria-hidden="true">🎡</div>
                     <div class="game-info">
                         <h3>Wheel of Fortune &mdash; Federal Government</h3>
                         <p>Spin the wheel and solve federal government&ndash;themed puzzles covering the Constitution, Congress, the presidency, and civil liberties.</p>
+                        <div class="game-use"><span>In class</span><span class="use-dot" aria-hidden="true">&middot;</span><span>One class meeting</span><span class="use-dot" aria-hidden="true">&middot;</span><span>Team review</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">Students can also replay it solo before the exam</span></div>
                         <div class="game-tags">
                             <span class="tag federal">Federal</span>
                             <span class="tag interactive">Interactive</span>
@@ -558,16 +675,17 @@
         <!-- 3. Research & Writing -->
         <div class="category">
             <div class="category-header">
-                <div class="category-icon research">📚</div>
+                <div class="category-icon research" aria-hidden="true">📚</div>
                 <div class="category-title">Research &amp; Writing</div>
             </div>
             <p class="category-desc">Tools that help students do the scholarly work &mdash; finding sources, citing them correctly, and writing about them.</p>
             <div class="game-grid">
-                <a class="game-card" href="annotated-bibliography.html" target="_blank">
-                    <div class="game-icon research">📚</div>
+                <a class="game-card" data-course="any" data-use="outside" href="annotated-bibliography.html" target="_blank" rel="noopener">
+                    <div class="game-icon research" aria-hidden="true">📚</div>
                     <div class="game-info">
                         <h3>Annotated Bibliography Desk</h3>
                         <p>Drop in a PDF or Word article and it pulls a verified APA 7 citation from CrossRef, guides the annotation with a writing scaffold, and exports to Word, RIS, BibTeX, or print &mdash; all in the browser.</p>
+                        <div class="game-use"><span>Outside class</span><span class="use-dot" aria-hidden="true">&middot;</span><span>Student writing tool</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">Pairs with any research assignment</span></div>
                         <div class="game-tags">
                             <span class="tag research">APA 7</span>
                             <span class="tag generator">Citation Tool</span>
@@ -581,27 +699,29 @@
         <!-- 4. Instructor Tools -->
         <div class="category">
             <div class="category-header">
-                <div class="category-icon tool">🛠</div>
+                <div class="category-icon tool" aria-hidden="true">🛠</div>
                 <div class="category-title">Instructor Tools</div>
             </div>
             <p class="category-desc">Utilities designed to support course planning, syllabus creation, and organization.</p>
             <div class="game-grid">
-                <a class="game-card" href="TCC%20Syllabus%20Generator.html" target="_blank">
-                    <div class="game-icon tool">📄</div>
+                <a class="game-card" data-course="any" data-use="instructor" href="TCC%20Syllabus%20Generator.html" target="_blank" rel="noopener">
+                    <div class="game-icon tool" aria-hidden="true">📄</div>
                     <div class="game-info">
                         <h3>TCC Syllabus Generator</h3>
                         <p>Step-by-step syllabus builder for Tarrant County College courses. Generates a polished, print-ready PDF with all required institutional sections.</p>
+                        <div class="game-use"><span>Instructor prep</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">Before the term starts</span></div>
                         <div class="game-tags">
                             <span class="tag generator">Utility</span>
                         </div>
                     </div>
                     <span class="game-arrow">&rarr;</span>
                 </a>
-                <a class="game-card" href="Generic%20Schedule%20Builder%20(For%20Dist%20to%20Chairs).html" target="_blank">
-                    <div class="game-icon tool">📅</div>
+                <a class="game-card" data-course="any" data-use="instructor" href="Generic%20Schedule%20Builder%20(For%20Dist%20to%20Chairs).html" target="_blank" rel="noopener">
+                    <div class="game-icon tool" aria-hidden="true">📅</div>
                     <div class="game-info">
                         <h3>Generic Schedule Builder</h3>
                         <p>A flexible schedule builder for creating and distributing course schedules. Designed for department chairs and lead instructors.</p>
+                        <div class="game-use"><span>Instructor prep</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">For chairs and lead instructors</span></div>
                         <div class="game-tags">
                             <span class="tag generator">Utility</span>
                         </div>
@@ -614,16 +734,17 @@
         <!-- 5. Simulations -->
         <div class="category">
             <div class="category-header">
-                <div class="category-icon sim">🏛</div>
+                <div class="category-icon sim" aria-hidden="true">🏛</div>
                 <div class="category-title">Simulations</div>
             </div>
             <p class="category-desc">Role-playing activities where students experience legislative processes firsthand.</p>
             <div class="game-grid">
-                <a class="game-card" href="Keep%20Your%20Job%20-%20Congressional%20Simulation%20Game.html" target="_blank">
-                    <div class="game-icon sim">🏛</div>
+                <a class="game-card" data-course="federal" data-use="outside" href="Keep%20Your%20Job%20-%20Congressional%20Simulation%20Game.html" target="_blank" rel="noopener">
+                    <div class="game-icon sim" aria-hidden="true">🏛</div>
                     <div class="game-info">
                         <h3>Keep Your Job &mdash; Congressional Simulation</h3>
                         <p>Students play as members of Congress, navigating committee assignments, floor votes, constituent demands, and reelection pressures.</p>
+                        <div class="game-use"><span>Outside class</span><span class="use-dot" aria-hidden="true">&middot;</span><span>About an hour</span><span class="use-dot" aria-hidden="true">&middot;</span><span>Individual play</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">Debrief together the next meeting</span></div>
                         <div class="game-tags">
                             <span class="tag federal">Federal</span>
                             <span class="tag interactive">Simulation</span>
@@ -631,11 +752,12 @@
                     </div>
                     <span class="game-arrow">&rarr;</span>
                 </a>
-                <a class="game-card" href="Keep%20Your%20Seat%20-%20Texas%20State%20Senate%20Simulation.html" target="_blank">
-                    <div class="game-icon sim">⭐</div>
+                <a class="game-card" data-course="texas" data-use="outside" href="Keep%20Your%20Seat%20-%20Texas%20State%20Senate%20Simulation.html" target="_blank" rel="noopener">
+                    <div class="game-icon sim" aria-hidden="true">⭐</div>
                     <div class="game-info">
                         <h3>Keep Your Seat &mdash; Texas State Senate Simulation</h3>
                         <p>Students serve as Texas State Senators, balancing constituent interests, party loyalty, and policy negotiations in Austin.</p>
+                        <div class="game-use"><span>Outside class</span><span class="use-dot" aria-hidden="true">&middot;</span><span>About an hour</span><span class="use-dot" aria-hidden="true">&middot;</span><span>Individual play</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">Debrief together the next meeting</span></div>
                         <div class="game-tags">
                             <span class="tag texas">Texas</span>
                             <span class="tag interactive">Simulation</span>
@@ -643,11 +765,12 @@
                     </div>
                     <span class="game-arrow">&rarr;</span>
                 </a>
-                <a class="game-card" href="Presidential%20Primary%20Game.html" target="_blank">
-                    <div class="game-icon sim">🗳</div>
+                <a class="game-card" data-course="federal" data-use="outside" href="Presidential%20Primary%20Game.html" target="_blank" rel="noopener">
+                    <div class="game-icon sim" aria-hidden="true">🗳</div>
                     <div class="game-info">
                         <h3>Presidential Primary Game</h3>
                         <p>Students campaign through the presidential primary process, making strategic decisions about messaging, fundraising, and state-by-state races.</p>
+                        <div class="game-use"><span>Outside class</span><span class="use-dot" aria-hidden="true">&middot;</span><span>About an hour</span><span class="use-dot" aria-hidden="true">&middot;</span><span>Individual play</span><span class="use-dot" aria-hidden="true">&middot;</span><span class="use-soft">Debrief together the next meeting</span></div>
                         <div class="game-tags">
                             <span class="tag federal">Federal</span>
                             <span class="tag interactive">Simulation</span>
@@ -661,13 +784,13 @@
         <!-- 6. Bonus -->
         <div class="category" style="opacity: 0.85;">
             <div class="category-header">
-                <div class="category-icon" style="background: #fce7f3; color: #be185d;">🎲</div>
+                <div class="category-icon" aria-hidden="true" style="background: #fce7f3; color: #be185d;">🎲</div>
                 <div class="category-title">Bonus &mdash; Just for Fun</div>
             </div>
             <p class="category-desc">Not a classroom resource &mdash; just a silly personal project. You've been warned.</p>
             <div class="game-grid">
-                <a class="game-card" href="Wheel_of_Levi.html" target="_blank" style="border-style: dashed;">
-                    <div class="game-icon" style="background: linear-gradient(135deg, #fce7f3, #fbcfe8);">🎡</div>
+                <a class="game-card" data-course="any" data-use="bonus" href="Wheel_of_Levi.html" target="_blank" rel="noopener" style="border-style: dashed;">
+                    <div class="game-icon" aria-hidden="true" style="background: linear-gradient(135deg, #fce7f3, #fbcfe8);">🎡</div>
                     <div class="game-info">
                         <h3>Wheel of Levi</h3>
                         <p>A fun, wacky custom Wheel of Fortune&ndash;style game made for a very specific kid. Not educational. Not serious. Purely chaotic.</p>
@@ -695,10 +818,65 @@
         <div class="footer-sep"></div>
         Created by Professor Jared Alan Stewart&ensp;&middot;&ensp;Tarrant County College<br>
         Released as an <strong>Open Educational Resource</strong><br><br>
+        <a href="https://jaredalanstewart.com/">jaredalanstewart.com</a>&ensp;&middot;&ensp;
         <a href="https://github.com/ProfessorJaredAlanStewart/Games-and-Simulations-">View on GitHub</a>&ensp;&middot;&ensp;
-        <a href="https://professorjaredalanstewart.github.io/Civic-Action-Project/">Civic Action Project</a>
+        <a href="https://professorjaredalanstewart.github.io/Civic-Action-Project/">Civic Action Project</a><br><br>
+        <span style="opacity:0.6;font-size:0.9em">Updated August 2026</span>
     </div>
 </footer>
 
+<script>
+/* Resource filtering: course AND use, with category headers hiding when empty. */
+(function () {
+    var bar = document.querySelector('.filters');
+    if (!bar) return;
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.game-card'));
+    var cats = Array.prototype.slice.call(document.querySelectorAll('.category'));
+    var countEl = document.getElementById('filterCount');
+    var emptyEl = document.getElementById('filterEmpty');
+    var total = cards.length;
+    var state = { course: 'all', use: 'all' };
+
+    function matches(card) {
+        var c = card.getAttribute('data-course') || 'any';
+        var u = (card.getAttribute('data-use') || '').split(' ');
+        var okCourse = state.course === 'all' || c === state.course || c === 'any';
+        var okUse = state.use === 'all' || u.indexOf(state.use) !== -1;
+        return okCourse && okUse;
+    }
+
+    function apply() {
+        var shown = 0;
+        cards.forEach(function (card) {
+            var ok = matches(card);
+            card.classList.toggle('is-hidden', !ok);
+            if (ok) shown++;
+        });
+        cats.forEach(function (cat) {
+            var any = cat.querySelector('.game-card:not(.is-hidden)');
+            cat.classList.toggle('is-hidden', !any);
+        });
+        var filtered = state.course !== 'all' || state.use !== 'all';
+        countEl.textContent = filtered
+            ? 'Showing ' + shown + ' of ' + total
+            : 'Showing all ' + total;
+        emptyEl.classList.toggle('is-shown', shown === 0);
+    }
+
+    bar.addEventListener('click', function (e) {
+        var btn = e.target.closest('.filter-btn');
+        if (!btn) return;
+        var group = btn.closest('.filter-group');
+        var facet = group.getAttribute('data-facet');
+        state[facet] = btn.getAttribute('data-value');
+        group.querySelectorAll('.filter-btn').forEach(function (b) {
+            b.setAttribute('aria-pressed', String(b === btn));
+        });
+        apply();
+    });
+
+    apply();
+})();
+</script>
 </body>
 </html>
