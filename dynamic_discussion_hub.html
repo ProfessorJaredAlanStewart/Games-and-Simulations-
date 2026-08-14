@@ -2066,6 +2066,76 @@
                 transition: none !important;
             }
         }
+
+        /* ==================== WELCOME MODAL ==================== */
+        .welcome-modal { max-width: 580px; }
+        .welcome-brand {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+        .welcome-logo {
+            background: linear-gradient(135deg, var(--ddh-teal), var(--ddh-blue));
+            color: white;
+            font-weight: bold;
+            font-family: 'Segoe UI', sans-serif;
+            letter-spacing: 1px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 1.05em;
+            flex-shrink: 0;
+        }
+        .welcome-sub {
+            color: var(--gray-500);
+            font-size: 0.9em;
+            margin-top: 4px;
+        }
+        .welcome-features {
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            margin: 20px 0;
+        }
+        .welcome-feature {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            font-size: 0.92em;
+        }
+        .welcome-feature .wf-ic {
+            color: var(--ddh-teal);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .welcome-feature strong { color: var(--ddh-dark); }
+        .welcome-start {
+            background: var(--ddh-mint);
+            border-left: 4px solid var(--ddh-teal);
+            border-radius: 0 8px 8px 0;
+            padding: 12px 16px;
+            font-size: 0.92em;
+        }
+        .welcome-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            color: var(--gray-500);
+            margin-top: 16px;
+            font-family: 'Segoe UI', sans-serif;
+            cursor: pointer;
+            user-select: none;
+        }
+        .welcome-check input { accent-color: var(--ddh-teal); width: 16px; height: 16px; cursor: pointer; }
+        .welcome-support {
+            font-size: 0.82em;
+            color: var(--gray-500);
+            margin-top: 15px;
+            text-align: center;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .welcome-support a { color: var(--ddh-teal); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -2684,6 +2754,48 @@
         <div class="dd-body" id="drilldownBody"></div>
     </div>
 
+    <!-- Welcome / First-Run Modal -->
+    <div class="modal-overlay" id="welcomeModal">
+        <div class="modal welcome-modal" role="dialog" aria-labelledby="welcomeTitle">
+            <div class="welcome-brand">
+                <span class="welcome-logo">DDH</span>
+                <div>
+                    <h3 id="welcomeTitle" style="margin: 0;">Welcome to the Dynamic Discussion Hub</h3>
+                    <p class="welcome-sub">A discussion platform built around regular substantive interaction (RSI) &mdash; in active development and not yet connected to a live course. Everything here runs in your browser.</p>
+                </div>
+            </div>
+            <div class="welcome-features">
+                <div class="welcome-feature">
+                    <span class="wf-ic" data-ic="grad" data-ic-size="20"></span>
+                    <span><strong>Grade a whole discussion in one pass.</strong> The Review tab walks you student by student &mdash; auto-grade breakdowns, one-click overrides, private feedback, and <kbd>J</kbd>/<kbd>K</kbd>/<kbd>G</kbd> keyboard flow.</span>
+                </div>
+                <div class="welcome-feature">
+                    <span class="wf-ic" data-ic="message" data-ic-size="20"></span>
+                    <span><strong>Real conversation tools.</strong> Threaded replies, quote-reply with attribution, video and audio responses, and drafts that autosave so nothing is ever lost to a refresh.</span>
+                </div>
+                <div class="welcome-feature">
+                    <span class="wf-ic" data-ic="eyeoff" data-ic-size="20"></span>
+                    <span><strong>Moderation that keeps the record.</strong> Pin, flag, hide with a stated reason, delete with undo, and unread tracking &mdash; all from the instructor Discussion tab.</span>
+                </div>
+                <div class="welcome-feature">
+                    <span class="wf-ic" data-ic="users" data-ic-size="20"></span>
+                    <span><strong>See both sides.</strong> Toggle between Student View and Instructor View in the header at any time.</span>
+                </div>
+            </div>
+            <div class="welcome-start">
+                <strong>The fastest way to see it:</strong> load the sample class below &mdash; six students, full threads, one under the word minimum &mdash; then open the Review tab and grade them.
+            </div>
+            <label class="welcome-check">
+                <input type="checkbox" id="welcomeDontShow"> Don't show this again
+            </label>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" onclick="closeWelcomeModal()">Explore on my own</button>
+                <button class="modal-btn primary" onclick="welcomeLoadSample()">Load Sample Data &amp; Explore</button>
+            </div>
+            <p class="welcome-support">Like where this is headed? Feedback and support move it forward &mdash; reach out via <a href="https://jaredalanstewart.com" target="_blank" rel="noopener">jaredalanstewart.com</a>.</p>
+        </div>
+    </div>
+
     <!-- Hide Post Modal (Tier 1) -->
     <div class="modal-overlay" id="hidePostModal">
         <div class="modal">
@@ -2836,6 +2948,7 @@
             document.addEventListener('keydown', handleReviewKeys);
             document.addEventListener('keydown', handleModalKeys);
             hydrateIcons();
+            if (shouldShowWelcome()) setTimeout(showWelcomeModal, 400);
         });
 
         // ==================== SETUP & PROFILE FUNCTIONS ====================
@@ -4585,6 +4698,29 @@
             });
         }
 
+        // ==================== WELCOME / FIRST-RUN ====================
+
+        function shouldShowWelcome() {
+            try { return localStorage.getItem('hubWelcomeDismissed') !== '1'; } catch (e) { return true; }
+        }
+
+        function showWelcomeModal() {
+            document.getElementById('welcomeModal').classList.add('active');
+        }
+
+        function closeWelcomeModal() {
+            const cb = document.getElementById('welcomeDontShow');
+            if (cb && cb.checked) {
+                try { localStorage.setItem('hubWelcomeDismissed', '1'); } catch (e) {}
+            }
+            document.getElementById('welcomeModal').classList.remove('active');
+        }
+
+        function welcomeLoadSample() {
+            closeWelcomeModal();
+            loadSampleData();
+        }
+
         // ==================== TIER 3: MODAL FOCUS TRAP & ESC ====================
 
         function activeModalOverlay() {
@@ -4604,6 +4740,7 @@
                     deleteConfirmModal: closeDeleteConfirmModal,
                     editPostModal: closeEditPostModal,
                     editHistoryModal: closeEditHistoryModal,
+                    welcomeModal: closeWelcomeModal,
                     hidePostModal: closeHideModal,
                     deletePostModal: closeDeletePostModal
                 };
