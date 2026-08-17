@@ -789,11 +789,11 @@
         <div class="setup-section">
             <div class="setup-label">How many teams are playing?</div>
             <div class="team-count-selector">
-                <button class="team-count-btn" onclick="selectTeamCount(2)">2</button>
-                <button class="team-count-btn" onclick="selectTeamCount(3)">3</button>
-                <button class="team-count-btn" onclick="selectTeamCount(4)">4</button>
-                <button class="team-count-btn" onclick="selectTeamCount(5)">5</button>
-                <button class="team-count-btn" onclick="selectTeamCount(6)">6</button>
+                <button class="team-count-btn" onclick="selectTeamCount(2, this)">2</button>
+                <button class="team-count-btn" onclick="selectTeamCount(3, this)">3</button>
+                <button class="team-count-btn" onclick="selectTeamCount(4, this)">4</button>
+                <button class="team-count-btn" onclick="selectTeamCount(5, this)">5</button>
+                <button class="team-count-btn" onclick="selectTeamCount(6, this)">6</button>
             </div>
         </div>
 
@@ -818,6 +818,7 @@
             <div class="controls">
                 <button class="control-btn" onclick="resetRound()">🔄 Reset Round</button>
                 <button class="control-btn danger" onclick="resetGame()">🔄 New Game</button>
+                <button class="control-btn" id="muteBtn" onclick="toggleSound()">🔊 Sound: On</button>
                 <button class="control-btn skip" id="skipRoundBtn" onclick="skipToRound2()" style="display: none;">⏭ Skip to Round 2</button>
             </div>
 
@@ -2489,7 +2490,7 @@
                                         }
                                 ],
                                 "correct_answer": "In a unitary system, all regional governments are subordinate to the central government.",
-                                "feedback": "Correct. In a unitary system, regional governments retain significant autonomy in many areas. In unitary government systems, the central governing body frequently chooses to create regional and local governments for administrative purposes. Generally, these subnational governments only have those powers the national government gives them."
+                                "feedback": "Correct. In a unitary system, all regional governments are subordinate to the central government. In unitary government systems, the central governing body frequently chooses to create regional and local governments for administrative purposes. Generally, these subnational governments only have those powers the national government gives them."
                         },
                         {
                                 "id": "Question_9",
@@ -4019,7 +4020,7 @@
                                 "choices": [
                                         {
                                                 "id": "I14_C0",
-                                                "text": "After reconstruction"
+                                                "text": "During Reconstruction"
                                         },
                                         {
                                                 "id": "I14_C1",
@@ -7307,7 +7308,7 @@
                                 "choices": [
                                         {
                                                 "id": "I25_C3",
-                                                "text": "1992"
+                                                "text": "1993"
                                         },
                                         {
                                                 "id": "I25_C2",
@@ -9064,7 +9065,7 @@
                                                 "text": "Interest groups help inform and organize the most interested citizens."
                                         }
                                 ],
-                                "correct_answer": "Interest groups allow individuals to elect candidates to state office efficiently.",
+                                "correct_answer": "Interest groups help inform and organize the most interested citizens.",
                                 "feedback": "Correct. Interest groups are effective in helping to inform and organize the most interested citizens."
                         },
                         {
@@ -17255,6 +17256,128 @@
         }
 };
 
+        /* ============================================================
+           AUDIO ENGINE - original composition, synthesized in-browser.
+           No external files, no copyrighted material. Works offline.
+           ============================================================ */
+        const Sound = (function () {
+            let ctx = null, master = null, muted = false;
+            let schedTimer = null, noteIdx = 0, nextTime = 0, playing = false;
+
+            const BPM = 128;
+            const EIGHTH = 30 / BPM;          // duration of an eighth note
+            const LOOKAHEAD = 0.25;
+
+            // Original 16-step motif (C minor). Freqs in Hz.
+            const LEAD = [523.25, 622.25, 783.99, 622.25, 466.16, 587.33, 698.46, 587.33,
+                          415.30, 523.25, 622.25, 523.25, 392.00, 493.88, 587.33, 698.46];
+            const BASS = [130.81, 0, 130.81, 0, 196.00, 0, 196.00, 0,
+                          103.83, 0, 103.83, 0, 196.00, 0, 246.94, 0];
+
+            function init() {
+                if (ctx) return;
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return;
+                ctx = new AC();
+                master = ctx.createGain();
+                master.gain.value = muted ? 0 : 0.5;
+                master.connect(ctx.destination);
+            }
+
+            function resume() {
+                init();
+                if (ctx && ctx.state === 'suspended') ctx.resume();
+            }
+
+            function tone(freq, start, dur, type, peak, filterHz) {
+                if (!ctx || freq <= 0) return;
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, start);
+                let node = osc;
+                if (filterHz) {
+                    const f = ctx.createBiquadFilter();
+                    f.type = 'lowpass';
+                    f.frequency.setValueAtTime(filterHz, start);
+                    osc.connect(f); node = f;
+                }
+                g.gain.setValueAtTime(0.0001, start);
+                g.gain.exponentialRampToValueAtTime(peak, start + 0.012);
+                g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+                node.connect(g); g.connect(master);
+                osc.start(start); osc.stop(start + dur + 0.05);
+            }
+
+            function tick(start) {
+                if (!ctx) return;
+                const len = Math.floor(ctx.sampleRate * 0.03);
+                const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+                const s = ctx.createBufferSource(); s.buffer = buf;
+                const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 7000;
+                const g = ctx.createGain(); g.gain.value = 0.05;
+                s.connect(f); f.connect(g); g.connect(master);
+                s.start(start);
+            }
+
+            function scheduler() {
+                if (!playing || !ctx) return;
+                while (nextTime < ctx.currentTime + LOOKAHEAD) {
+                    const i = noteIdx % 16;
+                    tone(LEAD[i], nextTime, EIGHTH * 0.9, 'triangle', 0.11);
+                    if (BASS[i] > 0) tone(BASS[i], nextTime, EIGHTH * 1.7, 'sawtooth', 0.14, 420);
+                    if (i % 2 === 1) tick(nextTime);
+                    nextTime += EIGHTH;
+                    noteIdx++;
+                }
+            }
+
+            return {
+                unlock: resume,
+                isMuted: () => muted,
+                toggleMute() {
+                    muted = !muted;
+                    if (master) master.gain.value = muted ? 0 : 0.5;
+                    return muted;
+                },
+                startThinkMusic() {
+                    resume();
+                    if (!ctx || playing) return;
+                    playing = true; noteIdx = 0; nextTime = ctx.currentTime + 0.06;
+                    scheduler();
+                    schedTimer = setInterval(scheduler, 25);
+                },
+                stopThinkMusic() {
+                    playing = false;
+                    if (schedTimer) { clearInterval(schedTimer); schedTimer = null; }
+                },
+                correct() {
+                    resume(); if (!ctx) return;
+                    const t = ctx.currentTime;
+                    [523.25, 659.25, 783.99, 1046.50].forEach((f, i) =>
+                        tone(f, t + i * 0.09, 0.32, 'triangle', 0.2));
+                },
+                wrong() {
+                    resume(); if (!ctx) return;
+                    const t = ctx.currentTime;
+                    tone(233.08, t, 0.30, 'sawtooth', 0.16, 700);
+                    tone(174.61, t + 0.16, 0.55, 'sawtooth', 0.16, 600);
+                },
+                dailyDouble() {
+                    resume(); if (!ctx) return;
+                    const t = ctx.currentTime;
+                    [392.00, 523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) =>
+                        tone(f, t + i * 0.075, 0.42, 'square', 0.13, 2600));
+                },
+                reveal() {
+                    resume(); if (!ctx) return;
+                    tone(880, ctx.currentTime, 0.13, 'sine', 0.13);
+                }
+            };
+        })();
+
         let teams = [];
         let currentTeamIndex = 0;
         let teamCount = 0;
@@ -17281,14 +17404,25 @@
             return text.replace(/^(Correct\.\s*|Incorrect\.\s*)/i, '').trim();
         }
 
+        // Registered once at load, so repeated games can't stack duplicate handlers
+        document.getElementById('ddWagerInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); submitDailyDoubleWager(); }
+        });
+
+        function toggleSound() {
+            const nowMuted = Sound.toggleMute();
+            document.getElementById('muteBtn').textContent =
+                nowMuted ? '🔇 Sound: Off' : '🔊 Sound: On';
+        }
+
         // Setup Phase Functions
-        function selectTeamCount(count) {
+        function selectTeamCount(count, btnEl) {
             teamCount = count;
-            
+            Sound.unlock();
             document.querySelectorAll('.team-count-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
-            event.target.classList.add('selected');
+            (btnEl || (window.event && window.event.target)).classList.add('selected');
             
             const container = document.getElementById('teamNamesContainer');
             container.innerHTML = '';
@@ -17310,6 +17444,7 @@
         }
 
         function startGame() {
+            Sound.unlock();
             teams = [];
             for (let i = 1; i <= teamCount; i++) {
                 const input = document.getElementById(`teamName${i}`);
@@ -17392,11 +17527,6 @@
             updateCurrentTeamIndicator();
             
             updateSkipButton();
-
-            // Enter key submits wager
-            document.getElementById('ddWagerInput').addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') submitDailyDoubleWager();
-            });
         }
 
         function updateTeamsDisplay() {
@@ -17526,11 +17656,13 @@
 
             document.getElementById('ddTeamName').textContent = `${team.name}'s Daily Double!`;
             document.getElementById('ddCurrentScore').textContent = `Current Score: $${team.score}`;
-            document.getElementById('ddWagerRange').textContent = `You may wager from $0 up to $${maxWager}`;
+            document.getElementById('ddWagerRange').textContent =
+                `You may wager from $${Math.min(100, maxWager)} up to $${maxWager}`;
             
             const input = document.getElementById('ddWagerInput');
+            input.min = Math.min(100, maxWager);
             input.max = maxWager;
-            input.value = 0;
+            input.value = Math.min(100, maxWager);
 
             // Generate quick wager buttons
             const quickDiv = document.getElementById('ddQuickWagers');
@@ -17551,6 +17683,7 @@
                 quickDiv.appendChild(btn);
             });
 
+            Sound.dailyDouble();
             document.getElementById('dailyDoubleOverlay').classList.add('active');
             setTimeout(() => input.focus(), 600);
         }
@@ -17560,7 +17693,8 @@
             const maxWager = Math.max(team.score, pendingDDValue);
             let wager = parseInt(document.getElementById('ddWagerInput').value) || 0;
             
-            if (wager < 0) wager = 0;
+            const minWager = Math.min(100, maxWager);
+            if (isNaN(wager) || wager < minWager) wager = minWager;
             if (wager > maxWager) wager = maxWager;
 
             dailyDoubleWager = wager;
@@ -17594,14 +17728,19 @@
 
             document.getElementById('feedback').classList.remove('show');
             document.getElementById('closeBtn').style.display = 'none';
-            document.getElementById('resetBtn').style.display = 'block';
+            // A wagered Daily Double is locked in: no backing out after seeing the clue
+            document.getElementById('resetBtn').style.display = isDailyDouble ? 'none' : 'block';
             document.getElementById('modal').classList.add('active');
+
+            Sound.reveal();
+            Sound.startThinkMusic();
         }
 
         function checkAnswer(selectedAnswer, button) {
             if (answered) return;
             
             answered = true;
+            Sound.stopThinkMusic();
             const buttons = document.querySelectorAll('.answer-btn');
             buttons.forEach(btn => btn.disabled = true);
 
@@ -17611,10 +17750,12 @@
             if (isCorrect) {
                 button.classList.add('correct');
                 teams[currentTeamIndex].score += pointValue;
+                Sound.correct();
                 showFeedback(true);
             } else {
                 button.classList.add('incorrect');
                 teams[currentTeamIndex].score -= pointValue;
+                Sound.wrong();
                 showFeedback(false);
                 
                 buttons.forEach(btn => {
@@ -17647,6 +17788,7 @@
         }
 
         function resetQuestion() {
+            Sound.stopThinkMusic();
             document.getElementById('modal').classList.remove('active');
             document.getElementById('dailyDoubleOverlay').classList.remove('active');
             currentQuestion = null;
@@ -17665,7 +17807,12 @@
             
             answeredCount = baseCount;
             usedQuestions[roundKey] = {};
-            
+
+            // Re-hide the Daily Double: a reset round must not reuse a known square
+            const cats = Object.keys(gameBoard[roundKey]);
+            dailyDoubles[roundKey] =
+                `${cats[Math.floor(Math.random() * cats.length)]}-${Math.floor(Math.random() * 5)}`;
+
             loadRound(currentRound);
             document.getElementById('nextRoundBtn').classList.remove('show');
         }
@@ -17773,6 +17920,7 @@
         }
 
         function closeModal() {
+            Sound.stopThinkMusic();
             document.getElementById('modal').classList.remove('active');
             answered = false;
             isDailyDouble = false;
