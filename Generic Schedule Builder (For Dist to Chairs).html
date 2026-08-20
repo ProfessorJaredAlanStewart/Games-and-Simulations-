@@ -388,7 +388,35 @@ td { border: 1px solid var(--line); padding: 4px; vertical-align: top; }
     padding: 0 4px; font-size: 9px; line-height: 14px;
     cursor: pointer; display: none;
 }
-.course-card:hover .card-x { display: block; }
+.card-place {
+    position: absolute; top: 1px; right: 18px;
+    background: var(--teal); color: #fff;
+    border: none; border-radius: 3px;
+    padding: 0 4px; font-size: 9px; line-height: 14px;
+    cursor: pointer; display: none;
+}
+.card-place:hover { background: var(--teal-bright); }
+.course-card:hover .card-x, .course-card:focus-within .card-x { display: block; }
+.course-card:hover .card-place, .course-card:focus-within .card-place { display: block; }
+.instructor-courses .course-card .card-place { display: block; }   /* always visible in the pool */
+
+/* Send-to-slot popover */
+.place-pop {
+    position: fixed; z-index: 1200; width: 288px;
+    background: #fff; border: 1px solid var(--line); border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(20,52,79,0.28);
+    padding: 12px 13px; font-family: 'Segoe UI', Arial, sans-serif;
+}
+.place-pop[hidden] { display: none; }
+.place-pop .pp-title { font-size: 13px; font-weight: 600; color: var(--navy); }
+.place-pop .pp-sub { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.place-pop label { display: block; font-size: 11px; color: var(--muted); margin: 8px 0 3px; }
+.place-pop select {
+    width: 100%; padding: 5px 6px; font-size: 12px;
+    border: 1px solid var(--line); border-radius: 4px; background: #fff; color: var(--ink);
+}
+.place-pop .pp-actions { display: flex; gap: 6px; margin-top: 12px; }
+.place-pop .pp-actions button { flex: 1; padding: 6px 8px; font-size: 12px; }
 
 /* Weekend section */
 .weekend-wrap { background: var(--paper); padding: 10px 12px; border-radius: 6px; margin-top: 18px; }
@@ -474,7 +502,8 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
 @media print {
     body { background: #fff; padding: 0; }
     .no-print, .sidebar, .instructor-pool, .toolbar, .lens-row, .stats,
-    #needsPanel, .banner, #toastHost, .card-x, .weekend-head span.hint { display: none !important; }
+    #needsPanel, .banner, #toastHost, .card-x, .card-place, .place-pop,
+    .weekend-head span.hint { display: none !important; }
     .main-layout { display: block; }
     .schedule-table, .masthead, .panel { box-shadow: none; border-radius: 0; }
     .weekend-grids { display: block !important; }
@@ -600,6 +629,8 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
             <summary>How placement works</summary>
             <ul>
                 <li>Drag a section to the grid, or click it once and then click a time slot.</li>
+                <li>No scrolling: “Add section” carries its own Days and Time dropdowns, so a new section can go straight onto the grid. For sections already in the pool, click <strong>→</strong> on the card (or select it and press <strong>P</strong>). Slots already taken by that instructor are disabled.</li>
+                <li>With “Keep a spare after placing” on, placing a section leaves an identical unplaced one in that instructor's box, so repeat sections need no extra clicks. The spare stops appearing once the instructor reaches their max load.</li>
                 <li>Monday–Thursday sections auto-pair on M/W or T/Th. Hybrid, Friday, and Saturday sections meet once.</li>
                 <li>Early and late half-term sections (8-week, 7-week) may share a slot; anything else double-booking an instructor is blocked.</li>
                 <li>Click the × on a placed section to return it to the pool. Everything autosaves in this browser.</li>
@@ -663,7 +694,12 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
         <div class="instructor-pool no-print">
             <div class="pool-head">
                 <h3>Available Sections</h3>
-                <div style="display:flex;gap:8px;align-items:center;">
+                <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+                    <label for="autoRefillToggle" style="margin:0;font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer;"
+                           title="After you place a section, an identical unplaced one reappears in that instructor's box until they hit their max load.">
+                        <input type="checkbox" id="autoRefillToggle" checked style="width:auto;margin:0;">
+                        Keep a spare after placing
+                    </label>
                     <label for="subjectFilter" style="margin:0;font-size:13px;">Subject:</label>
                     <select id="subjectFilter" style="width:auto;padding:5px 10px;">
                         <option value="all">All subjects</option>
@@ -671,7 +707,7 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
                     <span id="filterCount" style="font-size:12px;color:var(--muted);"></span>
                 </div>
             </div>
-            <div class="pool-hint">Drag a section onto the grid, or click to select it and then click a time slot. Use “Add section” to generate more.</div>
+            <div class="pool-hint">“Add section” now builds and sends in one step: pick the course, the format, then the days and time. Leave the days on “Leave in pool” to just stage the section. Existing sections go to the grid by drag, by click-then-click, or with the <strong>→</strong> button on the card.</div>
             <div class="instructor-sections" id="instructorPool"></div>
         </div>
 
@@ -679,6 +715,19 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
             <h2>Schedule Analysis &amp; Needs Assessment</h2>
             <div class="analysis-grid" id="needsAnalysis"></div>
         </div>
+    </div>
+</div>
+
+<div id="placePopover" class="place-pop no-print" hidden role="dialog" aria-label="Send section to a day and time">
+    <div class="pp-title" id="ppTitle">Section</div>
+    <div class="pp-sub" id="ppSub"></div>
+    <label for="ppDays">Days</label>
+    <select id="ppDays"></select>
+    <label for="ppTime">Time</label>
+    <select id="ppTime"></select>
+    <div class="pp-actions">
+        <button class="quiet" id="ppCancel">Cancel</button>
+        <button id="ppPlace">Place section</button>
     </div>
 </div>
 
@@ -697,11 +746,14 @@ let courseIdCounter = 1;
 
 let draggedCourse = null;          // { ...course, fromSlot? }
 let selectedCourse = null;         // click-to-place: { ...course, fromSlot? }
+let placeTarget = null;            // send-to-slot popover: { ...course, fromSlot? }
+let autoRefill = true;             // repopulate the pool with a twin after each placement
 let activeLens = 'all';
 
 const undoStack = [];
 const redoStack = [];
 const UNDO_LIMIT = 50;
+let suppressUndo = false;          // lets one action bundle several mutations into one undo step
 
 const LS_KEY = 'tccScheduleBuilderV2';
 
@@ -788,6 +840,7 @@ function snapshot() {
     return JSON.stringify({ scheduledCourses, instructorCourses, courseIdCounter });
 }
 function pushUndo() {
+    if (suppressUndo) return;
     undoStack.push(snapshot());
     if (undoStack.length > UNDO_LIMIT) undoStack.shift();
     redoStack.length = 0;
@@ -834,6 +887,7 @@ function stateObject() {
         phase: currentPhase(),
         department: document.getElementById('deptName').value,
         term: document.getElementById('academicTerm').value,
+        autoRefill,
         instructors, instructorCourses, scheduledCourses, courseIdCounter
     };
 }
@@ -843,6 +897,9 @@ function applyState(s) {
     instructorCourses = s.instructorCourses || {};
     scheduledCourses = s.scheduledCourses || {};
     courseIdCounter = s.courseIdCounter || 1;
+    autoRefill = s.autoRefill !== false;   // older files predate the setting; default it on
+    const refillBox = document.getElementById('autoRefillToggle');
+    if (refillBox) refillBox.checked = autoRefill;
     document.getElementById('deptName').value = s.department || '';
     document.getElementById('academicTerm').value = s.term || '';
     updateInstructorList();
@@ -1336,6 +1393,13 @@ function sessionClass(course) {
     return 's-' + course.session;
 }
 
+function sessionTag(course) {
+    if (course.dualCredit) return ' (DC)';
+    if (SESSION_ABBR[course.session]) return ' (' + SESSION_ABBR[course.session] + ')';
+    if (course.hybrid) return ' (Hy)';
+    return '';
+}
+
 function createCourseCard(course, context) {
     // context: 'pool' | 'grid'
     const card = document.createElement('div');
@@ -1344,10 +1408,7 @@ function createCourseCard(course, context) {
     card.dataset.courseId = course.id;
     card.tabIndex = 0;
 
-    let tag = '';
-    if (course.dualCredit) tag = ' (DC)';
-    else if (SESSION_ABBR[course.session]) tag = ' (' + SESSION_ABBR[course.session] + ')';
-    else if (course.hybrid) tag = ' (Hy)';
+    const tag = sessionTag(course);
 
     const title = document.createElement('div');
     title.className = 'cc-title';
@@ -1367,6 +1428,17 @@ function createCourseCard(course, context) {
         else deletePoolCourse(course.id);
     });
     card.appendChild(x);
+
+    const send = document.createElement('button');
+    send.className = 'card-place';
+    send.textContent = '→';
+    send.title = context === 'grid' ? 'Move to a different day and time' : 'Send to a day and time';
+    send.setAttribute('aria-label', send.title);
+    send.addEventListener('click', e => {
+        e.stopPropagation();
+        openPlacePopover(course.id, card);
+    });
+    card.appendChild(send);
 
     card.addEventListener('dragstart', e => handleDragStart(e, course.id));
     card.addEventListener('dragend', handleDragEnd);
@@ -1455,10 +1527,61 @@ function maybeExpandWeekendFor(course) {
 }
 
 /* ============================================================
+   POOL REFILL — a placed section leaves a twin behind
+   ============================================================ */
+function sameShape(a, b) {
+    return a.type === b.type && a.session === b.session &&
+           !!a.hybrid === !!b.hybrid && !!a.dualCredit === !!b.dualCredit;
+}
+
+// Called after a pool section lands on the grid. Keeps exactly one unplaced
+// twin available so repeat sections don't need the "Add section" form.
+function refillPool(course) {
+    const name = course.instructor;
+    const inst = findInstructor(name);
+    if (!inst) return;
+
+    const scheduled = scheduledIdsFor(name);          // already includes the section just placed
+    if (scheduled.size >= inst.max) return;           // at max load — stop dispensing
+
+    if (!instructorCourses[name]) instructorCourses[name] = [];
+    const list = instructorCourses[name];
+    const twinExists = list.some(c => !scheduled.has(c.id) && sameShape(c, course));
+    if (twinExists) return;
+
+    list.push({
+        id: courseIdCounter++,
+        type: course.type,
+        instructor: name,
+        session: course.session,
+        hybrid: !!course.hybrid,
+        dualCredit: !!course.dualCredit,
+        auto: true
+    });
+}
+
+// When sections come back off the grid, drop auto-generated twins that now
+// duplicate a real unplaced section, so the pool doesn't accumulate copies.
+function dedupePool() {
+    for (const name in instructorCourses) {
+        const scheduled = scheduledIdsFor(name);
+        const kept = [];
+        instructorCourses[name].forEach(c => {
+            if (scheduled.has(c.id) || !c.auto) { kept.push(c); return; }
+            const dupe = kept.some(k => !scheduled.has(k.id) && sameShape(k, c)) ||
+                         instructorCourses[name].some(k => k !== c && !k.auto && !scheduled.has(k.id) && sameShape(k, c));
+            if (!dupe) kept.push(c);
+        });
+        instructorCourses[name] = kept;
+    }
+}
+
+/* ============================================================
    PLACEMENT — shared by drag-drop and click-to-place
    ============================================================ */
 function placeCourse(courseWithOrigin, day, time) {
     const course = courseWithOrigin;
+    const fromPool = !course.fromSlot;
 
     // 1. Instructor double-booking
     const clash = wouldConflict(course, day, time);
@@ -1508,6 +1631,9 @@ function placeCourse(courseWithOrigin, day, time) {
         }
     });
 
+    // 5. Leave a twin in the pool so the next identical section is one click away
+    if (autoRefill && fromPool) refillPool(course);
+
     renderAll();
     return true;
 }
@@ -1521,7 +1647,7 @@ function unscheduleCourse(id) {
         if (scheduledCourses[key].length !== before) removed = true;
         if (!scheduledCourses[key].length) delete scheduledCourses[key];
     });
-    if (removed) renderAll();
+    if (removed) { dedupePool(); renderAll(); }
 }
 
 function deletePoolCourse(id) {
@@ -1529,6 +1655,136 @@ function deletePoolCourse(id) {
     for (const name in instructorCourses) {
         const idx = instructorCourses[name].findIndex(c => c.id === id);
         if (idx !== -1) { instructorCourses[name].splice(idx, 1); renderAll(); return; }
+    }
+}
+
+/* ============================================================
+   SEND TO SLOT — dropdown placement, no dragging or scrolling
+   ============================================================ */
+function dayPatternOptions(course) {
+    if (course.hybrid) {
+        return [['Monday', 'Monday only'], ['Tuesday', 'Tuesday only'],
+                ['Wednesday', 'Wednesday only'], ['Thursday', 'Thursday only'],
+                ['Friday', 'Friday evening'], ['Saturday', 'Saturday']];
+    }
+    return [['Monday', 'M/W'], ['Tuesday', 'T/Th'],
+            ['Friday', 'Friday evening'], ['Saturday', 'Saturday']];
+}
+
+function fillPopoverDays() {
+    const course = placeTarget;
+    const sel = document.getElementById('ppDays');
+    sel.innerHTML = '';
+    dayPatternOptions(course).forEach(([v, l]) => {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = l;
+        sel.appendChild(o);
+    });
+
+    let def = course.session === '14week' ? 'Saturday' : 'Monday';
+    if (course.fromSlot) {
+        const d = course.fromSlot.split('|')[0];
+        if (!course.hybrid && d === 'Wednesday') def = 'Monday';
+        else if (!course.hybrid && d === 'Thursday') def = 'Tuesday';
+        else def = d;
+    }
+    if ([...sel.options].some(o => o.value === def)) sel.value = def;
+}
+
+// Fills a <select> with the slots for one day, flagging conflicts and traffic.
+// Returns how many slots are actually available.
+function fillTimeSelect(sel, course, day) {
+    const prev = sel.value;
+    sel.innerHTML = '';
+
+    getTimeSlotsForDay(day).forEach(time => {
+        const o = document.createElement('option');
+        o.value = time;
+        const clash = wouldConflict(course, day, time);
+        let others = 0;
+        pairedDays(course, day).forEach(d => {
+            others += (scheduledCourses[d + '|' + time] || []).filter(c => c.id !== course.id).length;
+        });
+        let label = time + (PRIME_TIMES.includes(time) ? ' (prime)' : '');
+        if (clash) { label += ' — taken: ' + clash.type; o.disabled = true; }
+        else if (others) label += ' — ' + others + ' scheduled';
+        else label += ' — open';
+        o.textContent = label;
+        sel.appendChild(o);
+    });
+
+    const usable = [...sel.options].filter(o => !o.disabled);
+    if (usable.some(o => o.value === prev)) sel.value = prev;
+    else if (usable.length) sel.value = usable[0].value;
+    return usable.length;
+}
+
+function fillPopoverTimes() {
+    const course = placeTarget;
+    if (!course) return;
+    const day = document.getElementById('ppDays').value;
+    const open = fillTimeSelect(document.getElementById('ppTime'), course, day);
+
+    const btn = document.getElementById('ppPlace');
+    btn.disabled = open === 0;
+    btn.title = open ? '' : course.instructor + ' is already booked in every slot on that day.';
+}
+
+function positionPopover(pop, anchorEl) {
+    const r = anchorEl.getBoundingClientRect();
+    const w = pop.offsetWidth, h = pop.offsetHeight;
+    let left = r.left;
+    let top = r.bottom + 6;
+    if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 6);
+    if (left + w > window.innerWidth - 8) left = Math.max(8, window.innerWidth - w - 8);
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+}
+
+function openPlacePopover(courseId, anchorEl) {
+    const course = locateCourse(courseId);
+    if (!course) return;
+
+    clearSelection();
+    placeTarget = course;
+    selectedCourse = course;
+    const cardEl = document.querySelector('.course-card[data-course-id="' + courseId + '"]');
+    if (cardEl) cardEl.classList.add('selected');
+    showValidity(course);
+
+    const pop = document.getElementById('placePopover');
+    document.getElementById('ppTitle').textContent = course.type + sessionTag(course);
+    document.getElementById('ppSub').textContent = course.instructor +
+        (course.fromSlot ? ' · now on ' + course.fromSlot.replace('|', ' at ') : '');
+    fillPopoverDays();
+    fillPopoverTimes();
+
+    pop.hidden = false;
+    positionPopover(pop, anchorEl || cardEl || document.body);
+    document.getElementById('ppDays').focus();
+}
+
+function closePlacePopover() {
+    const pop = document.getElementById('placePopover');
+    if (!pop || pop.hidden) return;
+    pop.hidden = true;
+    placeTarget = null;
+    clearSelection();
+}
+
+function confirmPlacePopover() {
+    if (!placeTarget) return;
+    const course = placeTarget;
+    const day = document.getElementById('ppDays').value;
+    const time = document.getElementById('ppTime').value;
+    if (!time) { toast('Every slot on that day is taken for ' + course.instructor + '.', 'warn'); return; }
+
+    if (day === 'Friday' || day === 'Saturday') toggleWeekendSchedule(true);
+
+    if (placeCourse(course, day, time)) {
+        const label = pairedDays(course, day).map(d => d.slice(0, 3)).join('/');
+        toast(course.type + ' placed — ' + label + ' ' + time);
+        closePlacePopover();
     }
 }
 
@@ -1639,17 +1895,76 @@ function createInstructorPool() {
         });
         row1.append(courseSel, fmtSel);
 
+        // Row 2 — send it straight to the grid instead of dropping it in the pool
         const row2 = document.createElement('div');
         row2.className = 'generator-row';
+        const daySel = document.createElement('select');
+        const timeSel = document.createElement('select');
+        row2.append(daySel, timeSel);
+
+        const row3 = document.createElement('div');
+        row3.className = 'generator-row';
         const createBtn = document.createElement('button');
         createBtn.textContent = 'Create section';
         const cancelBtn = document.createElement('button');
         cancelBtn.className = 'quiet';
         cancelBtn.textContent = 'Cancel';
-        row2.append(createBtn, cancelBtn);
-        gen.append(row1, row2);
+        row3.append(createBtn, cancelBtn);
+        gen.append(row1, row2, row3);
 
-        addBtn.addEventListener('click', () => gen.classList.toggle('active'));
+        // A stand-in course used for conflict checks before the section exists
+        const draftCourse = () => {
+            const fmt = fmtSel.value;
+            return {
+                id: -1,
+                type: courseSel.value,
+                instructor: inst.name,
+                session: (fmt === 'hybrid' || fmt === 'dualcredit') ? '16week' : fmt,
+                hybrid: fmt === 'hybrid',
+                dualCredit: fmt === 'dualcredit'
+            };
+        };
+
+        const refreshGenTimes = () => {
+            const day = daySel.value;
+            if (!day) {
+                timeSel.innerHTML = '';
+                const o = document.createElement('option');
+                o.value = ''; o.textContent = 'No time needed';
+                timeSel.appendChild(o);
+                timeSel.disabled = true;
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create section';
+                return;
+            }
+            timeSel.disabled = false;
+            const open = fillTimeSelect(timeSel, draftCourse(), day);
+            createBtn.disabled = open === 0;
+            createBtn.textContent = 'Create and place';
+        };
+
+        const refreshGenDays = () => {
+            const prev = daySel.value;
+            daySel.innerHTML = '';
+            const stay = document.createElement('option');
+            stay.value = ''; stay.textContent = 'Leave in pool';
+            daySel.appendChild(stay);
+            dayPatternOptions(draftCourse()).forEach(([v, l]) => {
+                const o = document.createElement('option');
+                o.value = v; o.textContent = l;
+                daySel.appendChild(o);
+            });
+            if ([...daySel.options].some(o => o.value === prev)) daySel.value = prev;
+            if (fmtSel.value === '14week' && !prev) daySel.value = 'Saturday';
+            refreshGenTimes();
+        };
+
+        fmtSel.addEventListener('change', refreshGenDays);
+        daySel.addEventListener('change', refreshGenTimes);
+        addBtn.addEventListener('click', () => {
+            gen.classList.toggle('active');
+            if (gen.classList.contains('active')) refreshGenDays();
+        });
         cancelBtn.addEventListener('click', () => gen.classList.remove('active'));
         createBtn.addEventListener('click', () => {
             const fmt = fmtSel.value;
@@ -1661,9 +1976,28 @@ function createInstructorPool() {
                 hybrid: fmt === 'hybrid',
                 dualCredit: fmt === 'dualcredit'
             };
+            const day = daySel.value;
+            const time = day ? timeSel.value : '';
+
             pushUndo();
             if (!instructorCourses[inst.name]) instructorCourses[inst.name] = [];
             instructorCourses[inst.name].push(course);
+
+            if (day && time) {
+                if (day === 'Friday' || day === 'Saturday') toggleWeekendSchedule(true);
+                suppressUndo = true;                       // one undo covers create + place
+                let placed = false;
+                try { placed = placeCourse(course, day, time); }
+                finally { suppressUndo = false; }
+                if (placed) {
+                    toast(course.type + ' placed — ' +
+                          pairedDays(course, day).map(d => d.slice(0, 3)).join('/') + ' ' + time);
+                    refreshGenTimes();                     // stay open, ready for the next one
+                    return;
+                }
+                toast(course.type + ' was created but not placed — it is waiting in the pool.', 'warn');
+            }
+
             gen.classList.remove('active');
             renderAll();
         });
@@ -1815,6 +2149,7 @@ function toggleWeekendSchedule(forceOpen) {
 }
 
 function renderAll() {
+    if (placeTarget) closePlacePopover();   // its anchor card is about to be replaced
     renderSchedule();
     renderInstructorPool();
     updateFacultyPanel();
@@ -2088,6 +2423,7 @@ function clearSchedule() {
     if (!confirm('Return every scheduled section to the pool? (Undo is available afterward.)')) return;
     pushUndo();
     Object.keys(scheduledCourses).forEach(k => delete scheduledCourses[k]);
+    dedupePool();
     renderAll();
     toast('Schedule cleared — Undo to restore');
 }
@@ -2120,21 +2456,44 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('weekendHead').addEventListener('click', () => toggleWeekendSchedule());
     document.getElementById('subjectFilter').addEventListener('change', filterInstructorsBySubject);
 
+    // Send-to-slot popover + pool refill
+    document.getElementById('autoRefillToggle').addEventListener('change', e => {
+        autoRefill = e.target.checked;
+        saveLocal();
+        toast(autoRefill ? 'Spare sections will reappear after each placement' : 'Spare sections turned off');
+    });
+    document.getElementById('ppDays').addEventListener('change', fillPopoverTimes);
+    document.getElementById('ppPlace').addEventListener('click', confirmPlacePopover);
+    document.getElementById('ppCancel').addEventListener('click', closePlacePopover);
+    document.getElementById('placePopover').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); confirmPlacePopover(); }
+    });
+    window.addEventListener('resize', closePlacePopover);
+
     // Global keys
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
+            closePlacePopover();
             clearSelection();
             if (modalCleanup) modalCleanup();
             return;
         }
         const inField = /^(input|select|textarea)$/i.test(document.activeElement?.tagName || '');
         if (inField) return;
+        if (e.key.toLowerCase() === 'p' && !e.ctrlKey && !e.metaKey && !e.altKey && selectedCourse && !placeTarget) {
+            e.preventDefault();
+            const el = document.querySelector('.course-card[data-course-id="' + selectedCourse.id + '"]');
+            openPlacePopover(selectedCourse.id, el);
+            return;
+        }
         if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); doUndo(); }
         else if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) { e.preventDefault(); doRedo(); }
     });
 
     // Clicking empty page space cancels a pending click-to-place selection
     document.body.addEventListener('click', e => {
+        if (e.target.closest('#placePopover')) return;
+        if (placeTarget) { closePlacePopover(); return; }
         if (selectedCourse && !e.target.closest('.course-card') && !e.target.closest('.dropzone')) {
             clearSelection();
         }
