@@ -6,6 +6,8 @@
 <title>TCC Syllabus Generator</title>
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<link rel="stylesheet" href="vendor/quill/quill.snow.css">
+<script src="vendor/quill/quill.js"></script>
 <style>
 :root{--tcc-navy:#003C5A;--tcc-blue:#006184;--tcc-teal:#00A9A5;--tcc-green:#7AB648;--tcc-mint:#E8F6F5;--tcc-light:#F4F9FB;--text-primary:#2C3E50;--text-secondary:#5A6B7D;--text-muted:#8A96A3;--border:#D8E1E8;--white:#FFF;--danger:#E74C3C;--warning:#F39C12;--success:#27AE60;--shadow-sm:0 1px 3px rgba(0,60,90,.08);--shadow-md:0 4px 12px rgba(0,60,90,.1);--shadow-lg:0 8px 30px rgba(0,60,90,.12);--radius:10px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -75,6 +77,24 @@ body{font-family:'Source Sans 3',-apple-system,sans-serif;background:var(--tcc-l
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--tcc-teal);box-shadow:0 0 0 3px rgba(0,169,165,.12)}
 .field textarea{resize:vertical;min-height:110px;line-height:1.5}
 .field .hint{font-size:14px;color:var(--text-muted);margin-top:4px}
+/* Rich text editors (Quill) */
+.field textarea.rich-src{display:none}
+.rich-wrap{border:1.5px solid var(--border);border-radius:7px;background:var(--white);overflow:hidden;transition:.2s}
+.rich-wrap:focus-within{border-color:var(--tcc-teal);box-shadow:0 0 0 3px rgba(0,169,165,.12)}
+.rich-wrap.auto-filled{background:#F0FFF4;border-color:var(--success)}
+.rich-wrap .ql-toolbar.ql-snow{border:none;border-bottom:1px solid var(--border);background:#F7FAFC;padding:6px 8px;font-family:'Source Sans 3',sans-serif}
+.rich-wrap .ql-container.ql-snow{border:none;font-family:'Source Sans 3',sans-serif;font-size:17px}
+.rich-wrap .ql-editor{min-height:var(--rich-h,130px);padding:12px 14px;line-height:1.55;color:var(--text-primary)}
+.rich-wrap .ql-editor.ql-blank::before{color:var(--text-muted);font-style:normal;left:14px;right:14px}
+.rich-wrap .ql-editor ul,.rich-wrap .ql-editor ol{padding-left:1.4em}
+.rich-wrap .ql-editor li{margin-bottom:3px}
+.rich-wrap .ql-snow .ql-stroke{stroke:var(--text-secondary)}
+.rich-wrap .ql-snow .ql-fill{fill:var(--text-secondary)}
+.rich-wrap .ql-snow.ql-toolbar button:hover .ql-stroke,.rich-wrap .ql-snow.ql-toolbar button.ql-active .ql-stroke{stroke:var(--tcc-teal)}
+.rich-wrap .ql-snow.ql-toolbar button:hover .ql-fill,.rich-wrap .ql-snow.ql-toolbar button.ql-active .ql-fill{fill:var(--tcc-teal)}
+.rich-wrap .ql-snow.ql-toolbar button.ql-active{background:var(--tcc-mint);border-radius:4px}
+.rich-wrap .ql-snow .ql-tooltip{z-index:20}
+.rich-tip{font-size:13px;color:var(--text-muted);margin-top:5px}
 .field input.auto-filled,.field select.auto-filled,.field textarea.auto-filled{background:#F0FFF4;border-color:var(--success)}
 
 .hours-table{width:100%;border-collapse:collapse;font-size:16px}
@@ -280,7 +300,7 @@ body{background:#fff}
 <button class="add-btn" onclick="addTextbook()">+ Add Another Textbook</button></div>
 <div class="card"><div class="card-title">Special Materials</div>
 <div class="checkbox-row"><input type="checkbox" id="tccPlus"><label for="tccPlus">This course uses <strong>TCC Plus</strong> (Inclusive Access)</label></div>
-<div class="field"><label>Additional Materials</label><textarea id="specialMaterials" rows="4" placeholder="e.g. Access to Connect, calculator, reliable internet"></textarea></div></div>
+<div class="field"><label>Additional Materials</label><textarea class="rich-src" id="specialMaterials" rows="4" placeholder="e.g. Access to Connect, calculator, reliable internet"></textarea></div></div>
 <div class="nav-bar"><button class="btn btn-secondary" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
 </div>
 
@@ -288,8 +308,9 @@ body{background:#fff}
 <div class="form-step" data-step="4">
 <div class="step-header"><div class="step-number">Step 4 of 7</div><div class="step-title">Course Focus & Objectives</div><div class="step-desc">This is pulled directly from the "Focus" section of your ICR.</div></div>
 <div class="card"><div class="card-title">Course Focus & Learning Objectives</div>
-<div class="field"><label>Focus / Learning Objectives</label><textarea id="courseFocus" rows="12" placeholder="Paste the content from your ICR's Focus section here — description and learning objectives together.&#10;&#10;Example:&#10;This course is all about how the Federal government works. We'll look at:&#10;• Origin and development of the U.S. Constitution&#10;• Structure and powers of the national government&#10;• The role of political parties, interest groups, and media"></textarea>
-<div class="hint">This will appear as-is in your syllabus under "Course Focus & Learning Objectives." Bullet points (•) will be preserved.</div></div></div>
+<div class="field"><label>Focus / Learning Objectives</label><textarea class="rich-src" id="courseFocus" rows="12" placeholder="Course description, then the learning objectives as a bulleted list."></textarea>
+
+<div class="hint">Use the list buttons for bullets and numbering; pasting from Word keeps bold text and bullets. This appears as-is in your syllabus under "Course Focus & Learning Objectives."</div></div></div>
 <div class="nav-bar"><button class="btn btn-secondary" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
 </div>
 
@@ -303,7 +324,7 @@ body{background:#fff}
 <div class="field"><label>Scale</label><select id="gradingScale"><option value="standard">Standard: A=90-100, B=80-89, C=70-79, D=60-69, F=below 60</option><option value="custom">Custom (enter below)</option></select></div>
 <div class="field" id="customScaleField" style="display:none;margin-top:12px"><label>Custom Scale</label><textarea id="customScale" rows="4"></textarea></div></div>
 <div class="card"><div class="card-title">Grading Criteria</div>
-<div class="field"><label>Criteria / Late Work / Make-Up</label><textarea id="gradingCriteria" rows="5" placeholder="How is work evaluated? Late policy?"></textarea></div></div>
+<div class="field"><label>Criteria / Late Work / Make-Up</label><textarea class="rich-src" id="gradingCriteria" rows="5" placeholder="How is work evaluated? Late policy?"></textarea></div></div>
 <div class="nav-bar"><button class="btn btn-secondary" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
 </div>
 
@@ -311,9 +332,9 @@ body{background:#fff}
 <div class="form-step" data-step="6">
 <div class="step-header"><div class="step-number">Step 6 of 7</div><div class="step-title">Schedule & Additional</div><div class="step-desc">Course schedule and instructor policies.</div></div>
 <div class="card"><div class="card-title">Course Schedule</div>
-<div class="field"><label>Schedule / Key Dates</label><textarea id="courseSchedule" rows="8" placeholder="Week-by-week outline or 'See Canvas.'"></textarea></div></div>
+<div class="field"><label>Schedule / Key Dates</label><textarea class="rich-src" id="courseSchedule" rows="8" placeholder="Week-by-week outline or 'See Canvas.'"></textarea></div></div>
 <div class="card"><div class="card-title">Additional Information</div>
-<div class="field"><label>Additional Info</label><textarea id="additionalInfo" rows="6" placeholder="Special projects, tech requirements, etc."></textarea></div></div>
+<div class="field"><label>Additional Info</label><textarea class="rich-src" id="additionalInfo" rows="6" placeholder="Special projects, tech requirements, etc."></textarea></div></div>
 <div class="card" style="border-left:3px solid var(--tcc-teal)"><div class="card-title">Generative AI Policy <span class="missing-badge">Choose One — Required</span></div>
 <p style="font-size:15px;color:var(--text-secondary);margin-bottom:16px;">The district syllabus template requires every course to state one of these three AI policies. Tap the one that fits your course — the full district-approved language will be inserted automatically.</p>
 <div class="ai-option" id="aiOpt_none" onclick="selectAIPolicy('none')">
@@ -330,9 +351,9 @@ body{background:#fff}
 </div>
 </div>
 <div class="card"><div class="card-title">Instructor Policies</div>
-<div class="field"><label>Attendance (Instructor-Specific)</label><textarea id="attendancePolicy" rows="4" placeholder="Beyond TCC default. Leave blank for default only."></textarea></div>
-<div class="field" style="margin-top:14px"><label>Academic Integrity (Instructor-Specific)</label><textarea id="integrityPolicy" rows="4" placeholder="Leave blank for default only."></textarea></div>
-<div class="field" style="margin-top:14px"><label>Communication Policy</label><textarea id="commPolicy" rows="3" placeholder="e.g. I respond within 24 hours on business days."></textarea></div></div>
+<div class="field"><label>Attendance (Instructor-Specific)</label><textarea class="rich-src" id="attendancePolicy" rows="4" placeholder="Beyond TCC default. Leave blank for default only."></textarea></div>
+<div class="field" style="margin-top:14px"><label>Academic Integrity (Instructor-Specific)</label><textarea class="rich-src" id="integrityPolicy" rows="4" placeholder="Leave blank for default only."></textarea></div>
+<div class="field" style="margin-top:14px"><label>Communication Policy</label><textarea class="rich-src" id="commPolicy" rows="3" placeholder="e.g. I respond within 24 hours on business days."></textarea></div></div>
 <div class="nav-bar"><button class="btn btn-secondary" onclick="prevStep()">← Back</button><button class="btn btn-primary" onclick="nextStep()">Continue →</button></div>
 </div>
 
@@ -441,7 +462,8 @@ Object.entries(d.fields||{}).forEach(([id,v])=>{const e=document.getElementById(
 // A saved term may be outside the auto-generated range; add it so it isn't lost
 const ts=document.getElementById('courseTerm');if(d.fields&&d.fields.courseTerm&&ts.value!==d.fields.courseTerm){const o=document.createElement('option');o.textContent=d.fields.courseTerm;ts.appendChild(o);ts.value=d.fields.courseTerm}
 document.getElementById('customScaleField').style.display=document.getElementById('gradingScale').value==='custom'?'block':'none';
-if(d.ai)selectAIPolicy(d.ai)}
+if(d.ai)selectAIPolicy(d.ai);
+syncRichFromFields()}
 function describeDraft(d){
 const f=d.fields||{};
 const course=[f.coursePrefix,f.courseNumber].filter(Boolean).join(' ');
@@ -463,6 +485,65 @@ function discardDraft(){lsClear();checkForDraft()}
 document.getElementById('formContainer').addEventListener('input',scheduleSave);
 document.getElementById('formContainer').addEventListener('change',scheduleSave);
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);saveDraft()});
+// ═══ RICH TEXT EDITORS (Quill, vendored; BSD-3) ═══
+// The hidden <textarea class="rich-src"> stays the source of truth and holds HTML,
+// so autosave, ICR autofill, and val() keep working unchanged.
+const editors={};
+const RICH_TOOLBAR=[['bold','italic','underline'],[{list:'bullet'},{list:'ordered'}],['link'],['clean']];
+function isHtml(s){return /<\/?(p|ul|ol|li|strong|em|b|i|u|a|br)\b/i.test(s)}
+// Plain text → HTML: consecutive bullet-ish lines become one <ul>, other lines become <p>
+function plainToHtml(t){
+if(!t)return'';const out=[];let inList=false;
+t.split('\n').forEach(line=>{const l=line.trim();if(!l){if(inList){out.push('</ul>');inList=false}return}
+const m=l.match(/^([•\-\*•○◦▪]|\d+[\.\)])\s+(.*)$/);
+if(m){if(!inList){out.push('<ul>');inList=true}out.push(`<li>${esc(m[2])}</li>`)}
+else{if(inList){out.push('</ul>');inList=false}out.push(`<p>${esc(l)}</p>`)}});
+if(inList)out.push('</ul>');return out.join('')}
+function richIsEmpty(html){return !html||!html.replace(/<\/?(p|br|ul|ol|li)[^>]*>|&nbsp;|\s/gi,'').length}
+function initRichEditors(){
+if(typeof Quill==='undefined')return; // fall back to plain textareas if the library didn't load
+document.querySelectorAll('textarea.rich-src').forEach(ta=>{
+if(editors[ta.id])return;
+const wrap=document.createElement('div');wrap.className='rich-wrap';wrap.id='rich_'+ta.id;
+const rows=parseInt(ta.getAttribute('rows')||'4',10);wrap.style.setProperty('--rich-h',Math.max(110,rows*26)+'px');
+const host=document.createElement('div');wrap.appendChild(host);ta.after(wrap);
+const q=new Quill(host,{theme:'snow',placeholder:ta.getAttribute('placeholder')||'',formats:['bold','italic','underline','list','link'],modules:{toolbar:RICH_TOOLBAR}});
+editors[ta.id]=q;
+q.on('text-change',(d,o,src)=>{const html=q.getSemanticHTML().replace(/&nbsp;/g,' ').replace(/\u00a0/g,' ');ta.value=richIsEmpty(html)?'':html;if(src==='user'){ta.classList.remove('auto-filled');wrap.classList.remove('auto-filled');ta.dispatchEvent(new Event('input',{bubbles:true}))}});
+// Picks up a value already sitting in the textarea (restored draft before init, etc.)
+if(ta.value)setRich(ta.id,ta.value)})}
+function setRich(id,html){
+const q=editors[id],ta=document.getElementById(id);if(!ta)return;
+if(html&&!isHtml(html))html=plainToHtml(html);
+ta.value=html||'';
+if(!q)return;
+const delta=q.clipboard.convert({html:html||''});q.setContents(delta,'api');
+const wrap=document.getElementById('rich_'+id);if(wrap)wrap.classList.toggle('auto-filled',ta.classList.contains('auto-filled'))}
+function syncRichFromFields(){Object.keys(editors).forEach(id=>setRich(id,document.getElementById(id).value))}
+// Editor HTML → syllabus HTML with inline styles (Canvas paste keeps inline styles, drops stylesheets)
+function richOut(html,pStyle){
+if(richIsEmpty(html))return'';
+if(!isHtml(html))html=plainToHtml(html);
+const doc=new DOMParser().parseFromString('<div>'+html+'</div>','text/html');
+const ALLOW={P:'p',UL:'ul',OL:'ol',LI:'li',STRONG:'strong',B:'strong',EM:'em',I:'em',U:'u',A:'a',BR:'br'};
+const liStyle='font-family:Georgia,serif;font-size:15px;line-height:1.6;color:#222;margin-bottom:5px';
+function walk(node){let out='';node.childNodes.forEach(n=>{
+if(n.nodeType===3){out+=esc(n.nodeValue.replace(/\u00a0/g,' '));return}
+if(n.nodeType!==1)return;const tag=ALLOW[n.tagName];
+if(!tag){out+=walk(n);return}
+if(tag==='br'){out+='<br>';return}
+let open='';
+if(tag==='p')open=`<p style="${pStyle}">`;
+else if(tag==='ul'||tag==='ol')open=`<${tag} style="margin:6px 0 12px 24px;padding:0">`;
+else if(tag==='li')open=`<li style="${liStyle}">`;
+else if(tag==='a'){let href=n.getAttribute('href')||'';if(!/^(https?:|mailto:)/i.test(href))href='https://'+href.replace(/^\/*/,'');open=`<a href="${esc(href)}" style="color:#006184">`}
+else if(tag==='u')open='<u>';else open=`<${tag}>`;
+out+=open+walk(n)+`</${tag}>`})
+;return out}
+// Nested lists come out of Quill as <li data-list=... class="ql-indent-N">; indent is cosmetic here, flatten is fine for a syllabus
+return walk(doc.body.firstChild)}
+initRichEditors();
+
 if(typeof pdfjsLib!=='undefined')pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 function startFromScratch(){document.getElementById('landingScreen').style.display='none';document.getElementById('formContainer').style.display='block';document.getElementById('stepperBar').style.display='block';initStepper();draftActive=true;showStep(1)}
@@ -735,7 +816,7 @@ const data=await r.json(),text=data.content.map(c=>c.text||'').join('');
 return JSON.parse(text.replace(/```json\s*/g,'').replace(/```/g,'').trim())}
 
 function autoFill(d){
-function sv(id,v){const e=document.getElementById(id);if(e&&v){e.value=v;e.classList.add('auto-filled')}}
+function sv(id,v){const e=document.getElementById(id);if(e&&v){e.value=v;e.classList.add('auto-filled');if(e.classList.contains('rich-src'))setRich(id,v)}}
 function ss(id,v){const e=document.getElementById(id);if(!e||!v)return;for(let o of e.options)if(o.value===v||o.value.toLowerCase()===v.toLowerCase()||o.textContent.toLowerCase().includes(v.toLowerCase())){e.value=o.value;e.classList.add('auto-filled');return}}
 function pd(s){if(!s)return'';const m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);if(m){let y=m[3].length===2?'20'+m[3]:m[3];return`${y}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`}return''}
 ss('coursePrefix',d.coursePrefix);sv('courseNumber',d.courseNumber);sv('sectionNumber',d.sectionNumber);sv('courseTitle',d.courseTitle);sv('courseCRN',d.sectionNumber);ss('courseTerm',d.term);
@@ -766,7 +847,7 @@ const miss=[];if(!v('chairName'))miss.push('Chair Name');if(!v('chairEmail'))mis
 if(miss.length)h+=`<div style="margin-top:14px;padding:12px 16px;background:#FEF3CD;border-radius:6px;color:#856404;font-size:15px"><strong>⚠ Missing required fields:</strong> ${miss.join(', ')}. Go back to Step 2.</div>`;
 document.getElementById('summaryContent').innerHTML=h}
 
-function val(id){return(document.getElementById(id)?.value||'').trim()}
+function val(id){const e=document.getElementById(id);let v=(e?.value||'').trim();if(e&&e.classList.contains('rich-src')&&richIsEmpty(v))v='';return v}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function fmtDate(ds){if(!ds)return'';const d=new Date(ds+'T12:00:00');return d.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})}
 function toList(t){if(!t)return'';const l=t.split('\n').map(l=>l.trim()).filter(l=>l);return l.length?'<ul>'+l.map(l=>`<li>${esc(l.replace(/^[-•*]\s*/,''))}</li>`).join('')+'</ul>':''}
@@ -842,7 +923,7 @@ function para(t){return `<p style="${S.p}">${esc(t)}</p>`}
 function parasFromText(t){if(!t)return '';return t.split('\\n').filter(l=>l.trim()).map(l=>`<p style="${S.p}">${esc(l)}</p>`).join('')}
 
 // ── Communication ──
-if(iC||cp){h+=secTitle('Communication');if(iC)h+=`<p style="${S.p}">${esc(iC)}</p>`;if(cp)h+=cp.split('\\n').filter(l=>l.trim()).map(l=>`<p style="${S.p}">${esc(l)}</p>`).join('')}
+if(iC||cp){h+=secTitle('Communication');if(iC)h+=`<p style="${S.p}">${esc(iC)}</p>`;if(cp)h+=richOut(cp,S.p)}
 
 // ── Office Hours ──
 if(hrs.length){h+=secTitle('Student Support Hours');
@@ -854,15 +935,10 @@ h+=`</tbody></table>`;if(hN)h+=`<p style="${S.p}"><em>${esc(hN)}</em></p>`}
 if(bks.length||sm||tp){h+=secTitle('Textbooks & Materials');
 bks.forEach(b=>{h+=`<p style="${S.p}"><strong>${esc(b.title)}</strong>`;if(b.author)h+=` — ${esc(b.author)}`;if(b.pub)h+=` (${esc(b.pub)})`;if(b.isbn)h+=`<br><span style="font-size:13px;color:#666">ISBN: ${esc(b.isbn)}</span>`;h+=`</p>`});
 if(tp)h+=`<p style="${S.p}"><strong>TCC Plus (Inclusive Access):</strong> Your textbook and materials are available immediately upon registration at a discounted price — no need to visit the bookstore.</p>`;
-if(sm) sm.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}
+if(sm) h+=richOut(sm,S.p)}
 
 // ── Course Focus ──
-if(cf){h+=secTitle('Course Focus & Learning Objectives');
-const cfLines=cf.split('\n');let inList=false;
-for(const line of cfLines){const t=line.trim();if(!t)continue;
-if(/^[•\-\uf0b7○◦]/.test(t)){if(!inList){h+='<ul style="margin:8px 0 12px 24px;font-family:Georgia,serif;font-size:15px;color:#222">';inList=true}h+=`<li style="margin-bottom:5px">${esc(t.replace(/^[•\-\uf0b7○◦]\s*/,''))}</li>`}
-else{if(inList){h+='</ul>';inList=false}h+=`<p style="${S.p}">${esc(t)}</p>`}}
-if(inList)h+='</ul>'}
+if(cf){h+=secTitle('Course Focus & Learning Objectives');h+=richOut(cf,S.p)}
 
 // ── Grade components ──
 if(gc.length){h+=secTitle('Assignments & Grading');
@@ -876,11 +952,11 @@ if(gs==='standard'){h+=`<table style="width:auto;border-collapse:collapse;margin
 h+=`</tbody></table>`} else if(cs){cs.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}}
 
 // ── Other sections ──
-if(gci){h+=secTitle('Grading Criteria');gci.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}
-if(sch){h+=secTitle('Course Schedule');sch.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}
-if(ai){h+=secTitle('Additional Information');ai.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}
-if(ap){h+=secTitle('Attendance Policy');ap.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}
-if(ip){h+=secTitle('Academic Integrity');ip.split('\n').filter(l=>l.trim()).forEach(l=>{h+=`<p style="${S.p}">${esc(l)}</p>`})}
+if(gci){h+=secTitle('Grading Criteria');h+=richOut(gci,S.p)}
+if(sch){h+=secTitle('Course Schedule');h+=richOut(sch,S.p)}
+if(ai){h+=secTitle('Additional Information');h+=richOut(ai,S.p)}
+if(ap){h+=secTitle('Attendance Policy');h+=richOut(ap,S.p)}
+if(ip){h+=secTitle('Academic Integrity');h+=richOut(ip,S.p)}
 
 // ── DISTRICT POLICIES (per district syllabus template) ──
 h+=`<p style="${S.stitle};border-bottom:3px solid #006184">Tarrant County College District Policies</p>`;

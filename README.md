@@ -40,7 +40,7 @@ Tools that help students do the scholarly work — finding sources, citing them 
 ### 🛠 Instructor Tools
 Utilities for course planning and organization.
 
-- [TCC Syllabus Generator](https://jaredalanstewart.com/Games-and-Simulations-/TCC%20Syllabus%20Generator.html) — a step-by-step syllabus builder that outputs a print-ready PDF with required institutional sections.
+- [TCC Syllabus Generator](https://jaredalanstewart.com/Games-and-Simulations-/TCC%20Syllabus%20Generator.html) — a step-by-step syllabus builder that outputs a print-ready PDF with required institutional sections. Long-text fields use a rich text editor (bullets, numbering, bold, links) and drafts autosave in the browser with a Resume option. Uses [Quill](https://quilljs.com) (BSD-3-Clause), vendored in `vendor/quill/`.
 - [Generic Schedule Builder](https://jaredalanstewart.com/Games-and-Simulations-/Generic%20Schedule%20Builder%20%28For%20Dist%20to%20Chairs%29.html) — a flexible schedule builder for department chairs and lead instructors.
 
 ### 🏛 Simulations
