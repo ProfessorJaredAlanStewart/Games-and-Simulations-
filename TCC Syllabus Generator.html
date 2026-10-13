@@ -34,6 +34,11 @@ body{font-family:'Source Sans 3',-apple-system,sans-serif;background:var(--tcc-l
 .landing-card .lc-icon{font-size:52px;margin-bottom:14px}
 .landing-card .lc-title{font-size:21px;font-weight:700;color:var(--tcc-navy);margin-bottom:8px}
 .landing-card .lc-desc{font-size:16px;color:var(--text-secondary);line-height:1.5}
+.landing-card.resume{border-color:var(--tcc-teal);background:linear-gradient(135deg,#F0FAFA 0%,#fff 100%)}
+.landing-card .lc-meta{font-size:14px;color:var(--tcc-navy);font-weight:600;margin-top:12px}
+.landing-card .lc-discard{display:inline-block;margin-top:10px;font-size:13px;color:var(--text-secondary);text-decoration:underline;cursor:pointer}
+.landing-card .lc-discard:hover{color:var(--danger)}
+.autosave-note{font-size:13px;color:var(--text-secondary);margin-top:18px}
 
 /* IMPORT */
 .import-screen{display:none}.import-screen.active{display:block}
@@ -168,9 +173,11 @@ body{background:#fff}
 <div class="landing-title">TCC Syllabus Generator</div>
 <div class="landing-desc">Create a professional, Canvas-ready syllabus with all required TCC District policies automatically included.</div>
 <div class="landing-options">
+<div class="landing-card resume" id="resumeCard" style="display:none" onclick="resumeDraft()"><div class="lc-icon">⏯</div><div class="lc-title">Resume Saved Draft</div><div class="lc-desc">Pick up where you left off. Your draft is saved in this browser as you type.</div><div class="lc-meta" id="resumeMeta"></div><span class="lc-discard" onclick="event.stopPropagation();discardDraft()">Discard saved draft</span></div>
 <div class="landing-card" onclick="startFromScratch()"><div class="lc-icon">📝</div><div class="lc-title">Build from Scratch</div><div class="lc-desc">Enter your course information step-by-step using the guided form.</div></div>
 <div class="landing-card" onclick="startImport()"><div class="lc-icon">📄</div><div class="lc-title">Import from ICR</div><div class="lc-desc">Upload your existing ICR PDF and we'll auto-fill the form. Just review, add your Chair & Dean info, and generate.</div></div>
 </div>
+<div class="autosave-note">Your progress is saved automatically in this browser. Nothing is sent to a server.</div>
 </div>
 </div>
 
@@ -393,23 +400,85 @@ text:["As part of our commitment to fostering a dynamic learning environment, th
 function selectAIPolicy(key){
 selectedAIPolicy=key;
 ['none','permission','broad'].forEach(k=>{
-document.getElementById('aiOpt_'+k).classList.toggle('selected',k===key)})}
+document.getElementById('aiOpt_'+k).classList.toggle('selected',k===key)});
+scheduleSave()}
+
+// ═══ DRAFT AUTOSAVE / RESUME (localStorage, this browser only) ═══
+const DRAFT_KEY='tccSyllabusDraft_v1';
+let saveTimer=null,draftActive=false;
+function lsGet(){try{const r=localStorage.getItem(DRAFT_KEY);return r?JSON.parse(r):null}catch(e){return null}}
+function lsSet(d){try{localStorage.setItem(DRAFT_KEY,JSON.stringify(d));return true}catch(e){return false}}
+function lsClear(){try{localStorage.removeItem(DRAFT_KEY)}catch(e){}}
+function collectDraft(){
+const f={};
+document.querySelectorAll('#formContainer input[id],#formContainer select[id],#formContainer textarea[id]').forEach(e=>{
+if(e.type==='file')return;
+f[e.id]=e.type==='checkbox'?e.checked:e.value});
+const books=[];document.querySelectorAll('#textbookList .dynamic-list-item').forEach(i=>books.push({title:i.querySelector('.tb-title')?.value||'',author:i.querySelector('.tb-author')?.value||'',isbn:i.querySelector('.tb-isbn')?.value||'',pub:i.querySelector('.tb-pub')?.value||''}));
+const comps=[];document.querySelectorAll('#gradeComponentsList .dynamic-list-item').forEach(i=>comps.push({name:i.querySelector('.gc-name')?.value||'',weight:i.querySelector('.gc-weight')?.value||'',details:i.querySelector('.gc-details')?.value||''}));
+return{v:1,savedAt:Date.now(),step:currentStep,ai:selectedAIPolicy,fields:f,books,comps}}
+function draftHasContent(d){
+if(!d)return false;
+if(d.ai)return true;
+if(d.books.some(b=>b.title||b.author||b.isbn||b.pub))return true;
+if(d.comps.some(c=>c.name||c.weight||c.details))return true;
+// courseTerm is preselected on load, so ignore it when deciding whether anything was typed
+return Object.entries(d.fields).some(([k,v])=>k!=='courseTerm'&&k!=='gradingScale'&&v!==''&&v!==false)}
+function saveDraft(){
+if(!draftActive)return;
+const d=collectDraft();
+if(draftHasContent(d))lsSet(d)}
+function scheduleSave(){if(!draftActive)return;clearTimeout(saveTimer);saveTimer=setTimeout(saveDraft,400)}
+function restoreDraft(d){
+// Rebuild dynamic lists to match saved counts
+const tl=document.getElementById('textbookList');
+while(tl.querySelectorAll('.dynamic-list-item').length<Math.max(1,d.books.length))addTextbook();
+d.books.forEach((b,i)=>{const it=tl.querySelectorAll('.dynamic-list-item')[i];if(!it)return;it.querySelector('.tb-title').value=b.title;it.querySelector('.tb-author').value=b.author;it.querySelector('.tb-isbn').value=b.isbn;it.querySelector('.tb-pub').value=b.pub});
+const gl=document.getElementById('gradeComponentsList');
+while(gl.querySelectorAll('.dynamic-list-item').length<Math.max(1,d.comps.length))addGradeComponent();
+d.comps.forEach((c,i)=>{const it=gl.querySelectorAll('.dynamic-list-item')[i];if(!it)return;it.querySelector('.gc-name').value=c.name;it.querySelector('.gc-weight').value=c.weight;it.querySelector('.gc-details').value=c.details});
+Object.entries(d.fields||{}).forEach(([id,v])=>{const e=document.getElementById(id);if(!e)return;if(e.type==='checkbox')e.checked=!!v;else e.value=v});
+// A saved term may be outside the auto-generated range; add it so it isn't lost
+const ts=document.getElementById('courseTerm');if(d.fields&&d.fields.courseTerm&&ts.value!==d.fields.courseTerm){const o=document.createElement('option');o.textContent=d.fields.courseTerm;ts.appendChild(o);ts.value=d.fields.courseTerm}
+document.getElementById('customScaleField').style.display=document.getElementById('gradingScale').value==='custom'?'block':'none';
+if(d.ai)selectAIPolicy(d.ai)}
+function describeDraft(d){
+const f=d.fields||{};
+const course=[f.coursePrefix,f.courseNumber].filter(Boolean).join(' ');
+const title=f.courseTitle?` — ${f.courseTitle}`:'';
+const when=new Date(d.savedAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+return`${course||'Untitled syllabus'}${title}<br><span style="font-weight:400">Step ${d.step||1} of ${totalSteps} · saved ${when}</span>`}
+function checkForDraft(){
+const d=lsGet(),card=document.getElementById('resumeCard');
+if(d&&d.v===1&&draftHasContent(d)){document.getElementById('resumeMeta').innerHTML=describeDraft(d);card.style.display=''}
+else card.style.display='none'}
+function resumeDraft(){
+const d=lsGet();if(!d){checkForDraft();return}
+draftActive=false;
+startFromScratch();
+restoreDraft(d);
+draftActive=true;
+showStep(Math.min(Math.max(1,d.step||1),totalSteps))}
+function discardDraft(){lsClear();checkForDraft()}
+document.getElementById('formContainer').addEventListener('input',scheduleSave);
+document.getElementById('formContainer').addEventListener('change',scheduleSave);
+window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);saveDraft()});
 if(typeof pdfjsLib!=='undefined')pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-function startFromScratch(){document.getElementById('landingScreen').style.display='none';document.getElementById('formContainer').style.display='block';document.getElementById('stepperBar').style.display='block';initStepper();showStep(1)}
+function startFromScratch(){document.getElementById('landingScreen').style.display='none';document.getElementById('formContainer').style.display='block';document.getElementById('stepperBar').style.display='block';initStepper();draftActive=true;showStep(1)}
 function startImport(){document.getElementById('landingScreen').style.display='none';document.getElementById('importScreen').classList.add('active')}
-function backToLanding(){document.getElementById('landingScreen').style.display='';document.getElementById('importScreen').classList.remove('active');document.getElementById('formContainer').style.display='none';document.getElementById('stepperBar').style.display='none';document.getElementById('previewContainer').classList.remove('active');document.getElementById('headerStepLabel').textContent=''}
+function backToLanding(){clearTimeout(saveTimer);saveDraft();draftActive=false;checkForDraft();document.getElementById('landingScreen').style.display='';document.getElementById('importScreen').classList.remove('active');document.getElementById('formContainer').style.display='none';document.getElementById('stepperBar').style.display='none';document.getElementById('previewContainer').classList.remove('active');document.getElementById('headerStepLabel').textContent=''}
 
 function initStepper(){const t=document.getElementById('stepperTrack');t.innerHTML='';for(let i=1;i<=totalSteps;i++){const p=document.createElement('div');p.className='step-pill'+(i===1?' active':'');p.dataset.step=i;p.onclick=()=>goToStep(i);t.appendChild(p)}}
 function updateStepper(){document.querySelectorAll('.step-pill').forEach(p=>{const s=+p.dataset.step;p.className='step-pill';if(s<currentStep)p.classList.add('completed');if(s===currentStep)p.classList.add('active')});document.getElementById('headerStepLabel').textContent=`Step ${currentStep} of ${totalSteps} — ${['','Course','Instructor','Materials','Objectives','Grading','Schedule','Review'][currentStep]||''}`}
-function showStep(n){document.querySelectorAll('.form-step').forEach(e=>e.classList.remove('active'));const t=document.querySelector(`.form-step[data-step="${n}"]`);if(t){t.classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}currentStep=n;updateStepper();if(n===7)buildReviewSummary()}
+function showStep(n){document.querySelectorAll('.form-step').forEach(e=>e.classList.remove('active'));const t=document.querySelector(`.form-step[data-step="${n}"]`);if(t){t.classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}currentStep=n;updateStepper();scheduleSave();if(n===7)buildReviewSummary()}
 function nextStep(){if(currentStep<totalSteps)showStep(currentStep+1)}
 function prevStep(){if(currentStep>1)showStep(currentStep-1)}
 function goToStep(n){if(n>=1&&n<=totalSteps)showStep(n)}
 
 function addTextbook(){const l=document.getElementById('textbookList'),d=document.createElement('div');d.className='dynamic-list-item';d.innerHTML='<div class="item-content"><div class="field-row cols-2" style="margin-bottom:8px"><div class="field"><label>Title</label><input type="text" class="tb-title"></div><div class="field"><label>Author</label><input type="text" class="tb-author"></div></div><div class="field-row cols-2"><div class="field"><label>ISBN</label><input type="text" class="tb-isbn"></div><div class="field"><label>Publisher</label><input type="text" class="tb-pub"></div></div></div><button class="remove-btn" onclick="removeItem(this)">✕</button>';l.appendChild(d)}
 function addGradeComponent(){const l=document.getElementById('gradeComponentsList'),d=document.createElement('div');d.className='dynamic-list-item';d.innerHTML='<div class="item-content"><div class="field-row cols-3"><div class="field" style="grid-column:span 2"><label>Component</label><input type="text" class="gc-name"></div><div class="field"><label>Weight (%)</label><input type="number" class="gc-weight" min="0" max="100"></div></div><div class="field" style="margin-top:8px"><label>Details</label><input type="text" class="gc-details"></div></div><button class="remove-btn" onclick="removeItem(this)">✕</button>';l.appendChild(d)}
-function removeItem(b){const i=b.closest('.dynamic-list-item');if(i.parentElement.querySelectorAll('.dynamic-list-item').length>1)i.remove()}
+function removeItem(b){const i=b.closest('.dynamic-list-item');if(i.parentElement.querySelectorAll('.dynamic-list-item').length>1){i.remove();scheduleSave()}}
 document.getElementById('gradingScale').addEventListener('change',function(){document.getElementById('customScaleField').style.display=this.value==='custom'?'block':'none'});
 
 // Drag & drop
@@ -470,7 +539,7 @@ status.classList.remove('active');
 document.getElementById('importScreen').classList.remove('active');
 document.getElementById('formContainer').style.display='block';
 document.getElementById('stepperBar').style.display='block';
-initStepper();showStep(2);
+initStepper();draftActive=true;showStep(2);saveDraft();
 // Show reminder
 setTimeout(()=>{if(!document.getElementById('importReminder')){
 const r=document.createElement('div');r.id='importReminder';
@@ -904,7 +973,7 @@ window.scrollTo({top:0,behavior:'smooth'})}
 
 function backToEdit(){document.getElementById('formContainer').style.display='block';document.getElementById('previewContainer').classList.remove('active');window.scrollTo({top:0,behavior:'smooth'})}
 
-async function copyToClipboard(){const c=document.getElementById('syllabusOutput');try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([c.innerHTML],{type:'text/html'}),'text/plain':new Blob([c.innerText],{type:'text/plain'})})])}catch(e){const r=document.createRange();r.selectNodeContents(c);const s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges()}const f=document.getElementById('copyFeedback');f.classList.add('show');setTimeout(()=>f.classList.remove('show'),2500)}populateTerms();
+async function copyToClipboard(){const c=document.getElementById('syllabusOutput');try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([c.innerHTML],{type:'text/html'}),'text/plain':new Blob([c.innerText],{type:'text/plain'})})])}catch(e){const r=document.createRange();r.selectNodeContents(c);const s=window.getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges()}const f=document.getElementById('copyFeedback');f.classList.add('show');setTimeout(()=>f.classList.remove('show'),2500)}populateTerms();checkForDraft();
 </script>
 </body>
 </html>
