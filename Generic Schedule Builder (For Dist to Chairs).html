@@ -515,6 +515,78 @@ button.add-more:hover { background: #256a41; }
 .modal h2 { margin-bottom: 14px; }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
 
+/* ============================================================
+   OFF-GRID BUCKETS, DEMAND, LIST VIEW, AVAILABILITY, IMPORT MAP
+   ============================================================ */
+.offgrid-wrap { background: var(--paper); padding: 10px 12px; border-radius: 6px; margin-top: 18px; }
+.offgrid-wrap .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 700px) { .offgrid-wrap .two-col { grid-template-columns: 1fr; } }
+.offgrid-wrap h3 { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.offgrid-hint { font-size: 11px; color: var(--muted); font-family: 'Segoe UI', Arial, sans-serif; }
+.offgrid-bucket .dropzone { min-height: 56px; max-height: 260px; flex-direction: row; flex-wrap: wrap; align-content: flex-start; border: 1px dashed var(--line); }
+.offgrid-bucket .course-card { width: calc(33.33% - 2px); }
+.course-card.online-card { border-style: double; border-width: 3px; }
+.cc-demand { font-size: 8.5px; color: var(--muted); margin-top: 1px; }
+.cc-demand.weak { color: var(--danger); font-weight: 600; }
+.card-edit {
+    position: absolute; top: 1px; right: 35px;
+    background: var(--navy-2); color: #fff; border: none; border-radius: 3px;
+    padding: 0 4px; font-size: 9px; line-height: 14px; cursor: pointer; display: none;
+}
+.course-card:hover .card-edit, .course-card:focus-within .card-edit { display: block; }
+.dropzone.over-rooms { box-shadow: inset 0 0 0 2px var(--danger); }
+.dropzone.over-rooms::after { content: 'rooms'; font-size: 8px; color: var(--danger); text-align: right; font-family: 'Segoe UI', Arial, sans-serif; }
+
+.view-toggle { display: inline-flex; gap: 4px; margin-right: 4px; }
+.lens-sep { width: 1px; height: 18px; background: var(--line); margin: 0 6px; }
+
+.list-view { background: var(--card); padding: 16px; border-radius: 10px; box-shadow: 0 1px 6px rgba(20,52,79,0.06); }
+.list-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.list-hint { font-size: 12px; color: var(--muted); font-family: 'Segoe UI', Arial, sans-serif; }
+.list-scroll { overflow: auto; max-height: 70vh; }
+.section-table { font-size: 12px; }
+.section-table th { position: sticky; top: 0; cursor: pointer; user-select: none; white-space: nowrap; font-size: 11px; }
+.section-table td { padding: 3px 6px; white-space: nowrap; }
+.section-table tr.unplaced td { color: var(--muted); font-style: italic; }
+.section-table tr.weak td:nth-child(10) { color: var(--danger); font-weight: 600; }
+.section-table input.inline { width: 62px; padding: 2px 5px; font-size: 12px; border: 1px solid transparent; background: transparent; }
+.section-table input.inline:hover, .section-table input.inline:focus { border-color: var(--line); background: #fff; }
+.section-table td.actions { white-space: nowrap; }
+.section-table td.actions button { padding: 2px 7px; font-size: 11px; margin-right: 3px; }
+.section-table caption { caption-side: bottom; padding: 10px; color: var(--muted); font-size: 12px; }
+
+.avail-grid { width: auto; font-size: 10px; border-collapse: collapse; font-family: 'Segoe UI', Arial, sans-serif; }
+.avail-grid th { background: var(--teal-wash); color: var(--teal); font-weight: 600; padding: 3px 6px; border: 1px solid var(--line); white-space: nowrap; }
+.avail-grid td { width: 54px; height: 20px; padding: 0 3px; border: 1px solid var(--line); background: #f2faf4; cursor: pointer; text-align: center; color: var(--muted); }
+.avail-grid td.off { background: #e9b9b4; color: #6b2a25; }
+.avail-grid td.na { background: var(--paper); cursor: default; }
+
+.modal.modal-wide { max-width: 860px; }
+.map-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px 14px; }
+.map-row { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--ink); margin: 0; }
+.map-row select { width: 100%; padding: 4px 6px; font-size: 12px; }
+.reg-preview { margin-top: 12px; overflow: auto; max-height: 200px; }
+.reg-preview td, .reg-preview th { padding: 3px 6px; font-size: 11px; }
+pre.diff { font-family: Consolas, Menlo, monospace; font-size: 12px; white-space: pre-wrap; background: var(--paper); padding: 12px; border-radius: 6px; max-height: 60vh; overflow: auto; }
+
+/* Load sheets: hidden on screen, one page per instructor in print */
+.load-sheets { display: none; }
+.load-sheet { page-break-after: always; break-after: page; padding: 24px 28px; font-family: 'Segoe UI', Arial, sans-serif; color: #000; }
+.load-sheet:last-child { page-break-after: auto; break-after: auto; }
+.ls-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 14px; }
+.ls-dept { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #444; }
+.load-sheet h2 { font-family: Georgia, serif; font-size: 22px; color: #000; border: none; margin: 4px 0 2px; padding: 0; }
+.ls-sub { font-size: 12px; color: #444; }
+.ls-total { text-align: right; font-size: 11px; color: #444; }
+.ls-big { font-size: 30px; font-family: Georgia, serif; color: #000; line-height: 1; }
+.ls-small { font-size: 10px; }
+.ls-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ls-table th { background: #eee !important; color: #000 !important; text-align: left; padding: 5px 6px; border: 1px solid #999; }
+.ls-table td { padding: 5px 6px; border: 1px solid #bbb; }
+.ls-table tr.unplaced td { color: #777; font-style: italic; }
+.ls-note { font-size: 11px; color: #444; margin-top: 10px; }
+.ls-sign { display: flex; justify-content: space-between; gap: 16px; margin-top: 42px; font-size: 12px; }
+
 details.pairing-rules { margin-bottom: 12px; font-family: 'Segoe UI', Arial, sans-serif; }
 details.pairing-rules summary { cursor: pointer; font-size: 12px; color: var(--teal); }
 details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0 20px; }
@@ -545,6 +617,15 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
     .print-only { display: block; text-align: right; font-size: 10px; color: #666; padding: 4px 24px; }
     th { background: #eee !important; color: #000 !important; -webkit-print-color-adjust: exact; }
     .time-header { background: #f5f5f5 !important; color: #000 !important; }
+    .card-edit, .cc-demand.weak::before { display: none !important; }
+    .offgrid-bucket .dropzone { border: 1px solid #bbb; }
+    .list-scroll { max-height: none; overflow: visible; }
+    .section-table td.actions, .section-table th:last-child { display: none; }
+    .section-table input.inline { border: none; }
+
+    /* Load sheets replace the whole page when printing them */
+    body.print-sheets .container, body.print-sheets #toastHost { display: none !important; }
+    body.print-sheets .load-sheets { display: block; }
 }
 </style>
 </head>
@@ -580,6 +661,10 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
                     <label for="academicTerm">Academic term</label>
                     <input type="text" id="academicTerm" placeholder="e.g., Fall 2026">
                 </div>
+                <div class="form-group">
+                    <label for="roomsPerSlot">Classrooms available per time slot <span style="color:var(--muted);font-weight:400;">(optional — room assignment happens elsewhere, but this flags slots you've overbooked)</span></label>
+                    <input type="number" id="roomsPerSlot" min="1" max="99" placeholder="e.g., 6">
+                </div>
             </div>
         </div>
 
@@ -605,6 +690,10 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
                     <label for="courses">Courses (comma-separated)</label>
                     <input type="text" id="courses" placeholder="e.g., GOVT-2305, GOVT-2306">
                 </div>
+                <div class="form-group">
+                    <label for="releaseHours">Reassigned / release load hours <span style="color:var(--muted);font-weight:400;">(chair, coordinator — counts toward load)</span></label>
+                    <input type="number" id="releaseHours" value="0" min="0" max="15" step="0.5">
+                </div>
             </div>
             <div class="form-group">
                 <label>Teaching formats</label>
@@ -615,7 +704,10 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
                     <label class="check-label"><input type="checkbox" id="has8Week"> 8-Week</label>
                     <label class="check-label"><input type="checkbox" id="has7Week"> 7-Week</label>
                     <label class="check-label"><input type="checkbox" id="hasDualCredit"> Dual Credit</label>
+                    <label class="check-label"><input type="checkbox" id="hasOnline"> Online (no meeting time)</label>
+                    <label class="check-label"><input type="checkbox" id="hasEvening"> Evening block (once a week, 6:30–9:15)</label>
                 </div>
+                <div style="font-size:12px;color:var(--muted);margin-top:6px;">Days and times an instructor cannot teach are set with <strong>Edit</strong> in the list below.</div>
             </div>
             <div class="form-group">
                 <label class="check-label"><input type="checkbox" id="hasLabs"> Teaches labs <span style="color:var(--muted);font-weight:400;">(science and other lecture + lab courses)</span></label>
@@ -666,15 +758,23 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
             <span class="spacer"></span>
             <button class="secondary" id="openProjectBtnBuild">Open project</button>
             <button class="secondary" id="saveProjectBtnBuild">Save project</button>
-            <button class="secondary" id="importCsvBtn">Import CSV</button>
+            <button class="secondary" id="importCsvBtn" title="This tool's own CSV, or a registrar/Colleague section export — you'll map the columns">Import CSV</button>
             <button class="secondary" id="exportCsvBtn">Export CSV</button>
+            <button class="secondary" id="compareBtn" title="Open an earlier project file and see what changed">Compare to draft</button>
+            <button class="secondary" id="loadSheetsBtn" title="One page per instructor: their proposed load, for confirmation">Print load sheets</button>
             <button id="printBtn">Print schedule</button>
-            <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+            <input type="file" id="csvFileInput" accept=".csv,.txt" class="hidden">
             <input type="file" id="projectFileInput" accept=".json" class="hidden">
+            <input type="file" id="compareFileInput" accept=".json" class="hidden">
         </div>
 
         <div class="lens-row no-print" id="lensRow">
             <span class="lens-label">View:</span>
+            <span class="view-toggle" role="group" aria-label="Grid or list view">
+                <button type="button" class="chip view-chip active" data-view="grid">Grid</button>
+                <button type="button" class="chip view-chip" data-view="list">List</button>
+            </span>
+            <span class="lens-sep"></span>
             <!-- chips injected by JS -->
         </div>
 
@@ -687,9 +787,13 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
                 <li>Monday–Thursday sections auto-pair on M/W or T/Th. Blended, Friday, and Saturday sections meet once.</li>
                 <li>Labs are separate hatched <strong>LAB</strong> cards. A 2-slot lab fills two adjacent Monday–Thursday rows (the second shows “cont.”); Friday and Saturday blocks are already long enough, so a lab there takes one row. The 8:00–9:20 PM row exists so evening labs can run 6:30–9:20.</li>
                 <li>A lecture that feeds several lab sections (one 48-seat lecture, two 24-seat labs) is one lecture card marked “×2 labs”; place two lab cards for it. The needs panel flags courses short on labs.</li>
-                <li>Load is in <strong>load hours</strong> (handbook p. 53: one lecture hour = one lab hour = one contact hour). Set each course's lecture and lab hours in Setup. Full-time contract load is 15; the tool warns at the 6-hour overload cap and the 24-hour maximum.</li>
-                <li>Once-a-week evening lectures (6:30–9:15) still occupy a single 80-minute row; the tool approximates them.</li>
+                <li>Load is in <strong>load hours</strong> (handbook p. 53: one lecture hour = one lab hour = one contact hour). Set each course's lecture and lab hours in Setup. Full-time contract load is 15; the tool warns at the 6-hour overload cap and the 24-hour maximum. Reassigned/release hours set in Setup count toward load.</li>
+                <li><strong>Online</strong> and <strong>off-site dual credit</strong> sections have no time slot. They go in the two buckets under the grid, count toward load and the section totals, and never conflict with anything. Pick “Online” under <em>Meets</em> when adding a section (the instructor needs the Online format in Setup).</li>
+                <li><strong>Evening block</strong> lectures (once a week, 6:30–9:15) take both evening rows, like a 2-slot lab, so a second section can't be double-booked behind them. Pick “Evening block” under <em>Meets</em>.</li>
+                <li>An instructor's <strong>unavailable</strong> slots (set with Edit in Setup) show as taken in the dropdowns and ask before you override them.</li>
                 <li>Early and late half-term sections (8-week, 7-week) may share a slot; anything else double-booking an instructor is blocked.</li>
+                <li><strong>✎</strong> on a card (or the <strong>List</strong> view) sets a section number, cap and last term's enrollment. The Seats &amp; Demand card uses them to show fill rates and flag slots that ran under half full. A “classrooms per slot” number in Setup flags any slot with more sections than rooms.</li>
+                <li><strong>Import CSV</strong> accepts this builder's own export or a registrar / Colleague section export — you'll map the columns once, and the sections land on the grid. <strong>Compare to draft</strong> opens an earlier project file and lists what was added, removed, moved, and whose load changed. <strong>Print load sheets</strong> gives one page per instructor for sign-off.</li>
                 <li>Click the × on a placed section to return it to the pool. Everything autosaves in this browser.</li>
             </ul>
         </details>
@@ -745,6 +849,27 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
                         </div>
                     </div>
                 </div>
+
+                <div class="offgrid-wrap">
+                    <div class="two-col">
+                        <div>
+                            <h3>Online <span class="offgrid-hint">no meeting time · counts toward load</span></h3>
+                            <div class="offgrid-bucket" id="onlineBucket"></div>
+                        </div>
+                        <div>
+                            <h3>Off-site <span class="offgrid-hint">dual credit taught at the high school</span></h3>
+                            <div class="offgrid-bucket" id="offsiteBucket"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="list-view hidden" id="listView">
+                <div class="list-head">
+                    <h3>All sections</h3>
+                    <span class="list-hint">Click a column to sort. Section #, Cap and Last term are editable in place.</span>
+                </div>
+                <div class="list-scroll"><table class="section-table" id="sectionTable"></table></div>
             </div>
         </div>
 
@@ -789,6 +914,7 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
 </div>
 
 <div id="toastHost"></div>
+<div id="loadSheets" class="load-sheets" aria-hidden="true"></div>
 
 <script>
 'use strict';
@@ -799,12 +925,17 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
 // NOTE: the internal key `hybrid` is kept for compatibility with saved project files;
 // everywhere the user sees it, the format is called "Blended".
 let instructors = [];              // { name, type, max (load hours), courses[], hybrid, eightWeek, sevenWeek, sixteenWeek, fourteenWeek, dualCredit,
+                                   //   online, evening, release (reassigned load hrs), unavailable ["Day|Time"],
                                    //   hasLabs, labSpan (1|2), labMeets ('once'|'twice'), labCourses[] }
 let instructorCourses = {};        // name -> [ { id, type, instructor, session, hybrid, dualCredit, component ('lecture'|'lab'),
+                                   //            once (meets one day), span (lecture rows, 1|2), online,
+                                   //            section (registrar #), cap, prior (last term's enrollment),
                                    //            labSpan, labMeets, labSections (lecture: how many lab sections it feeds) } ]
-let scheduledCourses = {};         // "Day|Time" -> [ course ]
+let scheduledCourses = {};         // "Day|Time" -> [ course ]   (Online and Off-site sections live under "Online|—" / "Off-site|—")
 let courseLoad = {};               // course code -> { lecture: loadHours, lab: loadHours }
 let courseIdCounter = 1;
+let roomsPerSlot = null;           // classrooms the department can count on per time slot (null = don't check)
+let viewMode = 'grid';             // 'grid' | 'list'
 
 let draggedCourse = null;          // { ...course, fromSlot? }
 let selectedCourse = null;         // click-to-place: { ...course, fromSlot? }
@@ -830,7 +961,41 @@ const DEFAULT_COURSE_LOAD = { lecture: 3, lab: 3 };
 const fridaySlots = ['4:00-6:50','7:00-9:50'];
 const saturdaySlots = ['9:00-11:50','12:00-2:50'];
 const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+// Sections with no meeting time still count toward load and the section totals.
+// They live in two buckets below the grid rather than on it.
+const OFFGRID_DAYS = ['Online', 'Off-site'];
+const OFFGRID_TIME = '—';
+const ALL_DAYS = [...days, ...OFFGRID_DAYS];
+const isOffGridDay = d => OFFGRID_DAYS.includes(d);
 const PRIME_TIMES = ['9:30-10:50','11:00-12:20','12:30-1:50','9:00-11:50','12:00-2:50'];
+
+// How a lecture section meets. Kept on the course as hybrid/once/span/online for
+// compatibility with older project files; MEETS_OPTIONS is the single UI vocabulary.
+const MEETS_OPTIONS = [
+    ['twice',  'M/W or T/Th (80 min × 2)',           () => true],
+    ['once',   'Blended — once a week, 80 min',       inst => !!inst.hybrid],
+    ['block',  'Evening block — once a week, 6:30–9:15', inst => !!inst.evening],
+    ['online', 'Online — no meeting time',            inst => !!inst.online]
+];
+function meetsOf(course) {
+    if (isLab(course)) return course.labMeets === 'twice' ? 'twice' : 'once';
+    if (course.online) return 'online';
+    if (course.span === 2) return 'block';
+    if (course.hybrid || course.once) return 'once';
+    return 'twice';
+}
+function applyMeets(course, meets) {
+    course.online = meets === 'online';
+    course.hybrid = meets === 'once';
+    course.once = meets === 'once' || meets === 'block';
+    course.span = meets === 'block' ? 2 : 1;
+    return course;
+}
+function meetsLabel(course) {
+    const m = meetsOf(course);
+    if (isLab(course)) return m === 'twice' ? 'Lab ×2/wk' : 'Lab 1×/wk';
+    return { twice: 'M/W · T/Th', once: 'Blended', block: 'Evening block', online: 'Online' }[m];
+}
 
 const SESSION_LABELS = {
     '16week': '16-Week', '14week': '14-Week',
@@ -864,7 +1029,17 @@ function toast(msg, kind) {
 function getTimeSlotsForDay(day) {
     if (day === 'Friday') return fridaySlots;
     if (day === 'Saturday') return saturdaySlots;
+    if (isOffGridDay(day)) return [OFFGRID_TIME];
     return weekdaySlots;
+}
+
+// Which bucket or grid a section may be placed on. Online sections only go in
+// the Online bucket; dual-credit sections may sit off-site or on the grid.
+function placementAllowed(course, day) {
+    if (course.online) return day === 'Online';
+    if (day === 'Online') return false;
+    if (day === 'Off-site') return !!course.dualCredit;
+    return true;
 }
 
 function canonicalSlotOrder() {
@@ -880,10 +1055,10 @@ function sessionHalf(session) {
 function isLab(course) { return course && course.component === 'lab'; }
 
 function pairedDays(course, day) {
-    if (day === 'Friday' || day === 'Saturday') return [day];
+    if (day === 'Friday' || day === 'Saturday' || isOffGridDay(day)) return [day];
     if (isLab(course)) {
         if (course.labMeets !== 'twice') return [day];
-    } else if (course.hybrid) {
+    } else if (course.hybrid || course.once) {
         return [day];
     }
     if (day === 'Monday' || day === 'Wednesday') return ['Monday', 'Wednesday'];
@@ -892,11 +1067,11 @@ function pairedDays(course, day) {
 }
 
 // How many grid rows a section fills on a given day. Friday/Saturday blocks are
-// already ~3 hours, so a double-block lab needs only one row there.
+// already ~3 hours, so a double-block lab (or an evening block) needs only one row there.
 function spanFor(course, day) {
-    if (!isLab(course)) return 1;
-    if (day === 'Friday' || day === 'Saturday') return 1;
-    return course.labSpan === 2 ? 2 : 1;
+    if (day === 'Friday' || day === 'Saturday' || isOffGridDay(day)) return 1;
+    if (isLab(course)) return course.labSpan === 2 ? 2 : 1;
+    return course.span === 2 ? 2 : 1;
 }
 
 // The consecutive slots a section occupies starting at `time`, or null if it
@@ -942,7 +1117,8 @@ function loadHoursOf(course) {
 }
 
 // Scheduled load hours for an instructor; a combined lecture counts once.
-function loadHoursFor(name) {
+// Reassigned time (release) counts toward load, as the handbook treats it.
+function taughtHoursFor(name) {
     const seen = new Set();
     let total = 0;
     Object.values(scheduledCourses).forEach(list => list.forEach(c => {
@@ -952,6 +1128,11 @@ function loadHoursFor(name) {
     }));
     return total;
 }
+function releaseHoursFor(name) {
+    const inst = findInstructor(name);
+    return inst && Number.isFinite(+inst.release) ? +inst.release : 0;
+}
+function loadHoursFor(name) { return taughtHoursFor(name) + releaseHoursFor(name); }
 
 function fmtHours(h) { return (Math.round(h * 100) / 100).toString(); }
 
@@ -980,7 +1161,7 @@ function anchorKeyFor(id) {
     for (const key in scheduledCourses) {
         if (!scheduledCourses[key].some(c => c.id === id)) continue;
         const [d, t] = key.split('|');
-        const rank = days.indexOf(d) * 100 + order.indexOf(t);
+        const rank = ALL_DAYS.indexOf(d) * 100 + Math.max(0, order.indexOf(t));
         if (rank < bestRank) { bestRank = rank; best = key; }
     }
     return best;
@@ -1044,22 +1225,26 @@ function currentPhase() {
 
 function stateObject() {
     return {
-        version: 4,
+        version: 5,
         savedAt: Date.now(),
         phase: currentPhase(),
         department: document.getElementById('deptName').value,
         term: document.getElementById('academicTerm').value,
-        autoRefill,
+        autoRefill, roomsPerSlot, viewMode,
         instructors, instructorCourses, scheduledCourses, courseLoad, courseIdCounter
     };
 }
 
-// Older project files predate labs — give every record the new fields.
+// Older project files predate labs, online sections and availability — give every record the new fields.
 function normalizeInstructor(inst) {
     inst.hasLabs = !!inst.hasLabs;
     inst.labSpan = inst.labSpan === 1 ? 1 : 2;
     inst.labMeets = inst.labMeets === 'twice' ? 'twice' : 'once';
     inst.labCourses = Array.isArray(inst.labCourses) ? inst.labCourses : [];
+    inst.online = !!inst.online;
+    inst.evening = !!inst.evening;
+    inst.release = Math.max(0, parseFloat(inst.release) || 0);
+    inst.unavailable = Array.isArray(inst.unavailable) ? inst.unavailable.filter(k => typeof k === 'string') : [];
     delete inst.labsCountLoad;                       // superseded by per-course lab load hours
     inst.max = parseFloat(inst.max) || DEFAULT_LOAD[inst.type] || DEFAULT_LOAD.FT;
     return inst;
@@ -1070,9 +1255,18 @@ function normalizeCourse(c) {
         c.labSpan = c.labSpan === 1 ? 1 : 2;
         c.labMeets = c.labMeets === 'twice' ? 'twice' : 'once';
         delete c.labSections;
+        c.online = false; c.once = false; c.span = 1;
     } else {
         c.labSections = Math.max(1, parseInt(c.labSections, 10) || 1);
+        c.online = !!c.online;
+        c.hybrid = !!c.hybrid && !c.online;
+        c.once = (c.once === true || c.hybrid) && !c.online;
+        c.span = (c.span === 2 && c.once && !c.online) ? 2 : 1;
     }
+    c.dualCredit = !!c.dualCredit;
+    c.section = c.section == null ? '' : String(c.section);
+    c.cap = Number.isFinite(+c.cap) && c.cap !== '' && c.cap !== null ? +c.cap : null;
+    c.prior = Number.isFinite(+c.prior) && c.prior !== '' && c.prior !== null ? +c.prior : null;
     return c;
 }
 function normalizeState() {
@@ -1096,6 +1290,71 @@ const LAB_PATTERNS = [
     ['single-twice', 'Twice a week, 1 slot each (80 min)'],
     ['single-once',  'Once a week, 1 slot (80 min)']
 ];
+
+/* ---------- Availability (slots an instructor cannot teach) ---------- */
+function isUnavailable(inst, day, time) {
+    return !!(inst && inst.unavailable && inst.unavailable.includes(day + '|' + time));
+}
+// Every slot key a placement touches where the instructor is marked unavailable.
+function unavailableKeysFor(course, day, time) {
+    const inst = findInstructor(course.instructor);
+    if (!inst || !inst.unavailable.length) return [];
+    return (occupiedKeys(course, day, time) || []).filter(k => inst.unavailable.includes(k));
+}
+function summarizeUnavailable(keys) {
+    const byDay = {};
+    keys.forEach(k => { const [d, t] = k.split('|'); (byDay[d] = byDay[d] || []).push(t); });
+    return days.filter(d => byDay[d]).map(d => {
+        const all = getTimeSlotsForDay(d).every(t => byDay[d].includes(t));
+        return d.slice(0, 3) + (all ? ' (all day)' : ' ' + byDay[d].map(t => t.split('-')[0]).join(', '));
+    }).join('; ');
+}
+// Click-to-toggle grid of every slot; `set` is mutated in place.
+function buildAvailabilityGrid(host, set) {
+    host.innerHTML = '';
+    const table = document.createElement('table');
+    table.className = 'avail-grid';
+    const head = document.createElement('tr');
+    head.innerHTML = '<th></th>' + days.map(d => '<th>' + d.slice(0, 3) + '</th>').join('');
+    table.appendChild(head);
+    const rows = Math.max(weekdaySlots.length, fridaySlots.length, saturdaySlots.length);
+    for (let r = 0; r < rows; r++) {
+        const tr = document.createElement('tr');
+        const th = document.createElement('th');
+        th.textContent = weekdaySlots[r] || '';
+        tr.appendChild(th);
+        days.forEach(d => {
+            const td = document.createElement('td');
+            const t = getTimeSlotsForDay(d)[r];
+            if (!t) { td.className = 'na'; tr.appendChild(td); return; }
+            const key = d + '|' + t;
+            td.textContent = (d === 'Friday' || d === 'Saturday') ? t : '';
+            td.title = d + ' ' + t;
+            td.classList.toggle('off', set.has(key));
+            td.addEventListener('click', () => {
+                if (set.has(key)) set.delete(key); else set.add(key);
+                td.classList.toggle('off', set.has(key));
+            });
+            tr.appendChild(td);
+        });
+        table.appendChild(tr);
+    }
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:11px;color:var(--muted);margin-top:4px;';
+    note.textContent = 'Shaded = cannot teach. Whole-day shortcuts: click a day header.';
+    head.querySelectorAll('th').forEach((th, i) => {
+        if (i === 0) return;
+        th.style.cursor = 'pointer';
+        th.addEventListener('click', () => {
+            const d = days[i - 1];
+            const keys = getTimeSlotsForDay(d).map(t => d + '|' + t);
+            const allOff = keys.every(k => set.has(k));
+            keys.forEach(k => allOff ? set.delete(k) : set.add(k));
+            buildAvailabilityGrid(host, set);
+        });
+    });
+    host.append(table, note);
+}
 
 function labCoursesFor(inst) {
     if (!inst || !inst.hasLabs) return [];
@@ -1126,6 +1385,9 @@ function applyState(s) {
     autoRefill = s.autoRefill !== false;   // older files predate the setting; default it on
     const refillBox = document.getElementById('autoRefillToggle');
     if (refillBox) refillBox.checked = autoRefill;
+    roomsPerSlot = Number.isFinite(+s.roomsPerSlot) && s.roomsPerSlot !== null && s.roomsPerSlot !== '' ? +s.roomsPerSlot : null;
+    document.getElementById('roomsPerSlot').value = roomsPerSlot == null ? '' : roomsPerSlot;
+    viewMode = s.viewMode === 'list' ? 'list' : 'grid';
     document.getElementById('deptName').value = s.department || '';
     document.getElementById('academicTerm').value = s.term || '';
     updateInstructorList();
@@ -1323,7 +1585,10 @@ function addInstructor() {
         hybrid: document.getElementById('hasHybrid').checked,
         eightWeek: document.getElementById('has8Week').checked,
         sevenWeek: document.getElementById('has7Week').checked,
-        dualCredit: document.getElementById('hasDualCredit').checked
+        dualCredit: document.getElementById('hasDualCredit').checked,
+        online: document.getElementById('hasOnline').checked,
+        evening: document.getElementById('hasEvening').checked,
+        release: parseFloat(document.getElementById('releaseHours').value) || 0
     };
     const labs = readLabOptions(document, SETUP_LAB_IDS);
     if (labs.hasLabs && labs.labCourses.length && !labs.labCourses.some(c => courses.includes(c))) {
@@ -1335,9 +1600,10 @@ function addInstructor() {
 
     document.getElementById('instructorName').value = '';
     document.getElementById('courses').value = '';
+    document.getElementById('releaseHours').value = '0';
     document.getElementById('maxLoad').value = String(DEFAULT_LOAD[document.getElementById('instructorType').value] || DEFAULT_LOAD.FT);
     ['has16Week'].forEach(id => document.getElementById(id).checked = true);
-    ['has14Week','hasHybrid','has8Week','has7Week','hasDualCredit','hasLabs'].forEach(id => document.getElementById(id).checked = false);
+    ['has14Week','hasHybrid','has8Week','has7Week','hasDualCredit','hasOnline','hasEvening','hasLabs'].forEach(id => document.getElementById(id).checked = false);
     document.getElementById('labCourses').value = '';
     document.getElementById('labPattern').value = 'double-once';
     document.getElementById('labOpts').classList.add('hidden');
@@ -1389,11 +1655,15 @@ function updateInstructorList() {
         if (inst.eightWeek) options.push('8-Week');
         if (inst.sevenWeek) options.push('7-Week');
         if (inst.dualCredit) options.push('Dual Credit');
+        if (inst.online) options.push('Online');
+        if (inst.evening) options.push('Evening block');
         if (inst.hasLabs) {
             const pat = LAB_PATTERNS.find(([v]) => v === patternOf(inst));
             options.push('Labs: ' + (pat ? pat[1].toLowerCase() : patternOf(inst)) +
                 (inst.labCourses.length ? ' for ' + inst.labCourses.join(', ') : ''));
         }
+        if (inst.release) options.push(fmtHours(inst.release) + ' release hrs');
+        if (inst.unavailable.length) options.push('unavailable ' + summarizeUnavailable(inst.unavailable));
 
         div.innerHTML =
             '<div class="row"><div style="flex:1;">' +
@@ -1437,6 +1707,7 @@ function openEditModal(index) {
         '<div class="form-group"><label>Max load hours</label><input type="number" id="editMax" min="1" max="48" step="0.5"></div>' +
         '</div>' +
         '<div class="form-group"><label>Courses (comma-separated)</label><input type="text" id="editCourses"></div>' +
+        '<div class="form-group"><label>Reassigned / release load hours <span style="color:var(--muted);">(counts toward load)</span></label><input type="number" id="editRelease" min="0" max="15" step="0.5"></div>' +
         '<div class="form-group"><label>Teaching formats</label><div class="options-grid">' +
         '<label class="check-label"><input type="checkbox" id="edit16Week"> 16-Week</label>' +
         '<label class="check-label"><input type="checkbox" id="edit14Week"> 14-Week (Saturday)</label>' +
@@ -1444,8 +1715,12 @@ function openEditModal(index) {
         '<label class="check-label"><input type="checkbox" id="edit8Week"> 8-Week</label>' +
         '<label class="check-label"><input type="checkbox" id="edit7Week"> 7-Week</label>' +
         '<label class="check-label"><input type="checkbox" id="editDualCredit"> Dual Credit</label>' +
+        '<label class="check-label"><input type="checkbox" id="editOnline"> Online (no meeting time)</label>' +
+        '<label class="check-label"><input type="checkbox" id="editEvening"> Evening block (6:30–9:15)</label>' +
         '</div></div>' +
         labOptionsMarkup(EDIT_LAB_IDS) +
+        '<div class="form-group"><label>Cannot teach at <span style="color:var(--muted);">(click cells to toggle; the builder disables these slots and asks before overriding)</span></label>' +
+        '<div id="editAvail"></div></div>' +
         '<div class="modal-actions"><button class="quiet" id="editCancel">Cancel</button><button id="editSave">Save changes</button></div>';
 
     document.body.append(backdrop, modal);
@@ -1454,6 +1729,7 @@ function openEditModal(index) {
     modal.querySelector('#editName').value = inst.name;
     modal.querySelector('#editType').value = inst.type;
     modal.querySelector('#editMax').value = inst.max;
+    modal.querySelector('#editRelease').value = inst.release || 0;
     modal.querySelector('#editCourses').value = inst.courses.join(', ');
     modal.querySelector('#edit16Week').checked = !!inst.sixteenWeek;
     modal.querySelector('#edit14Week').checked = !!inst.fourteenWeek;
@@ -1461,8 +1737,12 @@ function openEditModal(index) {
     modal.querySelector('#edit8Week').checked = !!inst.eightWeek;
     modal.querySelector('#edit7Week').checked = !!inst.sevenWeek;
     modal.querySelector('#editDualCredit').checked = !!inst.dualCredit;
+    modal.querySelector('#editOnline').checked = !!inst.online;
+    modal.querySelector('#editEvening').checked = !!inst.evening;
     writeLabOptions(modal, EDIT_LAB_IDS, inst);
     wireLabToggle(modal, EDIT_LAB_IDS);
+    const unavailable = new Set(inst.unavailable || []);
+    buildAvailabilityGrid(modal.querySelector('#editAvail'), unavailable);
 
     const close = () => { backdrop.remove(); modal.remove(); modalCleanup = null; };
     modalCleanup = close;
@@ -1487,6 +1767,10 @@ function openEditModal(index) {
         inst.eightWeek = modal.querySelector('#edit8Week').checked;
         inst.sevenWeek = modal.querySelector('#edit7Week').checked;
         inst.dualCredit = modal.querySelector('#editDualCredit').checked;
+        inst.online = modal.querySelector('#editOnline').checked;
+        inst.evening = modal.querySelector('#editEvening').checked;
+        inst.release = parseFloat(modal.querySelector('#editRelease').value) || 0;
+        inst.unavailable = [...unavailable];
         Object.assign(inst, readLabOptions(modal, EDIT_LAB_IDS));
         normalizeInstructor(inst);
 
@@ -1528,6 +1812,7 @@ function enterBuilder(seedNew = true) {
     createInstructorPool();
     buildLensChips();
     renderAll();
+    setViewMode(viewMode);
     updateUndoButtons();
 }
 
@@ -1562,6 +1847,9 @@ function seedPools() {
                     instructorCourses[inst.name].push({ id: courseIdCounter++, type, instructor: inst.name, session: 'early8', hybrid: false, dualCredit: false });
                 }
             }
+        }
+        if (inst.online && inst.courses.length) {
+            instructorCourses[inst.name].push({ id: courseIdCounter++, type: inst.courses[0], instructor: inst.name, session: '16week', hybrid: false, dualCredit: false, online: true });
         }
         if (!instructorCourses[inst.name].length && inst.courses.length) {
             instructorCourses[inst.name].push({ id: courseIdCounter++, type: inst.courses[0], instructor: inst.name, session: '16week', hybrid: false, dualCredit: false });
@@ -1651,6 +1939,13 @@ function createGrid() {
     };
     buildSingle('fridayGrid', 'Friday', fridaySlots);
     buildSingle('saturdayGrid', 'Saturday', saturdaySlots);
+
+    // Off-grid buckets: Online and Off-site (dual credit at a high school)
+    const online = document.getElementById('onlineBucket');
+    const offsite = document.getElementById('offsiteBucket');
+    online.innerHTML = ''; offsite.innerHTML = '';
+    online.appendChild(makeDropzone('Online', OFFGRID_TIME));
+    offsite.appendChild(makeDropzone('Off-site', OFFGRID_TIME));
 }
 
 /* ============================================================
@@ -1666,16 +1961,26 @@ const LENSES = [
     { key: 'late7',  label: 'Late 7',   border: 'var(--l7-border)',  bg: 'var(--l7-bg)' },
     { key: 'dc',     label: 'Dual Credit', border: 'var(--dc-border)', bg: 'var(--dc-bg)' },
     { key: 'hybrid', label: 'Blended',  border: 'var(--s16-border)', bg: '#fff' },
+    { key: 'online', label: 'Online',   border: 'var(--navy)', bg: '#fff' },
     { key: 'lab',    label: 'Labs',     border: 'var(--teal)', bg: 'repeating-linear-gradient(135deg, rgba(14,110,115,0.35) 0 2px, #fff 2px 5px)' }
 ];
 
+function setViewMode(mode) {
+    viewMode = mode === 'list' ? 'list' : 'grid';
+    document.querySelectorAll('.view-chip').forEach(c => c.classList.toggle('active', c.dataset.view === viewMode));
+    document.querySelector('.schedule-table').classList.toggle('hidden', viewMode === 'list');
+    document.getElementById('listView').classList.toggle('hidden', viewMode !== 'list');
+    if (viewMode === 'list') renderListView();
+    saveLocal();
+}
+
 function buildLensChips() {
     const row = document.getElementById('lensRow');
-    row.querySelectorAll('.chip').forEach(c => c.remove());
+    row.querySelectorAll('.chip.lens-chip').forEach(c => c.remove());
     LENSES.forEach(l => {
         const chip = document.createElement('button');
         chip.type = 'button';
-        chip.className = 'chip' + (activeLens === l.key ? ' active' : '');
+        chip.className = 'chip lens-chip' + (activeLens === l.key ? ' active' : '');
         chip.dataset.lens = l.key;
         if (l.border) {
             const sw = document.createElement('span');
@@ -1688,7 +1993,7 @@ function buildLensChips() {
         chip.appendChild(document.createTextNode(l.label));
         chip.addEventListener('click', () => {
             activeLens = (activeLens === l.key) ? 'all' : l.key;
-            row.querySelectorAll('.chip').forEach(c =>
+            row.querySelectorAll('.chip.lens-chip').forEach(c =>
                 c.classList.toggle('active', c.dataset.lens === activeLens));
             applyLens();
         });
@@ -1700,6 +2005,7 @@ function cardMatchesLens(course) {
     if (activeLens === 'all') return true;
     if (activeLens === 'dc') return !!course.dualCredit;
     if (activeLens === 'hybrid') return !!course.hybrid;
+    if (activeLens === 'online') return !!course.online;
     if (activeLens === 'lab') return isLab(course);
     return course.session === activeLens;
 }
@@ -1733,21 +2039,34 @@ function sessionClass(course) {
 }
 
 function sessionTag(course) {
-    if (course.dualCredit) return ' (DC)';
-    if (SESSION_ABBR[course.session]) return ' (' + SESSION_ABBR[course.session] + ')';
-    if (course.hybrid) return ' (Bl)';
-    return '';
+    const parts = [];
+    if (course.dualCredit) parts.push('DC');
+    else if (SESSION_ABBR[course.session]) parts.push(SESSION_ABBR[course.session]);
+    if (course.online) parts.push('OL');
+    else if (course.span === 2) parts.push('Eve');
+    else if (course.hybrid) parts.push('Bl');
+    return parts.length ? ' (' + parts.join(' ') + ')' : '';
 }
 
 // Human label for a section's format, used in CSV, popovers and toasts.
 function componentLabel(course) { return isLab(course) ? 'Lab' : 'Lecture'; }
 
+// Short "fill" note for a card: "24 cap · 19 last term"
+function demandLabel(course) {
+    const bits = [];
+    if (course.section) bits.push('§' + course.section);
+    if (course.cap != null) bits.push(course.cap + ' cap');
+    if (course.prior != null) bits.push(course.prior + ' last term');
+    return bits.join(' · ');
+}
+
 function createCourseCard(course, context, slotKey) {
-    // context: 'pool' | 'grid'; slotKey (grid only) lets a lab's second row show as a continuation
+    // context: 'pool' | 'grid'; slotKey (grid only) lets a multi-row section's second row show as a continuation
     const card = document.createElement('div');
-    card.className = 'course-card ' + sessionClass(course) + (course.hybrid ? ' hybrid-card' : '') + (isLab(course) ? ' lab-card' : '');
-    if (context === 'grid' && isLab(course) && slotKey) {
-        // Every day a lab occupies starts at the same time, so any later row is a continuation.
+    card.className = 'course-card ' + sessionClass(course) + (course.hybrid ? ' hybrid-card' : '') +
+                     (isLab(course) ? ' lab-card' : '') + (course.online ? ' online-card' : '');
+    if (context === 'grid' && slotKey) {
+        // Every day a section occupies starts at the same time, so any later row is a continuation.
         const anchor = anchorKeyFor(course.id);
         if (anchor && slotKey.split('|')[1] !== anchor.split('|')[1]) card.classList.add('lab-cont');
     }
@@ -1771,6 +2090,22 @@ function createCourseCard(course, context, slotKey) {
         card.title = 'Combined lecture feeding ' + course.labSections + ' lab sections';
     }
     card.append(title, sub);
+    const demand = demandLabel(course);
+    if (demand) {
+        const d = document.createElement('div');
+        d.className = 'cc-demand';
+        d.textContent = demand;
+        if (course.cap && course.prior != null && course.prior / course.cap < 0.5) d.classList.add('weak');
+        card.appendChild(d);
+    }
+
+    const edit = document.createElement('button');
+    edit.className = 'card-edit';
+    edit.textContent = '✎';
+    edit.title = 'Section number, cap, last term\'s enrollment';
+    edit.setAttribute('aria-label', edit.title);
+    edit.addEventListener('click', e => { e.stopPropagation(); openSectionModal(course.id); });
+    card.appendChild(edit);
 
     const x = document.createElement('button');
     x.className = 'card-x';
@@ -1845,6 +2180,7 @@ function clearSelection() {
 function fitsGrid(course, day, time) { return occupiedKeys(course, day, time) !== null; }
 
 function wouldConflict(course, day, time) {
+    if (isOffGridDay(day)) return null;             // no meeting time, nothing to double-book
     const keys = occupiedKeys(course, day, time) || [];
     for (const key of keys) {
         const list = scheduledCourses[key];
@@ -1863,7 +2199,9 @@ function showValidity(course) {
     document.querySelectorAll('.dropzone').forEach(dz => {
         const day = dz.dataset.day, time = dz.dataset.time;
         dz.classList.remove('valid', 'invalid', 'discouraged');
-        if (!fitsGrid(course, day, time) || wouldConflict(course, day, time)) {
+        if (!placementAllowed(course, day) || !fitsGrid(course, day, time) || wouldConflict(course, day, time)) {
+            dz.classList.add('invalid');
+        } else if (unavailableKeysFor(course, day, time).length) {
             dz.classList.add('invalid');
         } else if (course.session === '14week' && day !== 'Saturday') {
             dz.classList.add('discouraged');
@@ -1891,6 +2229,7 @@ function maybeExpandWeekendFor(course) {
 function sameShape(a, b) {
     return a.type === b.type && a.session === b.session &&
            !!a.hybrid === !!b.hybrid && !!a.dualCredit === !!b.dualCredit &&
+           !!a.online === !!b.online && !!a.once === !!b.once && (a.span || 1) === (b.span || 1) &&
            isLab(a) === isLab(b) && (!isLab(a) || (a.labSpan === b.labSpan && a.labMeets === b.labMeets)) &&
            (isLab(a) || (a.labSections || 1) === (b.labSections || 1));
 }
@@ -1917,12 +2256,14 @@ function refillPool(course) {
         session: course.session,
         hybrid: !!course.hybrid,
         dualCredit: !!course.dualCredit,
+        online: !!course.online, once: !!course.once, span: course.span || 1,
+        cap: course.cap == null ? null : course.cap,      // cap usually repeats; section # and history don't
         component: course.component || 'lecture',
         auto: true
     };
     if (isLab(course)) { twin.labSpan = course.labSpan; twin.labMeets = course.labMeets; }
     else twin.labSections = course.labSections || 1;
-    list.push(twin);
+    list.push(normalizeCourse(twin));
 }
 
 // When sections come back off the grid, drop auto-generated twins that now
@@ -1948,10 +2289,18 @@ function placeCourse(courseWithOrigin, day, time) {
     const course = courseWithOrigin;
     const fromPool = !course.fromSlot;
 
-    // 0. Does it physically fit? (two-row labs can't start on the last row)
+    // 0a. Right kind of place? Online sections only go in the Online bucket, and vice versa.
+    if (!placementAllowed(course, day)) {
+        if (course.online) toast(course.type + ' is an online section — it belongs in the Online bucket below the grid.', 'error');
+        else if (day === 'Online') toast('Only online sections go in the Online bucket. Change the section\'s "Meets" to Online first.', 'error');
+        else toast('Only dual-credit sections go in the Off-site bucket.', 'error');
+        return false;
+    }
+
+    // 0b. Does it physically fit? (two-row labs and evening blocks can't start on the last row)
     const keys = occupiedKeys(course, day, time);
     if (!keys) {
-        toast('A double-block lab needs two adjacent slots — it can\'t start at ' + time + ' on ' + day + '.', 'error');
+        toast((isLab(course) ? 'A double-block lab' : 'An evening block') + ' needs two adjacent slots — it can\'t start at ' + time + ' on ' + day + '.', 'error');
         return false;
     }
 
@@ -1964,6 +2313,12 @@ function placeCourse(courseWithOrigin, day, time) {
         if (hA === hB && hA !== 'full') why += ' Both sections run in the same half of the term.';
         toast('Conflict — ' + why, 'error');
         return false;
+    }
+
+    // 1b. Marked unavailable (day job, release-time meetings, "no Fridays")
+    const blocked = unavailableKeysFor(course, day, time);
+    if (blocked.length) {
+        if (!confirm(course.instructor + ' is marked unavailable at ' + summarizeUnavailable(blocked) + '. Schedule anyway?')) return false;
     }
 
     // 2. Load ceiling in load hours (Faculty Handbook, Faculty Workload Procedures)
@@ -2040,14 +2395,19 @@ function deletePoolCourse(id) {
    SEND TO SLOT — dropdown placement, no dragging or scrolling
    ============================================================ */
 function dayPatternOptions(course) {
-    const once = isLab(course) ? course.labMeets !== 'twice' : !!course.hybrid;
+    if (course.online) return [['Online', 'Online (no meeting time)']];
+    const once = isLab(course) ? course.labMeets !== 'twice' : !!(course.hybrid || course.once);
+    let opts;
     if (once) {
-        return [['Monday', 'Monday only'], ['Tuesday', 'Tuesday only'],
+        opts = [['Monday', 'Monday only'], ['Tuesday', 'Tuesday only'],
                 ['Wednesday', 'Wednesday only'], ['Thursday', 'Thursday only'],
                 ['Friday', 'Friday evening'], ['Saturday', 'Saturday']];
+    } else {
+        opts = [['Monday', 'M/W'], ['Tuesday', 'T/Th'],
+                ['Friday', 'Friday evening'], ['Saturday', 'Saturday']];
     }
-    return [['Monday', 'M/W'], ['Tuesday', 'T/Th'],
-            ['Friday', 'Friday evening'], ['Saturday', 'Saturday']];
+    if (course.dualCredit) opts.push(['Off-site', 'Off-site (high school)']);
+    return opts;
 }
 
 function fillPopoverDays() {
@@ -2080,15 +2440,24 @@ function fillTimeSelect(sel, course, day) {
     getTimeSlotsForDay(day).forEach(time => {
         const o = document.createElement('option');
         o.value = time;
+        if (isOffGridDay(day)) {
+            const n = (scheduledCourses[day + '|' + time] || []).filter(c => c.id !== course.id).length;
+            o.textContent = (day === 'Online' ? 'Online' : 'Off-site') + (n ? ' — ' + n + ' there' : '');
+            sel.appendChild(o);
+            return;
+        }
         const keys = occupiedKeys(course, day, time);
         const clash = wouldConflict(course, day, time);
+        const away = unavailableKeysFor(course, day, time).length > 0;
         let others = 0;
         (keys || []).forEach(k => {
             others += (scheduledCourses[k] || []).filter(c => c.id !== course.id).length;
         });
         let label = rangeLabel(spanTimes(course, day, time) || [time]) + (PRIME_TIMES.includes(time) ? ' (prime)' : '');
-        if (!keys) { label += ' — too late to start a 2-slot lab'; o.disabled = true; }
+        if (!keys) { label += ' — too late to start a 2-slot ' + (isLab(course) ? 'lab' : 'block'); o.disabled = true; }
         else if (clash) { label += ' — taken: ' + clash.type + (isLab(clash) ? ' lab' : ''); o.disabled = true; }
+        else if (away) label += ' — marked unavailable';
+        else if (roomsPerSlot && roomsAtSlot(day, time) >= roomsPerSlot) label += ' — ' + others + ' scheduled, rooms full';
         else if (others) label += ' — ' + others + ' scheduled';
         else label += ' — open';
         o.textContent = label;
@@ -2266,16 +2635,25 @@ function createInstructorPool() {
         const fmts = [];
         if (inst.sixteenWeek) fmts.push(['16week', '16-Week']);
         if (inst.fourteenWeek) fmts.push(['14week', '14-Week (Saturday)']);
-        if (inst.hybrid) fmts.push(['hybrid', 'Blended (once/week)']);
         if (inst.eightWeek) { fmts.push(['early8', 'Early 8-Week'], ['late8', 'Late 8-Week']); }
         if (inst.sevenWeek) { fmts.push(['early7', 'Early 7-Week'], ['late7', 'Late 7-Week']); }
         if (inst.dualCredit) fmts.push(['dualcredit', 'Dual Credit']);
+        if (!fmts.length) fmts.push(['16week', '16-Week']);
         fmts.forEach(([v, l]) => {
             const o = document.createElement('option');
             o.value = v; o.textContent = l;
             fmtSel.appendChild(o);
         });
-        row1.append(courseSel, fmtSel);
+        fmtSel.title = 'Session / part of term';
+        // How the section meets — the one place blended, evening block and online are chosen
+        const meetsSel = document.createElement('select');
+        MEETS_OPTIONS.filter(([, , allowed]) => allowed(inst)).forEach(([v, l]) => {
+            const o = document.createElement('option');
+            o.value = v; o.textContent = l;
+            meetsSel.appendChild(o);
+        });
+        meetsSel.title = 'How the section meets';
+        row1.append(courseSel, fmtSel, meetsSel);
 
         // Lecture / Lab picker — only for lab-teaching instructors, and only when the
         // chosen course carries a lab. Lab sections pick their own pattern; lectures
@@ -2304,6 +2682,7 @@ function createInstructorPool() {
             patSel.style.display = lab ? '' : 'none';
             feedSel.style.display = (!lab && deptLab) ? '' : 'none';
             rowLab.style.display = (lab || deptLab) ? '' : 'none';
+            meetsSel.style.display = lab ? 'none' : '';        // a lab's pattern is its own select
         };
         row1.append(compSel);
         const compIsLab = () => labCourses.length && compSel.value === 'lab';
@@ -2334,14 +2713,17 @@ function createInstructorPool() {
                 id,
                 type: courseSel.value,
                 instructor: inst.name,
-                session: (fmt === 'hybrid' || fmt === 'dualcredit') ? '16week' : fmt,
-                hybrid: !lab && fmt === 'hybrid',          // a lab is a lab; "blended" describes the lecture
+                session: fmt === 'dualcredit' ? '16week' : fmt,
+                hybrid: false,
                 dualCredit: fmt === 'dualcredit',
                 component: lab ? 'lab' : 'lecture'
             };
             if (lab) applyPattern(c, patSel.value);
-            else c.labSections = deptLabCourses().has(c.type) ? (parseInt(feedSel.value, 10) || 1) : 1;
-            return c;
+            else {
+                applyMeets(c, meetsSel.value);             // a lab is a lab; "meets" describes the lecture
+                c.labSections = deptLabCourses().has(c.type) ? (parseInt(feedSel.value, 10) || 1) : 1;
+            }
+            return normalizeCourse(c);
         };
         const draftCourse = () => buildCourse(-1);
 
@@ -2358,7 +2740,13 @@ function createInstructorPool() {
                 return;
             }
             timeSel.disabled = false;
-            const open = fillTimeSelect(timeSel, draftCourse(), day);
+            const draft = draftCourse();
+            const open = fillTimeSelect(timeSel, draft, day);
+            // Evening blocks default to the 6:30 row (6:30–9:20) unless that's taken
+            if (draft.span === 2 && !isLab(draft)) {
+                const eve = [...timeSel.options].find(o => o.value === '6:30-7:50' && !o.disabled);
+                if (eve) timeSel.value = eve.value;
+            }
             createBtn.disabled = open === 0;
             createBtn.textContent = 'Create and place';
         };
@@ -2376,10 +2764,13 @@ function createInstructorPool() {
             });
             if ([...daySel.options].some(o => o.value === prev)) daySel.value = prev;
             if (fmtSel.value === '14week' && !prev) daySel.value = 'Saturday';
+            if (meetsSel.value === 'online' && !compIsLab()) daySel.value = 'Online';   // nowhere else it can go
+            if (meetsSel.value === 'block' && !compIsLab() && !prev) daySel.value = 'Monday';
             refreshGenTimes();
         };
 
         fmtSel.addEventListener('change', refreshGenDays);
+        meetsSel.addEventListener('change', refreshGenDays);
         compSel.addEventListener('change', () => { refreshCompVisibility(); refreshGenDays(); });
         patSel.addEventListener('change', refreshGenDays);
         courseSel.addEventListener('change', () => { refreshCompVisibility(); refreshGenDays(); });
@@ -2501,9 +2892,17 @@ function updateFacultyPanel() {
         const labCount = new Set(Object.values(scheduledCourses).flat()
             .filter(c => c.instructor === inst.name && isLab(c)).map(c => c.id)).size;
         const pct = Math.min(100, Math.round((count / inst.max) * 100));
+        const placeholder = inst.max >= 99;      // "Staff (TBA)" from an import — unassigned hours, not a person's load
 
         const div = document.createElement('div');
         div.className = 'faculty-item';
+        if (placeholder) {
+            div.innerHTML = '<div class="faculty-name"></div><div class="faculty-load"></div>';
+            div.querySelector('.faculty-name').textContent = inst.name;
+            div.querySelector('.faculty-load').textContent = fmtHours(count) + ' hrs unassigned · ' + sections + ' section' + (sections !== 1 ? 's' : '');
+            (inst.type === 'FT' ? ftDiv : adjDiv).appendChild(div);
+            return;
+        }
         if (count > 0) div.classList.add('has-courses');
         if (count === inst.max) div.classList.add('full-load');
         if (count > inst.max) div.classList.add('over-load');
@@ -2514,9 +2913,13 @@ function updateFacultyPanel() {
         nameEl.textContent = inst.name;
         const loadEl = document.createElement('div');
         loadEl.className = 'faculty-load';
+        const onlineCount = new Set(Object.values(scheduledCourses).flat()
+            .filter(c => c.instructor === inst.name && c.online).map(c => c.id)).size;
         loadEl.textContent = fmtHours(count) + '/' + fmtHours(inst.max) + ' load hrs (' + pct + '%) · ' +
             sections + ' section' + (sections !== 1 ? 's' : '') +
             (labCount ? ' incl. ' + labCount + ' lab' + (labCount !== 1 ? 's' : '') : '') +
+            (onlineCount ? ', ' + onlineCount + ' online' : '') +
+            (inst.release ? ' + ' + fmtHours(inst.release) + ' release' : '') +
             (count > inst.max ? (inst.type === 'FT' && count <= inst.max + FT_OVERLOAD_HOURS ? ' — OVERLOAD' : ' — OVER') : '');
         const bar = document.createElement('div');
         bar.className = 'faculty-load-bar';
@@ -2578,8 +2981,24 @@ function renderAll() {
     updateStats();
     updateNeedsAnalysis();
     updateWeekendIndicator();
+    markRoomPressure();
+    if (viewMode === 'list') renderListView();
     applyLens();
     saveLocal();
+}
+
+// Distinct sections meeting in a grid slot (each one needs a room that period).
+function roomsAtSlot(day, time) {
+    const list = scheduledCourses[day + '|' + time] || [];
+    return new Set(list.map(c => c.id)).size;
+}
+function markRoomPressure() {
+    document.querySelectorAll('.dropzone').forEach(dz => {
+        const { day, time } = dz.dataset;
+        const over = roomsPerSlot && !isOffGridDay(day) && roomsAtSlot(day, time) > roomsPerSlot;
+        dz.classList.toggle('over-rooms', !!over);
+        dz.title = over ? roomsAtSlot(day, time) + ' sections here, ' + roomsPerSlot + ' classrooms' : '';
+    });
 }
 
 /* ============================================================
@@ -2596,7 +3015,7 @@ function updateNeedsAnalysis() {
     const labsNeeded = {};
     deptLabCourses().forEach(c => { courseCounts[c + ' (Lab)'] = 0; labsNeeded[c] = 0; });
     Object.values(scheduledCourses).forEach(list => list.forEach(c => { if (isLab(c)) courseCounts[c.type + ' (Lab)'] = courseCounts[c.type + ' (Lab)'] || 0; }));
-    const dayTotals = { Monday: 0, Tuesday: 0, Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0 };
+    const dayTotals = { Monday: 0, Tuesday: 0, Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Online: 0, 'Off-site': 0 };
     const seenIds = new Set();
     const seenDay = new Set();   // "id|day" — a two-row lab is one meeting on that day
 
@@ -2669,7 +3088,7 @@ function updateNeedsAnalysis() {
     // Instructor utilization
     html += '<div class="analysis-card" style="background:#f4f1f9;border-left-color:var(--dc-border);">' +
             '<h4 style="color:var(--dc-border);">Instructor Utilization</h4><div class="body">';
-    const utils = instructors.map(i => ({ name: i.name, n: loadHoursFor(i.name), max: i.max }))
+    const utils = instructors.filter(i => i.max < 99).map(i => ({ name: i.name, n: loadHoursFor(i.name), max: i.max }))
         .sort((a, b) => (a.n / a.max) - (b.n / b.max));
     utils.forEach(u => {
         const pct = Math.round((u.n / u.max) * 100);
@@ -2696,9 +3115,71 @@ function updateNeedsAnalysis() {
             '<h4 style="color:var(--amber);">Daily Distribution</h4><div class="body">';
     const maxDay = Math.max(...Object.values(dayTotals), 1);
     Object.entries(dayTotals).forEach(([day, n]) => {
-        html += barRow(day, n, maxDay, n === 0 ? 'var(--danger)' : 'var(--amber)', n + ' section' + (n !== 1 ? 's' : ''));
+        if (isOffGridDay(day) && n === 0) return;     // only show the buckets once something is in them
+        html += barRow(day, n, maxDay, (n === 0 && !isOffGridDay(day)) ? 'var(--danger)' : 'var(--amber)', n + ' section' + (n !== 1 ? 's' : ''));
     });
     html += '</div></div>';
+
+    // Seats & demand — only as good as the caps and last-term numbers entered
+    html += '<div class="analysis-card" style="background:#eef3f8;border-left-color:var(--navy-2);">' +
+            '<h4 style="color:var(--navy-2);">Seats &amp; Demand</h4><div class="body">';
+    const placed = [];
+    const seenP = new Set();
+    Object.entries(scheduledCourses).forEach(([key, list]) => list.forEach(c => {
+        if (seenP.has(c.id)) return; seenP.add(c.id);
+        placed.push({ c, key: anchorKeyFor(c.id) || key });
+    }));
+    const withCap = placed.filter(p => p.c.cap);
+    if (!withCap.length) {
+        html += 'Add a cap and last term\'s enrollment to sections (✎ on a card, or the List view) and this panel will show seats offered, fill rates, and the slots that historically don\'t make.';
+    } else {
+        const perCourse = {};
+        withCap.forEach(({ c }) => {
+            const k = c.type + (isLab(c) ? ' (Lab)' : '');
+            const e = perCourse[k] = perCourse[k] || { n: 0, seats: 0, prior: 0, priorSeats: 0 };
+            e.n++; e.seats += c.cap;
+            if (c.prior != null) { e.prior += c.prior; e.priorSeats += c.cap; }
+        });
+        Object.entries(perCourse).sort().forEach(([k, e]) => {
+            let val = e.n + ' sec · ' + e.seats + ' seats';
+            let color = 'var(--navy-2)';
+            if (e.priorSeats) {
+                const pct = Math.round((e.prior / e.priorSeats) * 100);
+                val += ' · ' + pct + '% fill last term';
+                color = pct < 60 ? 'var(--danger)' : pct < 80 ? 'var(--amber)' : 'var(--ok)';
+            }
+            html += barRow(k, e.seats, Math.max(...Object.values(perCourse).map(x => x.seats), 1), color, val);
+        });
+        const weak = placed.filter(({ c }) => c.cap && c.prior != null && c.prior / c.cap < 0.5)
+            .map(({ c, key }) => {
+                const [d, t] = key.split('|');
+                return c.type + ' ' + (isOffGridDay(d) ? d : daysLabelFor(c, d) + ' ' + rangeLabel(spanTimes(c, d, t) || [t])) +
+                       ' (' + c.prior + '/' + c.cap + ')';
+            });
+        if (weak.length) {
+            html += '<div style="margin-top:8px;color:var(--danger);font-weight:600;">⚠ Under 50% last term: ' + esc(weak.join('; ')) + '</div>';
+        }
+        const totalSeats = withCap.reduce((s, { c }) => s + c.cap, 0);
+        const noCap = placed.length - withCap.length;
+        html += '<div style="margin-top:8px;">' + totalSeats + ' seats across ' + withCap.length + ' sections' +
+                (noCap ? ' · ' + noCap + ' section' + (noCap !== 1 ? 's' : '') + ' without a cap' : '') + '</div>';
+    }
+    html += '</div></div>';
+
+    // Room pressure — a slot-density sanity check, not room assignment
+    if (roomsPerSlot) {
+        html += '<div class="analysis-card" style="background:#f7f0ef;border-left-color:var(--danger);">' +
+                '<h4 style="color:var(--danger);">Room Pressure (' + roomsPerSlot + ' classrooms per slot)</h4><div class="body">';
+        const over = [];
+        days.forEach(day => getTimeSlotsForDay(day).forEach(time => {
+            const n = roomsAtSlot(day, time);
+            if (n > roomsPerSlot) over.push(day.slice(0, 3) + ' ' + time + ': ' + n + ' sections');
+        }));
+        html += over.length
+            ? '<div style="color:var(--danger);font-weight:600;">⚠ Over capacity:</div>' + over.map(esc).join('<br>')
+            : '<span style="color:var(--ok);">No slot has more sections than classrooms.</span>';
+        html += '</div></div>';
+    }
 
     host.innerHTML = html;
 }
@@ -2729,13 +3210,14 @@ function updateNeedsAnalysis() {
 function csvField(v) { return '"' + String(v ?? '').replace(/"/g, '""') + '"'; }
 function csvRow(fields) { return fields.map(csvField).join(',') + '\n'; }
 
-const CSV_SCHEDULE_HEADER = ['Time', 'Days', 'Course', 'Component', 'Instructor', 'Session', 'Blended', 'DualCredit', 'LabSections'];
-const CSV_ROSTER_HEADER = ['Name', 'Type', 'Max Load Hours', 'Courses', 'Formats', 'Teaches Labs', 'Lab Length', 'Lab Meets', 'Lab Courses'];
+const CSV_SCHEDULE_HEADER = ['Time', 'Days', 'Course', 'Section', 'Component', 'Instructor', 'Session', 'Meets', 'Blended', 'DualCredit', 'LabSections', 'Cap', 'Last Term Enrolled'];
+const CSV_ROSTER_HEADER = ['Name', 'Type', 'Max Load Hours', 'Release Hours', 'Courses', 'Formats', 'Unavailable', 'Teaches Labs', 'Lab Length', 'Lab Meets', 'Lab Courses'];
 const CSV_COURSE_HEADER = ['Course', 'Lecture Load Hours', 'Lab Load Hours'];
 const FORMAT_FLAGS = [['sixteenWeek', '16-Week'], ['fourteenWeek', '14-Week'], ['hybrid', 'Blended'],
-                      ['eightWeek', '8-Week'], ['sevenWeek', '7-Week'], ['dualCredit', 'Dual Credit']];
+                      ['eightWeek', '8-Week'], ['sevenWeek', '7-Week'], ['dualCredit', 'Dual Credit'],
+                      ['online', 'Online'], ['evening', 'Evening Block']];
 
-// Days column for a placed section: "M/W", "T/Th", or a single day name.
+// Days column for a placed section: "M/W", "T/Th", a single day name, "Online" or "Off-site".
 function daysLabelFor(course, anchorDay) {
     const pd = pairedDays(course, anchorDay);
     if (pd.length === 2) return pd[0] === 'Monday' ? 'M/W' : 'T/Th';
@@ -2743,10 +3225,11 @@ function daysLabelFor(course, anchorDay) {
 }
 
 function scheduleRow(course, time, daysLabel) {
-    return csvRow([time, daysLabel, course.type, componentLabel(course), course.instructor,
-                   SESSION_LABELS[course.session] || '16-Week',
+    return csvRow([time, daysLabel, course.type, course.section || '', componentLabel(course), course.instructor,
+                   SESSION_LABELS[course.session] || '16-Week', meetsLabel(course),
                    course.hybrid ? 'Yes' : 'No', course.dualCredit ? 'Yes' : 'No',
-                   isLab(course) ? '' : String(course.labSections || 1)]);
+                   isLab(course) ? '' : String(course.labSections || 1),
+                   course.cap == null ? '' : String(course.cap), course.prior == null ? '' : String(course.prior)]);
 }
 
 function exportToCSV() {
@@ -2769,12 +3252,12 @@ function exportToCSV() {
             if (exported.has(course.id)) return;
             exported.add(course.id);
             const [day, time] = anchorKeyFor(course.id).split('|');
-            anchors.push({ course, day, time, rank: order.indexOf(time) * 10 + days.indexOf(day) });
+            anchors.push({ course, day, time, rank: isOffGridDay(day) ? 9000 + OFFGRID_DAYS.indexOf(day) : order.indexOf(time) * 10 + days.indexOf(day) });
         });
     }
     anchors.sort((a, b) => a.rank - b.rank || a.course.instructor.localeCompare(b.course.instructor));
     anchors.forEach(({ course, day, time }) => {
-        const timeLabel = rangeLabel(spanTimes(course, day, time) || [time]);
+        const timeLabel = isOffGridDay(day) ? '' : rangeLabel(spanTimes(course, day, time) || [time]);
         out += scheduleRow(course, timeLabel, daysLabelFor(course, day));
     });
 
@@ -2795,7 +3278,8 @@ function exportToCSV() {
     out += csvRow(CSV_ROSTER_HEADER);
     instructors.forEach(inst => {
         const fmts = FORMAT_FLAGS.filter(([k]) => inst[k]).map(([, label]) => label).join('; ');
-        out += csvRow([inst.name, inst.type, fmtHours(inst.max), inst.courses.join('; '), fmts,
+        out += csvRow([inst.name, inst.type, fmtHours(inst.max), fmtHours(inst.release || 0), inst.courses.join('; '), fmts,
+                       (inst.unavailable || []).join('; '),
                        inst.hasLabs ? 'Yes' : 'No',
                        inst.hasLabs ? (inst.labSpan === 1 ? 'Single' : 'Double') : '',
                        inst.hasLabs ? (inst.labMeets === 'twice' ? 'Twice' : 'Once') : '',
@@ -2890,7 +3374,8 @@ function importCSV(ev) {
                     courseMarkerIdx = i;
                 }
             }
-            if (scheduleHeaderIdx < 0) throw new Error('missing columns');
+            // Not this tool's own layout → treat it as a registrar / Colleague export and ask how the columns map
+            if (scheduleHeaderIdx < 0) { openRegistrarImport(rows, file.name); return; }
 
             const header = rows[scheduleHeaderIdx].map(lc);
             const col = (...names) => Math.max(...names.map(n => header.indexOf(n)));
@@ -2898,7 +3383,8 @@ function importCSV(ev) {
                   iInst = col('instructor'), iComp = col('component', 'type'),
                   iSession = col('session', 'session type'),
                   iBlend = col('blended', 'hybrid'), iDC = col('dualcredit', 'dual credit'),
-                  iFeeds = col('labsections', 'lab sections');
+                  iFeeds = col('labsections', 'lab sections'),
+                  iSec = col('section'), iMeets = col('meets'), iCap = col('cap'), iPrior = col('last term enrolled', 'prior');
 
             // --- Roster block (optional, present in files this tool wrote) ---
             const roster = {};
@@ -2910,7 +3396,8 @@ function importCSV(ev) {
                 const rName = rc('name', 'instructor'), rType = rc('type'),
                       rMaxHours = rc('max load hours'), rMaxSections = rc('max load', 'max'),
                       rCourses = rc('courses'), rFmts = rc('formats'), rLabs = rc('teaches labs', 'labs'),
-                      rLen = rc('lab length'), rMeets = rc('lab meets'), rLabCourses = rc('lab courses');
+                      rLen = rc('lab length'), rMeets = rc('lab meets'), rLabCourses = rc('lab courses'),
+                      rRelease = rc('release hours'), rUnavail = rc('unavailable');
                 const rosterEnd = courseMarkerIdx > rosterMarkerIdx ? courseMarkerIdx : rows.length;
                 if (rName >= 0) {
                     for (let i = hIdx + 1; i < rosterEnd; i++) {
@@ -2931,6 +3418,9 @@ function importCSV(ev) {
                             sixteenWeek: has('16-Week') || !fmts.length, fourteenWeek: has('14-Week'),
                             hybrid: has('Blended') || has('Hybrid'),
                             eightWeek: has('8-Week'), sevenWeek: has('7-Week'), dualCredit: has('Dual Credit'),
+                            online: has('Online'), evening: has('Evening Block'),
+                            release: rRelease >= 0 ? (parseFloat(r[rRelease]) || 0) : 0,
+                            unavailable: rUnavail >= 0 ? splitList(r[rUnavail]).filter(k => k.includes('|')) : [],
                             hasLabs,
                             labSpan: rLen >= 0 && /^single/i.test(r[rLen] || '') ? 1 : 2,
                             labMeets: rMeets >= 0 && /^twice/i.test(r[rMeets] || '') ? 'twice' : 'once',
@@ -3009,10 +3499,34 @@ function importCSV(ev) {
 
                 const course = { id: courseIdCounter++, type, instructor: name, session, hybrid, dualCredit, component: lab ? 'lab' : 'lecture' };
                 if (lab) { course.labSpan = inst.labSpan; course.labMeets = inst.labMeets; }
-                else course.labSections = Math.max(1, (iFeeds >= 0 && parseInt(v[iFeeds], 10)) || 1);
+                else {
+                    course.labSections = Math.max(1, (iFeeds >= 0 && parseInt(v[iFeeds], 10)) || 1);
+                    const meetsText = iMeets >= 0 ? lc(v[iMeets]) : '';
+                    if (/online/.test(meetsText) || /^online$/i.test(dayField)) applyMeets(course, 'online');
+                    else if (/evening/.test(meetsText)) applyMeets(course, 'block');
+                    else if (/blended/.test(meetsText) || hybrid) applyMeets(course, 'once');
+                    if (course.online) inst.online = true;
+                    if (course.span === 2) inst.evening = true;
+                }
+                if (iSec >= 0) course.section = v[iSec] || '';
+                if (iCap >= 0 && v[iCap] !== '') course.cap = parseInt(v[iCap], 10);
+                if (iPrior >= 0 && v[iPrior] !== '') course.prior = parseInt(v[iPrior], 10);
+                normalizeCourse(course);
 
                 if (!instructorCourses[name]) instructorCourses[name] = [];
                 instructorCourses[name].push(course);
+
+                // Online / off-site rows go straight to their bucket (an "Unplaced" online section stays in the pool)
+                const unplacedRow = /^unplaced$/i.test(dayField);
+                if (/^online$/i.test(dayField) || (course.online && dayField && !unplacedRow)) {
+                    applyMeets(course, 'online');
+                    (scheduledCourses['Online|' + OFFGRID_TIME] = scheduledCourses['Online|' + OFFGRID_TIME] || []).push(course);
+                    placed++; continue;
+                }
+                if (/^off-?site$/i.test(dayField) && course.dualCredit) {
+                    (scheduledCourses['Off-site|' + OFFGRID_TIME] = scheduledCourses['Off-site|' + OFFGRID_TIME] || []).push(course);
+                    placed++; continue;
+                }
 
                 // Unplaced rows just go to the pool
                 if (!time || !dayField || /^unplaced$/i.test(dayField)) { pooled++; continue; }
@@ -3022,6 +3536,13 @@ function importCSV(ev) {
                 else if (/^t\/?th?$/i.test(dayField)) anchorDay = 'Tuesday';
                 else anchorDay = days.find(d => d.toLowerCase() === dayField.toLowerCase() || d.slice(0, 3).toLowerCase() === dayField.toLowerCase());
                 if (!anchorDay) { pooled++; continue; }
+                // A single weekday on a lecture row means it meets once; "6:30-9:20 PM" means a two-row block
+                if (!lab && !isOffGridDay(anchorDay) && anchorDay !== 'Friday' && anchorDay !== 'Saturday' && /^(m|t|w|th|r|mon|tue|wed|thu|monday|tuesday|wednesday|thursday)$/i.test(dayField)) {
+                    if (!course.once) applyMeets(course, 'once');
+                    const endPart = time.replace(/\s+/g, '').split('-')[1] || '';
+                    if (/^9:20/.test(endPart) && /^6:30/.test(time.trim())) { applyMeets(course, 'block'); inst.evening = true; }
+                    else if (course.hybrid) inst.hybrid = true;
+                }
 
                 // A lab imported from an M/W or T/Th row meets twice regardless of the roster default
                 if (lab) course.labMeets = /^(m\/?w|t\/?th?)$/i.test(dayField) ? 'twice' : 'once';
@@ -3066,8 +3587,600 @@ function importCSV(ev) {
             if (skipped) msg += '; ' + skipped + ' row(s) skipped';
             toast(msg);
         } catch (err) {
-            toast('Could not read that CSV. Expected columns: Time, Days, Course, Instructor.', 'error');
+            console.error(err);
+            toast('Could not read that CSV. Expected columns: Time, Days, Course, Instructor — or a registrar export with a header row.', 'error');
         }
+    };
+    reader.readAsText(file);
+}
+
+/* ============================================================
+   REGISTRAR IMPORT — any section export with a header row.
+   The chair maps columns once; days and times are normalized
+   ("MW", "TR", "T/TH", "9:30AM-10:50AM", "0930-1050", "Online")
+   and rows land on the grid, in the Online/Off-site buckets, or
+   in the pool when a time isn't on this grid.
+   ============================================================ */
+const REG_FIELDS = [
+    ['course',  'Course (e.g. GOVT-2305)', /^(course|crs|subj.*[\/ ]?(num|no|crs|course)|course ?(id|code)|class|course ?name|short ?title)$/i, true],
+    ['subject', 'Subject (if separate)',    /^(subj(ect)?|dept|discipline|prefix)$/i],
+    ['number',  'Course number (if separate)', /^(course ?(num|no|number)|catalog( ?nbr| ?number)?|num(ber)?|crs ?no)$/i],
+    ['section', 'Section #',               /^(sec(tion)?( ?(num|no|number|id))?|sect)$/i],
+    ['instructor', 'Instructor',           /^(instr(uctor)?( ?name)?|faculty|teacher|primary ?instr(uctor)?|name)$/i, true],
+    ['days',    'Days (MW, TR, M…)',        /^(days?|meeting ?days?|day ?pattern|pattern)$/i],
+    ['start',   'Start time',              /^(start( ?time)?|begin( ?time)?|time ?start|from)$/i],
+    ['end',     'End time',                /^(end( ?time)?|stop( ?time)?|time ?end|to)$/i],
+    ['time',    'Time (one column, e.g. 9:30-10:50)', /^(times?|meeting ?times?|time ?range)$/i],
+    ['session', 'Part of term / session',  /^(session|part ?of ?term|pot|term ?part|sess(ion)? ?code|length)$/i],
+    ['modality', 'Delivery / modality',    /^(modality|delivery|instr(uction)? ?(method|mode)|format|location ?type|campus)$/i],
+    ['cap',     'Capacity',                /^(cap(acity)?|max ?(enroll|seats?)|seats?|limit)$/i],
+    ['enrolled', 'Enrolled (last term)',   /^(enr(oll)?(ed|ment)?|act(ual)?|count|students|headcount)$/i]
+];
+
+function guessColumn(headers, regex) {
+    const i = headers.findIndex(h => regex.test(h.trim()));
+    return i;
+}
+
+// "MW", "M W", "M/W", "TR", "T/TH", "TTh", "MWF", "W", "Sat" → list of grid day names
+function parseDaysText(txt) {
+    let s = String(txt || '').toUpperCase().replace(/[^A-Z]/g, '');
+    if (!s) return [];
+    if (/ONLINE|WEB|ASYNC|ARR|TBA/.test(s)) return ['Online'];
+    s = s.replace(/THURS?(DAY)?/g, 'R').replace(/TUES?(DAY)?/g, 'T').replace(/MON(DAY)?/g, 'M')
+         .replace(/WED(NESDAY)?/g, 'W').replace(/FRI(DAY)?/g, 'F').replace(/SAT(URDAY)?/g, 'S').replace(/SUN(DAY)?/g, 'U')
+         .replace(/TH/g, 'R');
+    const map = { M: 'Monday', T: 'Tuesday', W: 'Wednesday', R: 'Thursday', F: 'Friday', S: 'Saturday' };
+    const out = [];
+    s.split('').forEach(ch => { if (map[ch] && !out.includes(map[ch])) out.push(map[ch]); });
+    return out;
+}
+
+// "9:30AM", "9:30 am", "0930", "930", "09:30:00", "2:00PM", "14:00" → minutes since midnight
+function parseClock(txt) {
+    let s = String(txt || '').trim().toLowerCase().replace(/\s+/g, '');
+    if (!s || /tba|arr|online/.test(s)) return null;
+    const pm = /p/.test(s), am = /a/.test(s);
+    s = s.replace(/[ap]\.?m?\.?/g, '');
+    let h, m;
+    const colon = s.match(/^(\d{1,2}):(\d{2})/);
+    if (colon) { h = +colon[1]; m = +colon[2]; }
+    else if (/^\d{3,4}$/.test(s)) { h = Math.floor(+s / 100); m = +s % 100; }
+    else return null;
+    if (pm && h < 12) h += 12;
+    if (am && h === 12) h = 0;
+    // No am/pm given: the grid starts at 8:00, so 1:00–7:59 means afternoon/evening
+    if (!pm && !am && h >= 1 && h < 8) h += 12;
+    return h * 60 + m;
+}
+
+// The grid row whose start matches a minutes-since-midnight value (within 15 min).
+function slotStartingAt(day, mins) {
+    if (mins == null) return null;
+    const slots = getTimeSlotsForDay(day);
+    let best = null, bestDiff = 16;
+    slots.forEach(t => {
+        const sm = parseClock(t.split('-')[0] + (/PM$/.test(t) || +t.split(':')[0] < 8 ? 'pm' : ''));
+        const d = Math.abs(sm - mins);
+        if (d < bestDiff) { bestDiff = d; best = t; }
+    });
+    return best;
+}
+function slotEndMinutes(day, t) {
+    const end = t.split('-')[1];
+    return parseClock(end + (/PM$/.test(t) || +end.split(':')[0] < 8 ? 'pm' : ''));
+}
+
+function guessSession(txt) {
+    const s = String(txt || '').toLowerCase();
+    if (/14/.test(s)) return '14week';
+    if (/(early|1st|first|a\b|^1$)/.test(s) && /8/.test(s)) return 'early8';
+    if (/(late|2nd|second|b\b|^2$)/.test(s) && /8/.test(s)) return 'late8';
+    if (/(early|1st|first|a\b)/.test(s) && /7/.test(s)) return 'early7';
+    if (/(late|2nd|second|b\b)/.test(s) && /7/.test(s)) return 'late7';
+    if (/^(8|8w|8wk|8-week)$/.test(s.trim())) return 'early8';
+    return '16week';
+}
+
+function openRegistrarImport(rows, fileName) {
+    const nonEmpty = r => r.some(f => f !== '');
+    const data = rows.filter(nonEmpty);
+    if (data.length < 2) { toast('That file has no data rows.', 'error'); return; }
+    // The header is the first row with at least three non-empty cells
+    const hIdx = data.findIndex(r => r.filter(f => f !== '').length >= 3);
+    const headers = data[hIdx].map(h => String(h || '').trim());
+    const body = data.slice(hIdx + 1);
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    const modal = document.createElement('div');
+    modal.className = 'modal modal-wide';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-label', 'Map registrar columns');
+
+    let html = '<h2>Import ' + esc(fileName || 'CSV') + '</h2>' +
+        '<p style="font-size:13px;color:var(--muted);margin-bottom:12px;">This isn\'t a file the builder wrote, so tell it which column is which. ' +
+        body.length + ' rows found. Course and Instructor are required; everything else is optional.</p>' +
+        '<div class="map-grid">';
+    const guesses = {};
+    REG_FIELDS.forEach(([key, , regex]) => { guesses[key] = guessColumn(headers, regex); });
+    // "Subject" + "Course Number" files: don't let the combined Course field grab the number column
+    if (guesses.subject >= 0 && guesses.number >= 0 && guesses.course === guesses.number) guesses.course = -1;
+    if (guesses.start >= 0 && guesses.time === guesses.start) guesses.time = -1;
+    REG_FIELDS.forEach(([key, label, , required]) => {
+        const guess = guesses[key];
+        html += '<label class="map-row"><span>' + esc(label) + (required ? ' <b style="color:var(--danger)">*</b>' : '') + '</span>' +
+                '<select data-field="' + key + '"><option value="">— not in file —</option>' +
+                headers.map((h, i) => '<option value="' + i + '"' + (i === guess ? ' selected' : '') + '>' + esc(h || '(column ' + (i + 1) + ')') + '</option>').join('') +
+                '</select></label>';
+    });
+    html += '</div>' +
+        '<div class="form-group" style="margin-top:12px;"><label class="check-label"><input type="checkbox" id="regReplace" checked> Replace the current schedule (uncheck to add these sections to what\'s already here)</label></div>' +
+        '<div class="form-group"><label class="check-label"><input type="checkbox" id="regEnrolledIsPrior" checked> Treat the Enrolled column as last term\'s enrollment (you are rolling a past term forward)</label></div>' +
+        '<div id="regPreview" class="reg-preview"></div>' +
+        '<div class="modal-actions"><button class="quiet" id="regCancel">Cancel</button><button id="regGo">Import</button></div>';
+    modal.innerHTML = html;
+    document.body.append(backdrop, modal);
+
+    const close = () => { backdrop.remove(); modal.remove(); modalCleanup = null; };
+    modalCleanup = close;
+    backdrop.addEventListener('click', close);
+    modal.querySelector('#regCancel').addEventListener('click', close);
+
+    const mapping = () => {
+        const m = {};
+        modal.querySelectorAll('select[data-field]').forEach(s => { m[s.dataset.field] = s.value === '' ? -1 : +s.value; });
+        return m;
+    };
+    const cell = (r, i) => i >= 0 ? String(r[i] || '').trim() : '';
+    // "GOVT2305" → "GOVT-2305"; "GOVT-2305-001" → "GOVT-2305"; "GOVT 2305" → "GOVT-2305"
+    const normalizeCode = raw => {
+        raw = String(raw || '').toUpperCase().replace(/\s+/g, '');
+        const mm = raw.match(/^([A-Z]{2,5})-?(\d{4}[A-Z]?)/);
+        return mm ? mm[1] + '-' + mm[2] : raw.split('-').slice(0, 2).join('-');
+    };
+    const courseCodeOf = (r, m) => {
+        if (m.course >= 0 && cell(r, m.course)) return normalizeCode(cell(r, m.course));
+        const subj = cell(r, m.subject).toUpperCase(), num = cell(r, m.number);
+        if (subj && num) return normalizeCode(subj + '-' + num);
+        if (subj && /\d{4}/.test(subj)) return normalizeCode(subj);   // the "subject" cell already holds the full code
+        return '';
+    };
+
+    const preview = () => {
+        const m = mapping();
+        const host = modal.querySelector('#regPreview');
+        const sample = body.slice(0, 5).map(r => {
+            const days = parseDaysText(cell(r, m.days));
+            const timeTxt = m.time >= 0 ? cell(r, m.time) : (cell(r, m.start) + (cell(r, m.end) ? '-' + cell(r, m.end) : ''));
+            return '<tr><td>' + esc(courseCodeOf(r, m) || '?') + '</td><td>' + esc(cell(r, m.section)) + '</td><td>' + esc(cell(r, m.instructor) || 'Staff') +
+                   '</td><td>' + esc(days.join('/') || '—') + '</td><td>' + esc(timeTxt || '—') + '</td><td>' +
+                   esc(SESSION_LABELS[guessSession(cell(r, m.session))]) + '</td></tr>';
+        }).join('');
+        host.innerHTML = '<table class="section-table"><thead><tr><th>Course</th><th>Sec</th><th>Instructor</th><th>Days</th><th>Time</th><th>Session</th></tr></thead><tbody>' + sample + '</tbody></table>' +
+                         '<div style="font-size:11px;color:var(--muted);margin-top:4px;">Preview of the first ' + Math.min(5, body.length) + ' rows as the builder reads them.</div>';
+    };
+    modal.querySelectorAll('select[data-field]').forEach(s => s.addEventListener('change', preview));
+    preview();
+
+    modal.querySelector('#regGo').addEventListener('click', () => {
+        const m = mapping();
+        if (m.course < 0 && !(m.subject >= 0 && m.number >= 0)) { toast('Pick the Course column (or Subject + Course number).', 'warn'); return; }
+        const replace = modal.querySelector('#regReplace').checked;
+        const enrolledIsPrior = modal.querySelector('#regEnrolledIsPrior').checked;
+
+        pushUndo();
+        if (replace) {
+            Object.keys(scheduledCourses).forEach(k => delete scheduledCourses[k]);
+            Object.keys(instructorCourses).forEach(k => delete instructorCourses[k]);
+        }
+
+        let placed = 0, pooled = 0, skipped = 0;
+        const newNames = new Set();
+        // "Lovelace, Ada" / "Lovelace Ada" / "Ada Lovelace" are the same roster entry
+        const tokens = n => String(n).toLowerCase().replace(/[.,]/g, ' ').split(/\s+/).filter(Boolean).sort().join(' ');
+        const matchRoster = raw => {
+            const exact = findInstructor(raw);
+            if (exact) return exact;
+            const t = tokens(raw);
+            return instructors.find(i => tokens(i.name) === t) || null;
+        };
+        body.forEach(r => {
+            const type = courseCodeOf(r, m);
+            if (!type) { skipped++; return; }
+            const rawName = cell(r, m.instructor);
+            let inst = rawName ? matchRoster(rawName) : null;
+            const name = inst ? inst.name : (rawName || 'Staff (TBA)');
+            if (!inst) inst = findInstructor(name);
+            if (!inst) {
+                inst = normalizeInstructor({
+                    name, type: /^staff/i.test(name) ? 'ADJ' : 'ADJ', max: DEFAULT_LOAD.ADJ, courses: [type],
+                    sixteenWeek: true, fourteenWeek: false, hybrid: false, eightWeek: false, sevenWeek: false, dualCredit: false
+                });
+                if (/^staff/i.test(name)) inst.max = 99;        // a placeholder, not a person — no load ceiling
+                instructors.push(inst);
+                newNames.add(name);
+            }
+            if (!inst.courses.includes(type)) inst.courses.push(type);
+
+            const modality = cell(r, m.modality).toLowerCase();
+            const dayList = parseDaysText(cell(r, m.days));
+            const online = dayList[0] === 'Online' || /online|web|internet|async|virtual|distance/.test(modality) && !dayList.length;
+            const dc = /dual|high ?school|hs\b|ecshs|collegiate/.test(modality);
+            const session = guessSession(cell(r, m.session));
+
+            const course = normalizeCourse({
+                id: courseIdCounter++, type, instructor: name, session, dualCredit: dc, component: 'lecture',
+                section: cell(r, m.section), hybrid: false
+            });
+            const cap = parseInt(cell(r, m.cap), 10), enr = parseInt(cell(r, m.enrolled), 10);
+            if (Number.isFinite(cap)) course.cap = cap;
+            if (Number.isFinite(enr)) course.prior = enrolledIsPrior ? enr : null;
+            if (session !== '16week') { if (/8/.test(session)) inst.eightWeek = true; if (/7/.test(session)) inst.sevenWeek = true; if (session === '14week') inst.fourteenWeek = true; }
+            if (dc) inst.dualCredit = true;
+
+            if (!instructorCourses[name]) instructorCourses[name] = [];
+            instructorCourses[name].push(course);
+
+            if (online) {
+                applyMeets(course, 'online'); inst.online = true;
+                (scheduledCourses['Online|' + OFFGRID_TIME] = scheduledCourses['Online|' + OFFGRID_TIME] || []).push(course);
+                placed++; return;
+            }
+            if (dc && (!dayList.length || /off|high|hs/.test(modality))) {
+                (scheduledCourses['Off-site|' + OFFGRID_TIME] = scheduledCourses['Off-site|' + OFFGRID_TIME] || []).push(course);
+                placed++; return;
+            }
+
+            // Times: one column or start/end
+            let startMin, endMin;
+            if (m.time >= 0 && cell(r, m.time)) {
+                const parts = cell(r, m.time).split(/\s*[-–]\s*/);
+                startMin = parseClock(parts[0]); endMin = parseClock(parts[1]);
+                // "9:30-10:50 AM": the am/pm at the end applies to both halves
+                if (parts[1] && /p/i.test(parts[1]) && !/[ap]/i.test(parts[0]) && startMin != null && startMin < 12 * 60 && startMin + 60 < endMin) startMin += 12 * 60;
+            } else {
+                startMin = parseClock(cell(r, m.start)); endMin = parseClock(cell(r, m.end));
+            }
+            if (!dayList.length || startMin == null) { pooled++; return; }
+
+            // Day pattern → anchor day and meets
+            const hasMW = dayList.includes('Monday') && dayList.includes('Wednesday');
+            const hasTR = dayList.includes('Tuesday') && dayList.includes('Thursday');
+            let anchorDay;
+            if (hasMW) anchorDay = 'Monday';
+            else if (hasTR) anchorDay = 'Tuesday';
+            else anchorDay = dayList[0];
+            if (!days.includes(anchorDay)) { pooled++; return; }
+            const once = !(hasMW || hasTR) && anchorDay !== 'Friday' && anchorDay !== 'Saturday';
+            if (once) {
+                applyMeets(course, 'once');
+                if (modality && /blend|hybrid/.test(modality)) inst.hybrid = true;
+            }
+            const startSlot = slotStartingAt(anchorDay, startMin);
+            if (!startSlot) { pooled++; return; }
+            // A once-a-week section that runs past the row's end is a block (6:30–9:15 → two rows)
+            if (once && endMin != null && endMin > slotEndMinutes(anchorDay, startSlot) + 20) {
+                applyMeets(course, 'block'); inst.evening = true;
+            } else if (once) {
+                inst.hybrid = true;
+            }
+            normalizeCourse(course);
+            const keys = occupiedKeys(course, anchorDay, startSlot);
+            if (!keys) { pooled++; return; }
+            keys.forEach(k => { (scheduledCourses[k] = scheduledCourses[k] || []).push(course); });
+            placed++;
+        });
+
+        close();
+        normalizeState();
+        updateInstructorList();
+        createInstructorPool();
+        buildLensChips();
+        renderAll();
+        let msg = 'Imported ' + placed + ' placed' + (pooled ? ' + ' + pooled + ' unplaced (time not on this grid)' : '') + ' section(s)';
+        if (newNames.size) msg += ' — added ' + newNames.size + ' instructor(s) not in the roster (check type and max load in Setup)';
+        if (skipped) msg += '; ' + skipped + ' row(s) skipped (no course)';
+        toast(msg);
+    });
+}
+
+/* ============================================================
+   SECTION DETAILS — section #, cap, last term's enrollment
+   ============================================================ */
+function openSectionModal(courseId) {
+    const course = findCourseAnywhere(courseId);
+    if (!course) return;
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-label', 'Section details');
+    modal.innerHTML =
+        '<h2>' + esc(course.type + (isLab(course) ? ' Lab' : '') + sessionTag(course)) + ' <span style="font-size:13px;color:var(--muted);">' + esc(course.instructor) + '</span></h2>' +
+        '<div class="form-grid">' +
+        '<div class="form-group"><label>Section #</label><input type="text" id="secNum" placeholder="e.g., 001"></div>' +
+        '<div class="form-group"><label>Cap (seats)</label><input type="number" id="secCap" min="0" max="999"></div>' +
+        '<div class="form-group"><label>Enrolled last term <span style="color:var(--muted);">(in this slot)</span></label><input type="number" id="secPrior" min="0" max="999"></div>' +
+        '</div>' +
+        '<p style="font-size:12px;color:var(--muted);">Cap and last-term numbers feed the Seats &amp; Demand card and flag sections that ran under half full.</p>' +
+        '<div class="modal-actions"><button class="quiet" id="secCancel">Cancel</button><button id="secSave">Save</button></div>';
+    document.body.append(backdrop, modal);
+    modal.querySelector('#secNum').value = course.section || '';
+    modal.querySelector('#secCap').value = course.cap == null ? '' : course.cap;
+    modal.querySelector('#secPrior').value = course.prior == null ? '' : course.prior;
+    const close = () => { backdrop.remove(); modal.remove(); modalCleanup = null; };
+    modalCleanup = close;
+    backdrop.addEventListener('click', close);
+    modal.querySelector('#secCancel').addEventListener('click', close);
+    const save = () => {
+        pushUndo();
+        updateCourseEverywhere(course.id, {
+            section: modal.querySelector('#secNum').value.trim(),
+            cap: modal.querySelector('#secCap').value === '' ? null : parseInt(modal.querySelector('#secCap').value, 10),
+            prior: modal.querySelector('#secPrior').value === '' ? null : parseInt(modal.querySelector('#secPrior').value, 10)
+        });
+        close();
+        renderAll();
+    };
+    modal.querySelector('#secSave').addEventListener('click', save);
+    modal.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); } });
+    modal.querySelector('#secNum').focus();
+}
+
+// A placed section is the same object in every slot it occupies; the pool keeps its own copy.
+function updateCourseEverywhere(id, patch) {
+    Object.values(scheduledCourses).forEach(list => list.forEach(c => { if (c.id === id) Object.assign(c, patch); }));
+    Object.values(instructorCourses).forEach(list => list.forEach(c => { if (c.id === id) Object.assign(c, patch); }));
+}
+
+/* ============================================================
+   LIST VIEW — every section as a row; sort by any column
+   ============================================================ */
+let listSort = { key: 'instructor', dir: 1 };
+
+function allSectionRows() {
+    const rows = [];
+    const seen = new Set();
+    Object.entries(scheduledCourses).forEach(([key, list]) => list.forEach(c => {
+        if (seen.has(c.id)) return; seen.add(c.id);
+        const anchor = anchorKeyFor(c.id) || key;
+        const [d, t] = anchor.split('|');
+        rows.push({
+            c, placed: true, day: d, time: t,
+            daysLabel: isOffGridDay(d) ? d : daysLabelFor(c, d),
+            timeLabel: isOffGridDay(d) ? '' : rangeLabel(spanTimes(c, d, t) || [t]),
+            rank: ALL_DAYS.indexOf(d) * 100 + Math.max(0, canonicalSlotOrder().indexOf(t))
+        });
+    }));
+    instructors.forEach(inst => (instructorCourses[inst.name] || []).forEach(c => {
+        if (seen.has(c.id) || c.auto) return; seen.add(c.id);
+        rows.push({ c, placed: false, day: '', time: '', daysLabel: 'Unplaced', timeLabel: '', rank: 99999 });
+    }));
+    return rows;
+}
+
+const LIST_COLUMNS = [
+    ['instructor', 'Instructor', r => r.c.instructor],
+    ['type',       'Course',     r => r.c.type],
+    ['section',    'Sec #',      r => r.c.section || ''],
+    ['component',  'Comp',       r => componentLabel(r.c)],
+    ['session',    'Session',    r => SESSION_LABELS[r.c.session] || '16-Week'],
+    ['meets',      'Meets',      r => meetsLabel(r.c)],
+    ['days',       'Days',       r => r.rank],
+    ['time',       'Time',       r => r.rank],
+    ['cap',        'Cap',        r => r.c.cap == null ? -1 : r.c.cap],
+    ['prior',      'Last term',  r => r.c.prior == null ? -1 : r.c.prior],
+    ['load',       'Load hrs',   r => loadHoursOf(r.c)]
+];
+
+function renderListView() {
+    const table = document.getElementById('sectionTable');
+    if (!table) return;
+    const rows = allSectionRows();
+    const col = LIST_COLUMNS.find(c => c[0] === listSort.key) || LIST_COLUMNS[0];
+    rows.sort((a, b) => {
+        const va = col[2](a), vb = col[2](b);
+        const cmp = typeof va === 'number' && typeof vb === 'number' ? va - vb : String(va).localeCompare(String(vb));
+        return (cmp || a.c.instructor.localeCompare(b.c.instructor) || a.rank - b.rank) * listSort.dir;
+    });
+
+    table.innerHTML = '';
+    const thead = document.createElement('thead');
+    const tr = document.createElement('tr');
+    LIST_COLUMNS.forEach(([key, label]) => {
+        const th = document.createElement('th');
+        th.textContent = label + (listSort.key === key ? (listSort.dir > 0 ? ' ▲' : ' ▼') : '');
+        th.addEventListener('click', () => {
+            if (listSort.key === key) listSort.dir = -listSort.dir; else listSort = { key, dir: 1 };
+            renderListView();
+        });
+        tr.appendChild(th);
+    });
+    tr.appendChild(document.createElement('th'));
+    thead.appendChild(tr);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    rows.forEach(r => {
+        const c = r.c;
+        const row = document.createElement('tr');
+        row.className = r.placed ? '' : 'unplaced';
+        const inline = (prop, value, type) => {
+            const td = document.createElement('td');
+            const inp = document.createElement('input');
+            inp.type = type; inp.value = value == null ? '' : value;
+            inp.className = 'inline';
+            if (type === 'number') { inp.min = 0; inp.max = 999; }
+            inp.addEventListener('change', () => {
+                pushUndo();
+                const v = type === 'number' ? (inp.value === '' ? null : parseInt(inp.value, 10)) : inp.value.trim();
+                updateCourseEverywhere(c.id, { [prop]: v });
+                renderAll();
+            });
+            td.appendChild(inp);
+            return td;
+        };
+        const text = v => { const td = document.createElement('td'); td.textContent = v; return td; };
+        row.append(
+            text(c.instructor), text(c.type + (c.labSections > 1 ? ' ×' + c.labSections : '')),
+            inline('section', c.section, 'text'),
+            text(componentLabel(c)), text(SESSION_LABELS[c.session] || '16-Week'), text(meetsLabel(c) + (c.dualCredit ? ' · DC' : '')),
+            text(r.daysLabel), text(r.timeLabel),
+            inline('cap', c.cap, 'number'), inline('prior', c.prior, 'number'),
+            text(fmtHours(loadHoursOf(c)))
+        );
+        if (c.cap && c.prior != null && c.prior / c.cap < 0.5) row.classList.add('weak');
+        const act = document.createElement('td');
+        act.className = 'actions';
+        const go = document.createElement('button');
+        go.className = 'quiet'; go.textContent = r.placed ? 'Move' : 'Place';
+        go.addEventListener('click', e => { e.stopPropagation(); openPlacePopover(c.id, go); });
+        const x = document.createElement('button');
+        x.className = 'quiet'; x.textContent = r.placed ? 'Unplace' : 'Delete';
+        x.addEventListener('click', () => r.placed ? unscheduleCourse(c.id) : deletePoolCourse(c.id));
+        act.append(go, x);
+        row.appendChild(act);
+        tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+    if (!rows.length) {
+        const p = document.createElement('caption');
+        p.textContent = 'No sections yet.';
+        table.appendChild(p);
+    }
+}
+
+/* ============================================================
+   LOAD SHEETS — one printed page per instructor
+   ============================================================ */
+function buildLoadSheets() {
+    const host = document.getElementById('loadSheets');
+    host.innerHTML = '';
+    const dept = document.getElementById('deptName').value.trim() || 'Department';
+    const term = document.getElementById('academicTerm').value.trim();
+    const rows = allSectionRows();
+    instructors.forEach(inst => {
+        const mine = rows.filter(r => r.c.instructor === inst.name).sort((a, b) => a.rank - b.rank);
+        if (!mine.length && !inst.release) return;
+        const sheet = document.createElement('section');
+        sheet.className = 'load-sheet';
+        const taught = taughtHoursFor(inst.name), total = loadHoursFor(inst.name);
+        let html = '<div class="ls-head"><div><div class="ls-dept">' + esc(dept) + (term ? ' · ' + esc(term) : '') + '</div>' +
+                   '<h2>' + esc(inst.name) + '</h2><div class="ls-sub">' + (inst.type === 'FT' ? 'Full-time' : 'Adjunct') + ' · contract load ' + fmtHours(inst.max) + ' hrs</div></div>' +
+                   '<div class="ls-total"><div class="ls-big">' + fmtHours(total) + '</div><div>load hours</div>' +
+                   (inst.release ? '<div class="ls-small">' + fmtHours(taught) + ' taught + ' + fmtHours(inst.release) + ' release</div>' : '') +
+                   (total > inst.max ? '<div class="ls-small" style="color:var(--danger)">' + fmtHours(total - inst.max) + ' over contract</div>' : '') + '</div></div>';
+        html += '<table class="ls-table"><thead><tr><th>Course</th><th>Sec</th><th>Comp</th><th>Session</th><th>Meets</th><th>Days</th><th>Time</th><th>Cap</th><th>Load</th></tr></thead><tbody>';
+        mine.forEach(r => {
+            html += '<tr' + (r.placed ? '' : ' class="unplaced"') + '><td>' + esc(r.c.type) + '</td><td>' + esc(r.c.section || '') + '</td><td>' + esc(componentLabel(r.c)) +
+                    '</td><td>' + esc(SESSION_LABELS[r.c.session] || '16-Week') + '</td><td>' + esc(meetsLabel(r.c) + (r.c.dualCredit ? ' · DC' : '')) +
+                    '</td><td>' + esc(r.daysLabel) + '</td><td>' + esc(r.timeLabel) + '</td><td>' + (r.c.cap == null ? '' : r.c.cap) +
+                    '</td><td>' + fmtHours(loadHoursOf(r.c)) + '</td></tr>';
+        });
+        if (inst.release) html += '<tr><td colspan="8">Reassigned time</td><td>' + fmtHours(inst.release) + '</td></tr>';
+        html += '</tbody></table>';
+        if (inst.unavailable.length) html += '<div class="ls-note">Unavailable (on file): ' + esc(summarizeUnavailable(inst.unavailable)) + '</div>';
+        html += '<div class="ls-sign"><div>Please review and return by ____________</div><div>Instructor signature ______________________________</div><div>Date ____________</div></div>';
+        sheet.innerHTML = html;
+        host.appendChild(sheet);
+    });
+    return host.children.length;
+}
+
+function printLoadSheets() {
+    if (!buildLoadSheets()) { toast('Nothing to print yet — no instructor has sections or release time.', 'warn'); return; }
+    document.body.classList.add('print-sheets');
+    const done = () => { document.body.classList.remove('print-sheets'); window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    window.print();
+    setTimeout(done, 2000);     // browsers that never fire afterprint
+}
+
+/* ============================================================
+   COMPARE TO DRAFT — what changed since an earlier project file
+   ============================================================ */
+function sectionSignature(c, daysLabel, timeLabel) {
+    return [c.instructor, c.type, c.section || '', componentLabel(c), SESSION_LABELS[c.session] || '16-Week', meetsLabel(c), daysLabel, timeLabel].join(' | ');
+}
+function rowsFromState(s) {
+    // Run the same row builder against another state, without touching the live one
+    const saved = { instructors, instructorCourses, scheduledCourses };
+    instructors = s.instructors || []; instructorCourses = s.instructorCourses || {}; scheduledCourses = s.scheduledCourses || {};
+    try { normalizeState(); return allSectionRows(); }
+    finally { instructors = saved.instructors; instructorCourses = saved.instructorCourses; scheduledCourses = saved.scheduledCourses; }
+}
+function compareToDraft(draft) {
+    const now = allSectionRows();
+    const then = rowsFromState(JSON.parse(JSON.stringify(draft)));
+    const key = r => sectionSignature(r.c, r.daysLabel, r.timeLabel);
+    const ident = r => [r.c.instructor, r.c.type, r.c.section || '', componentLabel(r.c), SESSION_LABELS[r.c.session] || '16-Week'].join(' | ');
+
+    const nowMap = new Map(), thenMap = new Map();
+    now.forEach(r => nowMap.set(key(r), (nowMap.get(key(r)) || []).concat(r)));
+    then.forEach(r => thenMap.set(key(r), (thenMap.get(key(r)) || []).concat(r)));
+    const added = [], removed = [];
+    nowMap.forEach((list, k) => { const n = list.length - (thenMap.get(k) || []).length; for (let i = 0; i < n; i++) added.push(list[i]); });
+    thenMap.forEach((list, k) => { const n = list.length - (nowMap.get(k) || []).length; for (let i = 0; i < n; i++) removed.push(list[i]); });
+
+    // Same section (by identity) in both lists but at a different day/time → a move, not add+remove
+    const moved = [];
+    const removedLeft = [];
+    removed.forEach(r => {
+        const idx = added.findIndex(a => ident(a) === ident(r));
+        if (idx >= 0) { moved.push({ from: r, to: added[idx] }); added.splice(idx, 1); }
+        else removedLeft.push(r);
+    });
+
+    const loads = [];
+    const names = new Set([...instructors.map(i => i.name), ...(draft.instructors || []).map(i => i.name)]);
+    const thenLoad = {};
+    (draft.instructors || []).forEach(i => {
+        thenLoad[i.name] = then.filter(r => r.c.instructor === i.name && r.placed).reduce((s, r) => s + loadHoursOf(r.c), 0) + (parseFloat(i.release) || 0);
+    });
+    names.forEach(n => {
+        const a = thenLoad[n] ?? null, b = findInstructor(n) ? loadHoursFor(n) : null;
+        if (a !== b) loads.push({ name: n, from: a, to: b });
+    });
+
+    const line = r => r.c.instructor + ' — ' + r.c.type + (r.c.section ? ' §' + r.c.section : '') + (isLab(r.c) ? ' lab' : '') + sessionTag(r.c) +
+                      ' · ' + (r.placed ? r.daysLabel + (r.timeLabel ? ' ' + r.timeLabel : '') : 'unplaced');
+    const when = draft.savedAt ? new Date(draft.savedAt).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'unknown date';
+    let text = 'Changes since draft saved ' + when + (draft.term ? ' (' + draft.term + ')' : '') + '\n\n';
+    text += 'ADDED (' + added.length + ')\n' + (added.map(line).join('\n') || '  none') + '\n\n';
+    text += 'REMOVED (' + removedLeft.length + ')\n' + (removedLeft.map(line).join('\n') || '  none') + '\n\n';
+    text += 'MOVED (' + moved.length + ')\n' + (moved.map(m => line(m.from) + '  →  ' + (m.to.placed ? m.to.daysLabel + ' ' + m.to.timeLabel : 'unplaced')).join('\n') || '  none') + '\n\n';
+    text += 'LOAD CHANGES\n' + (loads.map(l => l.name + ': ' + (l.from == null ? 'not in draft' : fmtHours(l.from) + ' hrs') + ' → ' + (l.to == null ? 'removed' : fmtHours(l.to) + ' hrs')).join('\n') || '  none') + '\n';
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    const modal = document.createElement('div');
+    modal.className = 'modal modal-wide';
+    modal.setAttribute('role', 'dialog');
+    modal.innerHTML = '<h2>Compared to draft</h2><pre class="diff"></pre>' +
+        '<div class="modal-actions"><button class="quiet" id="diffCopy">Copy</button><button id="diffClose">Close</button></div>';
+    modal.querySelector('pre').textContent = text;
+    document.body.append(backdrop, modal);
+    const close = () => { backdrop.remove(); modal.remove(); modalCleanup = null; };
+    modalCleanup = close;
+    backdrop.addEventListener('click', close);
+    modal.querySelector('#diffClose').addEventListener('click', close);
+    modal.querySelector('#diffCopy').addEventListener('click', () => {
+        navigator.clipboard?.writeText(text).then(() => toast('Copied — paste it into the email to your dean')).catch(() => toast('Select the text and copy it', 'warn'));
+    });
+}
+function handleCompareFile(ev) {
+    const file = ev.target.files[0];
+    ev.target.value = '';
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const s = JSON.parse(e.target.result);
+            if (!s.instructors) throw new Error('not a project');
+            compareToDraft(s);
+        } catch (err) { toast('That is not a project file saved by this builder.', 'error'); }
     };
     reader.readAsText(file);
 }
@@ -3115,8 +4228,17 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('openProjectBtnBuild').addEventListener('click', openProjectFile);
     document.getElementById('projectFileInput').addEventListener('change', handleProjectFile);
     document.getElementById('printBtn').addEventListener('click', () => window.print());
+    document.getElementById('loadSheetsBtn').addEventListener('click', printLoadSheets);
+    document.getElementById('compareBtn').addEventListener('click', () => document.getElementById('compareFileInput').click());
+    document.getElementById('compareFileInput').addEventListener('change', handleCompareFile);
     document.getElementById('weekendHead').addEventListener('click', () => toggleWeekendSchedule());
     document.getElementById('subjectFilter').addEventListener('change', filterInstructorsBySubject);
+    document.querySelectorAll('.view-chip').forEach(chip => chip.addEventListener('click', () => setViewMode(chip.dataset.view)));
+    document.getElementById('roomsPerSlot').addEventListener('change', e => {
+        const v = parseInt(e.target.value, 10);
+        roomsPerSlot = Number.isFinite(v) && v > 0 ? v : null;
+        if (currentPhase() === 'builder') renderAll(); else saveLocal();
+    });
 
     // Send-to-slot popover + pool refill
     document.getElementById('autoRefillToggle').addEventListener('change', e => {
