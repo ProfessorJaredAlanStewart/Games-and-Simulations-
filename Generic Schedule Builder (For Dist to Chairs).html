@@ -583,7 +583,6 @@ pre.diff { font-family: Consolas, Menlo, monospace; font-size: 12px; white-space
 .ls-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .ls-table th { background: #eee !important; color: #000 !important; text-align: left; padding: 5px 6px; border: 1px solid #999; }
 .ls-table td { padding: 5px 6px; border: 1px solid #bbb; }
-.ls-table tr.unplaced td { color: #777; font-style: italic; }
 .ls-note { font-size: 11px; color: #444; margin-top: 10px; }
 .ls-sign { display: flex; justify-content: space-between; gap: 16px; margin-top: 42px; font-size: 12px; }
 
@@ -793,7 +792,7 @@ details.pairing-rules ul { font-size: 12px; color: var(--muted); margin: 6px 0 0
                 <li>An instructor's <strong>unavailable</strong> slots (set with Edit in Setup) show as taken in the dropdowns and ask before you override them.</li>
                 <li>Early and late half-term sections (8-week, 7-week) may share a slot; anything else double-booking an instructor is blocked.</li>
                 <li><strong>✎</strong> on a card (or the <strong>List</strong> view) sets a section number, cap and last term's enrollment. The Seats &amp; Demand card uses them to show fill rates and flag slots that ran under half full. A “classrooms per slot” number in Setup flags any slot with more sections than rooms.</li>
-                <li><strong>Import CSV</strong> accepts this builder's own export or a registrar / Colleague section export — you'll map the columns once, and the sections land on the grid. <strong>Compare to draft</strong> opens an earlier project file and lists what was added, removed, moved, and whose load changed. <strong>Print load sheets</strong> gives one page per instructor for sign-off.</li>
+                <li><strong>Import CSV</strong> accepts this builder's own export or a registrar / Colleague section export — you'll map the columns once, and the sections land on the grid. <strong>Compare to draft</strong> opens an earlier project file and lists what was added, removed, moved, and whose load changed. <strong>Print load sheets</strong> gives one page per instructor for sign-off, listing placed sections and release time only — anything still in the pool isn't part of a load yet.</li>
                 <li>Click the × on a placed section to return it to the pool. Everything autosaves in this browser.</li>
             </ul>
         </details>
@@ -4060,8 +4059,11 @@ function buildLoadSheets() {
     host.innerHTML = '';
     const dept = document.getElementById('deptName').value.trim() || 'Department';
     const term = document.getElementById('academicTerm').value.trim();
-    const rows = allSectionRows();
+    // Placed sections only: the sheet is what the instructor confirms, and the
+    // load total already excludes anything still in the pool.
+    const rows = allSectionRows().filter(r => r.placed);
     instructors.forEach(inst => {
+        if (inst.max >= 99) return;                       // Staff (TBA) placeholder — nobody to sign it
         const mine = rows.filter(r => r.c.instructor === inst.name).sort((a, b) => a.rank - b.rank);
         if (!mine.length && !inst.release) return;
         const sheet = document.createElement('section');
@@ -4074,7 +4076,7 @@ function buildLoadSheets() {
                    (total > inst.max ? '<div class="ls-small" style="color:var(--danger)">' + fmtHours(total - inst.max) + ' over contract</div>' : '') + '</div></div>';
         html += '<table class="ls-table"><thead><tr><th>Course</th><th>Sec</th><th>Comp</th><th>Session</th><th>Meets</th><th>Days</th><th>Time</th><th>Cap</th><th>Load</th></tr></thead><tbody>';
         mine.forEach(r => {
-            html += '<tr' + (r.placed ? '' : ' class="unplaced"') + '><td>' + esc(r.c.type) + '</td><td>' + esc(r.c.section || '') + '</td><td>' + esc(componentLabel(r.c)) +
+            html += '<tr><td>' + esc(r.c.type) + '</td><td>' + esc(r.c.section || '') + '</td><td>' + esc(componentLabel(r.c)) +
                     '</td><td>' + esc(SESSION_LABELS[r.c.session] || '16-Week') + '</td><td>' + esc(meetsLabel(r.c) + (r.c.dualCredit ? ' · DC' : '')) +
                     '</td><td>' + esc(r.daysLabel) + '</td><td>' + esc(r.timeLabel) + '</td><td>' + (r.c.cap == null ? '' : r.c.cap) +
                     '</td><td>' + fmtHours(loadHoursOf(r.c)) + '</td></tr>';
@@ -4090,7 +4092,7 @@ function buildLoadSheets() {
 }
 
 function printLoadSheets() {
-    if (!buildLoadSheets()) { toast('Nothing to print yet — no instructor has sections or release time.', 'warn'); return; }
+    if (!buildLoadSheets()) { toast('Nothing to print yet — no instructor has placed sections or release time. Sections still in the pool are not on a load sheet.', 'warn'); return; }
     document.body.classList.add('print-sheets');
     const done = () => { document.body.classList.remove('print-sheets'); window.removeEventListener('afterprint', done); };
     window.addEventListener('afterprint', done);
