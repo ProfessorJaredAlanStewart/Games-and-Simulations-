@@ -94,9 +94,11 @@ button:disabled { opacity: .45; cursor: default; }
 .stat { background: var(--card); padding: 14px; border-radius: 8px; box-shadow: 0 1px 6px rgba(20,52,79,0.06); text-align: center; }
 .stat-value { font-size: 26px; color: var(--teal); font-family: Georgia, serif; }
 .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { background: var(--navy); color: #fff; padding: 8px; text-align: left; font-weight: 600; font-size: 12px; white-space: nowrap; position: sticky; top: 0; cursor: pointer; user-select: none; }
-td { border-bottom: 1px solid var(--line); padding: 7px 8px; vertical-align: top; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { background: var(--navy); color: #fff; padding: 7px 6px; text-align: left; font-weight: 600; font-size: 11px; position: sticky; top: 0; cursor: pointer; user-select: none; }
+td { border-bottom: 1px solid var(--line); padding: 6px; vertical-align: top; }
+#logTable td:nth-child(1) { white-space: nowrap; }
+#logTable .badge { white-space: normal; }
 tr:hover td { background: #fbfcfc; }
 .table-scroll { overflow: auto; max-height: 60vh; }
 .badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
@@ -970,6 +972,8 @@ function filteredLog() {
         (flag !== 'flagged' || flagsFor(r).length) && (flag !== 'reach' || r.reachOut));
 }
 function sectionKey(r) { return (r.course || '').trim().toLowerCase(); }
+// "Federal Government GOVT 2305-54214" → "GOVT 2305-54214" for tight spaces; full text goes in the tooltip
+function shortCourse(c) { const m = String(c || '').match(/[A-Z]{2,5}\s?-?\s?\d{4}\s?[-–]\s?\d{2,6}/); return m ? m[0] : String(c || ''); }
 function barRow(label, count, max, color, val) {
     const w = Math.max(5, (count / Math.max(max, 1)) * 110);
     return '<div class="bar-row"><span class="bar-label" title="' + esc(label) + '">' + esc(label) + '</span><span class="bar" style="width:' + w + 'px;background:' + color + ';"></span><span class="bar-val">' + esc(val) + '</span></div>';
@@ -1008,7 +1012,7 @@ function renderLog() {
     const byReason = tally(rows, r => r.reason.code);
     a += card('By reason', 'var(--plum)', 'var(--plum-wash)', byReason.map(([k, n]) => barRow(k, n, byReason[0][1], 'var(--plum)', String(n))).join('') || '—');
     const bySection = tally(rows, r => r.course);
-    a += card('By section', 'var(--amber)', 'var(--amber-wash)', bySection.map(([k, n]) => barRow(k, n, bySection[0][1], n >= 2 ? 'var(--danger)' : 'var(--amber)', String(n))).join('') || '—');
+    a += card('By section', 'var(--amber)', 'var(--amber-wash)', bySection.map(([k, n]) => barRow(shortCourse(k), n, bySection[0][1], n >= 2 ? 'var(--danger)' : 'var(--amber)', String(n)).replace('title="' + esc(shortCourse(k)) + '"', 'title="' + esc(k) + '"')).join('') || '—');
     const byDay = tally(rows, r => r.weekday);
     const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     byDay.sort((x, y) => dayOrder.indexOf(x[0]) - dayOrder.indexOf(y[0]));
@@ -1054,10 +1058,10 @@ function renderLog() {
         trr.append(
             td(esc(fmtDate(r.date)) + '<br><span class="badge plain">' + esc((r.weekday || '').slice(0, 3)) + '</span>'),
             td(esc(r.instructor.name) + (r.reachOut ? '<br><span class="badge warn">asked for outreach</span>' : '')),
-            td(esc(r.course) + '<br><span class="badge plain">' + esc(r.modality || '') + '</span>'),
-            td(esc(r.absence.kindLabel) + (r.absence.minutesMissed != null ? '<br><span class="badge plain">' + r.absence.minutesMissed + ' min</span>' : '')),
-            td(esc(r.reason.label)),
-            td(esc(r.coverage.label) + (r.coverage.detail ? '<br><span class="badge plain">' + esc(r.coverage.detail) + '</span>' : '')),
+            td('<span title="' + esc(r.course) + '">' + esc(shortCourse(r.course)) + '</span><br><span class="badge plain">' + esc(r.modality || '') + '</span>'),
+            td(esc(r.absence.kind === 'full' ? 'Full' : r.absence.kindLabel) + (r.absence.minutesMissed != null ? '<br><span class="badge plain">' + r.absence.minutesMissed + ' min</span>' : '')),
+            td('<span title="' + esc(r.reason.label) + '">' + esc(r.reason.label.replace(/\s*\(.*\)$/, '').replace(/ — .*$/, m => m.length > 24 ? ' — …' : m)) + '</span>'),
+            td(esc(r.coverage.label) + (r.coverage.detail ? '<br><span class="badge plain" title="' + esc(r.coverage.detail) + '">' + esc(r.coverage.detail.length > 40 ? r.coverage.detail.slice(0, 38) + '…' : r.coverage.detail) + '</span>' : '')),
             td('<span class="badge ' + (r.handbook.leave === 'no' ? 'bad' : r.handbook.leave === 'after' ? 'warn' : 'ok') + '">' + esc(r.handbook.leaveLabel) + '</span>'),
             td('<span class="badge ' + (r.handbook.notified === 'before' ? 'ok' : r.handbook.notified === 'no' ? 'bad' : 'warn') + '">' + esc(r.handbook.notifiedLabel) + '</span>' + (r.handbook.notifiedWhen ? '<br><span class="badge plain">' + esc(r.handbook.notifiedWhen) + '</span>' : '')),
             td(((r.artifacts.announcement || []).length) + ' ann · ' + ((r.artifacts.assignment || []).length) + ' asg'),
