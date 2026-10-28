@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cancelled Class Tracker</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS — same academic-catalog palette as the Schedule Builder
+   ============================================================ */
+:root {
+    --navy: #14344f; --navy-2: #1d4a6b;
+    --teal: #0e6e73; --teal-bright: #12868c; --teal-wash: #e8f4f4;
+    --paper: #eef2f3; --card: #ffffff; --ink: #22303a; --muted: #5b6b77; --line: #d8e1e4;
+    --amber: #c77f1f; --amber-wash: #fdf6e9; --danger: #b3372f; --danger-wash: #faecea; --ok: #2e7d4f; --ok-wash: #eaf5ee;
+    --plum: #7b5ea7; --plum-wash: #f2eef8;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Georgia, 'Times New Roman', serif; background: var(--paper); color: var(--ink); min-height: 100vh; padding: 24px 20px 60px; }
+.container { max-width: 1100px; margin: 0 auto; }
+.sans, button, input, select, textarea, table, .chip, .stat, .toast, .banner, .badge, .file-list, .tabs, .hint, .steps, .flag { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+
+/* Masthead */
+.masthead { background: var(--card); border-radius: 10px; box-shadow: 0 2px 10px rgba(20,52,79,0.08); margin-bottom: 18px; overflow: hidden; }
+.masthead-band { height: 6px; background: linear-gradient(90deg, var(--navy) 0%, var(--teal) 100%); }
+.masthead-inner { padding: 18px 24px 14px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px; }
+.masthead h1 { font-size: 26px; color: var(--navy); font-weight: normal; }
+.masthead .term-line { font-size: 13px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+.masthead-rule { margin: 0 24px; border-top: 1px solid var(--navy); border-bottom: 1px solid var(--line); height: 3px; }
+.autosave-status { font-size: 12px; color: var(--muted); }
+.autosave-status .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); margin-right: 5px; vertical-align: 1px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+.tab { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 7px 16px; font-size: 13px; color: var(--navy); cursor: pointer; }
+.tab:hover { border-color: var(--teal); }
+.tab.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+.tabs .spacer { flex: 1; }
+
+/* Panels & forms */
+.panel { background: var(--card); padding: 20px 24px; border-radius: 10px; box-shadow: 0 1px 6px rgba(20,52,79,0.06); margin-bottom: 18px; }
+h2 { color: var(--teal); font-size: 18px; font-weight: normal; margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+h3 { color: var(--navy); font-size: 15px; font-weight: normal; margin: 14px 0 8px; }
+label { display: block; margin-bottom: 5px; color: var(--muted); font-size: 13px; }
+label .req { color: var(--danger); }
+.check-label { display: flex; align-items: flex-start; gap: 8px; color: var(--ink); font-size: 13px; cursor: pointer; line-height: 1.4; }
+.check-label input { width: auto; margin-top: 3px; flex-shrink: 0; }
+input[type=text], input[type=email], input[type=date], input[type=time], input[type=number], select, textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 5px; font-size: 14px; background: #fff; color: var(--ink);
+}
+textarea { min-height: 80px; resize: vertical; line-height: 1.4; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px 16px; margin-bottom: 12px; }
+.form-group { margin-bottom: 12px; }
+.span2 { grid-column: 1 / -1; }
+.hint { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+.note { font-size: 13px; color: var(--ink); background: var(--teal-wash); border-left: 3px solid var(--teal); padding: 10px 14px; border-radius: 4px; margin-bottom: 14px; line-height: 1.5; }
+.note.amber { background: var(--amber-wash); border-left-color: var(--amber); }
+.note.plum { background: var(--plum-wash); border-left-color: var(--plum); }
+.note p + p { margin-top: 6px; }
+.inline-opts { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+.inline-opts label { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--ink); margin: 0; cursor: pointer; }
+.inline-opts input { width: auto; }
+.sub-fields { margin-top: 8px; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 5px; background: var(--paper); }
+.hidden { display: none !important; }
+
+button { background: var(--teal); color: #fff; border: none; border-radius: 5px; padding: 8px 16px; font-size: 13px; cursor: pointer; }
+button:hover { background: var(--teal-bright); }
+button.secondary { background: #fff; color: var(--navy); border: 1px solid var(--navy-2); }
+button.secondary:hover { background: var(--teal-wash); }
+button.quiet { background: #fff; color: var(--muted); border: 1px solid var(--line); }
+button.quiet:hover { background: var(--paper); color: var(--ink); }
+button.danger { background: var(--danger); }
+button.primary-go { background: var(--navy); font-size: 14px; padding: 10px 20px; }
+button.primary-go:hover { background: var(--navy-2); }
+button:disabled { opacity: .45; cursor: default; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+
+/* Upload zones */
+.drop { border: 2px dashed var(--line); border-radius: 8px; padding: 16px; text-align: center; background: #fbfcfc; cursor: pointer; transition: background .1s, border-color .1s; font-size: 13px; color: var(--muted); }
+.drop:hover, .drop.over { border-color: var(--teal); background: var(--teal-wash); }
+.drop strong { color: var(--navy); }
+.file-list { list-style: none; margin-top: 8px; display: grid; gap: 6px; }
+.file-list li { display: flex; align-items: center; gap: 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 5px; padding: 6px 8px; font-size: 12px; }
+.file-list img.thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 3px; border: 1px solid var(--line); background: #fff; }
+.file-list .icon { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--navy); background: #fff; border: 1px solid var(--line); border-radius: 3px; }
+.file-list .meta { flex: 1; min-width: 0; }
+.file-list .meta .name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-list .meta .size { color: var(--muted); }
+.file-list button { padding: 3px 8px; font-size: 11px; }
+
+/* Stats & tables */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.stat { background: var(--card); padding: 14px; border-radius: 8px; box-shadow: 0 1px 6px rgba(20,52,79,0.06); text-align: center; }
+.stat-value { font-size: 26px; color: var(--teal); font-family: Georgia, serif; }
+.stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--navy); color: #fff; padding: 8px; text-align: left; font-weight: 600; font-size: 12px; white-space: nowrap; position: sticky; top: 0; cursor: pointer; user-select: none; }
+td { border-bottom: 1px solid var(--line); padding: 7px 8px; vertical-align: top; }
+tr:hover td { background: #fbfcfc; }
+.table-scroll { overflow: auto; max-height: 60vh; }
+.badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.badge.ok { background: var(--ok-wash); color: var(--ok); }
+.badge.warn { background: var(--amber-wash); color: #8a5a12; }
+.badge.bad { background: var(--danger-wash); color: var(--danger); }
+.badge.plain { background: var(--paper); color: var(--muted); }
+.flag { font-size: 11px; color: var(--danger); display: block; }
+.analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.analysis-card { padding: 12px 14px; border-radius: 6px; border-left: 3px solid; font-family: 'Segoe UI', Arial, sans-serif; }
+.analysis-card h4 { margin: 0 0 9px 0; font-size: 13px; font-weight: 600; }
+.analysis-card .body { font-size: 12px; color: var(--muted); max-height: 240px; overflow-y: auto; }
+.bar-row { margin: 3px 0; display: flex; align-items: center; }
+.bar-row .bar-label { display: inline-block; width: 165px; font-size: 11px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-row .bar { max-width: 110px; }
+.bar-row .bar { display: inline-block; height: 13px; border-radius: 2px; }
+.bar-row .bar-val { margin-left: 6px; font-size: 11px; white-space: nowrap; }
+.filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; }
+.filters .form-group { margin: 0; min-width: 150px; }
+.filters select, .filters input { padding: 6px 8px; font-size: 13px; }
+
+/* Steps (process) */
+.steps { counter-reset: s; list-style: none; display: grid; gap: 8px; }
+.steps li { position: relative; padding-left: 34px; font-size: 13px; line-height: 1.45; }
+.steps li::before { counter-increment: s; content: counter(s); position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+/* Banner, toast, modal */
+.banner { background: var(--amber-wash); border: 1px solid #ecd9b2; border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.banner button { padding: 5px 10px; font-size: 12px; margin-left: 6px; }
+#toastHost { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 2000; }
+.toast { background: var(--navy); color: #fff; padding: 10px 16px; border-radius: 6px; font-size: 13px; box-shadow: 0 4px 14px rgba(0,0,0,.25); max-width: 420px; animation: fade 4.5s forwards; }
+.toast.warn { background: var(--amber); } .toast.error { background: var(--danger); }
+@keyframes fade { 0%,80% { opacity: 1; } 100% { opacity: 0; } }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(20,52,79,0.45); z-index: 999; }
+.modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 22px; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); z-index: 1000; max-width: 720px; width: 92%; max-height: 86vh; overflow-y: auto; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+details.help { margin-bottom: 14px; }
+details.help summary { cursor: pointer; font-size: 13px; color: var(--teal); }
+details.help .body { font-size: 13px; color: var(--muted); margin: 8px 0 0 18px; line-height: 1.5; }
+details.help ul { margin-left: 18px; }
+
+/* Settings pre-fill chip */
+.prefill { font-size: 12px; color: var(--muted); }
+code { font-family: Consolas, Menlo, monospace; font-size: 12px; background: var(--paper); padding: 1px 5px; border-radius: 3px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media print {
+    body { background: #fff; padding: 0; }
+    .tabs, .no-print, #toastHost, .actions, .drop, button { display: none !important; }
+    .panel, .masthead, .stat { box-shadow: none; border-radius: 0; }
+    .table-scroll { max-height: none; overflow: visible; }
+    th { background: #eee !important; color: #000 !important; position: static; -webkit-print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+    <div class="masthead">
+        <div class="masthead-band"></div>
+        <div class="masthead-inner">
+            <div>
+                <h1 id="mastheadTitle">Cancelled Class Tracker</h1>
+                <div class="term-line" id="mastheadSub">Report · Log · Resources</div>
+            </div>
+            <div class="autosave-status no-print" id="autosaveStatus"></div>
+        </div>
+        <div class="masthead-rule"></div>
+    </div>
+
+    <div id="bannerHost"></div>
+
+    <div class="tabs no-print" role="tablist">
+        <button class="tab active" data-tab="report" role="tab">Report a cancellation</button>
+        <button class="tab" data-tab="log" role="tab">Department log</button>
+        <button class="tab" data-tab="process" role="tab">Process &amp; resources</button>
+        <button class="tab" data-tab="settings" role="tab">Settings</button>
+        <span class="spacer"></span>
+        <span class="prefill" id="prefillNote"></span>
+    </div>
+
+    <!-- ================= REPORT (instructor) ================= -->
+    <section id="tab-report" class="tabpane">
+        <div class="note">
+            <p><strong>Why this exists.</strong> Students notice cancelled classes, and the college is asked about them. One short report per cancelled session gives the department a complete record: what happened, how students were told, and what they worked on instead.</p>
+            <p><strong>This is also how the department looks out for you.</strong> The reason you give is seen only by the chair and dean. If a pattern suggests you could use support — a medical accommodation, a schedule change, help with a commute or caregiving — the chair's job is to connect you with those resources, not to count against you. Keep medical details out of this form; “Sick” is enough. Anything FMLA-related goes through Human Resources.</p>
+        </div>
+
+        <details class="help">
+            <summary>What the Faculty Handbook requires when you miss class</summary>
+            <div class="body">
+                <ul>
+                    <li>Full-time faculty submit a request in the leave management system — before the absence when possible, otherwise immediately on return.</li>
+                    <li>The department chair (or, in the chair's absence, the dean or VPAA) must be notified by phone or other means that you cannot meet class.</li>
+                    <li>A class may not meet unsupervised, and students may not be left without notice of your absence.</li>
+                </ul>
+                <p style="margin-top:6px;">This form records that each of those happened; it does not replace the leave request.</p>
+            </div>
+        </details>
+
+        <div class="panel">
+            <h2>Who, when, which class</h2>
+            <div class="form-grid">
+                <div class="form-group"><label for="fName">Instructor name <span class="req">*</span></label><input type="text" id="fName" autocomplete="name"></div>
+                <div class="form-group"><label for="fEmail">Email</label><input type="email" id="fEmail" autocomplete="email" placeholder="you@college.edu"></div>
+                <div class="form-group"><label for="fType">Appointment</label>
+                    <select id="fType"><option value="FT">Full-time</option><option value="ADJ">Adjunct</option><option value="DC">Dual-credit / other</option></select></div>
+                <div class="form-group"><label for="fDate">Date of the class session <span class="req">*</span></label><input type="date" id="fDate"></div>
+                <div class="form-group span2"><label for="fCourse">Course and section <span class="req">*</span></label>
+                    <input type="text" id="fCourse" placeholder="e.g., Federal Government GOVT 2305-54214" list="courseMemory">
+                    <datalist id="courseMemory"></datalist>
+                    <div class="hint">Free text, so any department can use it. Include the section number — the log tracks repeat cancellations per section.</div></div>
+                <div class="form-group"><label for="fModality">How this section meets</label>
+                    <select id="fModality"><option>In person</option><option>Blended</option><option>Online — synchronous</option><option>Lab</option><option>Off-site / dual credit</option></select></div>
+                <div class="form-group"><label for="fStart">Scheduled start</label><input type="time" id="fStart"></div>
+                <div class="form-group"><label for="fEnd">Scheduled end</label><input type="time" id="fEnd"></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>What was missed</h2>
+            <div class="form-group">
+                <label>Length of the absence <span class="req">*</span></label>
+                <div class="inline-opts">
+                    <label><input type="radio" name="fKind" value="full" checked> Entire session</label>
+                    <label><input type="radio" name="fKind" value="late"> Started late</label>
+                    <label><input type="radio" name="fKind" value="early"> Ended early</label>
+                    <label><input type="radio" name="fKind" value="both"> Started late and ended early</label>
+                </div>
+                <div class="sub-fields hidden" id="partialFields">
+                    <div class="form-grid" style="margin-bottom:0;">
+                        <div class="form-group" id="lateWrap"><label for="fLate">Started how many minutes late?</label><input type="number" id="fLate" min="1" max="300" placeholder="e.g., 20"></div>
+                        <div class="form-group" id="earlyWrap"><label for="fEarly">Ended how many minutes early?</label><input type="number" id="fEarly" min="1" max="300" placeholder="e.g., 30"></div>
+                    </div>
+                </div>
+                <div class="hint" id="minutesHint"></div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group"><label for="fReason">Reason <span class="req">*</span></label>
+                    <select id="fReason">
+                        <option value="">— choose —</option>
+                        <option>Sick</option>
+                        <option>Sick family / child</option>
+                        <option>Traveling — college business or conference</option>
+                        <option>Traveling — personal</option>
+                        <option>Issues getting to campus (weather, car, transit)</option>
+                        <option>Bereavement</option>
+                        <option>Jury duty or other civic obligation</option>
+                        <option>College-assigned duty (committee, training, event)</option>
+                        <option>Campus or facilities issue (closure, room unusable)</option>
+                        <option>Other</option>
+                    </select></div>
+                <div class="form-group hidden" id="otherWrap"><label for="fReasonOther">Please describe</label><input type="text" id="fReasonOther" placeholder="brief, no medical detail needed"></div>
+            </div>
+            <div class="hint">Pick the closest match. Detail beyond the category is optional and, for health reasons, discouraged here.</div>
+        </div>
+
+        <div class="panel">
+            <h2>Handbook steps</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="fLeave">Leave request in the leave management system</label>
+                    <select id="fLeave">
+                        <option value="before">Submitted before the absence</option>
+                        <option value="after">Will submit / submitted on return</option>
+                        <option value="na">Not required (adjunct, partial session, or college-assigned duty)</option>
+                        <option value="no">Not submitted</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fNotified">Chair (or dean / VPAA) notified</label>
+                    <select id="fNotified">
+                        <option value="before">Before the class</option>
+                        <option value="during">After the class had started</option>
+                        <option value="after">After the class ended</option>
+                        <option value="no">Not yet</option>
+                    </select>
+                </div>
+                <div class="form-group"><label for="fNotifiedHow">How</label>
+                    <select id="fNotifiedHow"><option>Phone call</option><option>Text</option><option>Email</option><option>Teams</option><option>In person</option><option>Other</option></select></div>
+                <div class="form-group"><label for="fNotifiedWhen">When (date and time)</label><input type="text" id="fNotifiedWhen" placeholder="e.g., 10/28 7:15 AM"></div>
+            </div>
+            <div class="form-group">
+                <label>Students were told, and the class did not meet unsupervised</label>
+                <div class="inline-opts">
+                    <label><input type="checkbox" id="fAnnounced"> Canvas announcement posted</label>
+                    <label><input type="checkbox" id="fEmailed"> Email / Canvas inbox sent</label>
+                    <label><input type="checkbox" id="fDoorSign"> Sign on the door or front-desk notice requested</label>
+                    <label><input type="checkbox" id="fUnsupervised"> No one met the room unsupervised</label>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label for="fCoverage">Coverage</label>
+                    <select id="fCoverage">
+                        <option value="async">Asynchronous assignment (described below)</option>
+                        <option value="sub">Colleague covered the session</option>
+                        <option value="guest">Guest speaker / recorded lecture</option>
+                        <option value="dctc">Don't Cancel That Class session requested</option>
+                        <option value="makeup">Make-up session scheduled</option>
+                        <option value="none">No replacement activity</option>
+                    </select></div>
+                <div class="form-group"><label for="fCoverageDetail">Detail (who covered, make-up date, etc.)</label><input type="text" id="fCoverageDetail"></div>
+            </div>
+            <div class="note plum" id="dctcInline">
+                <strong>Don't Cancel That Class.</strong> <span id="dctcBlurb">When you know in advance (conference travel, a scheduled procedure, jury duty), Student Affairs can send a presenter to run a workshop — study skills, library research, career services, wellness, Title IX — in your time slot so the session still counts.</span> <span id="dctcWhere">Details and contact are on the <em>Process &amp; resources</em> tab.</span>
+                <div class="inline-opts" style="margin-top:8px;">
+                    <label><input type="radio" name="fDctc" value="requested"> I requested a session</label>
+                    <label><input type="radio" name="fDctc" value="noNotice" checked> Not possible — no advance notice</label>
+                    <label><input type="radio" name="fDctc" value="declined"> Had notice, chose another plan</label>
+                    <label><input type="radio" name="fDctc" value="unaware"> Didn't know about it until now</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Artifacts</h2>
+            <p class="hint" style="margin-bottom:12px;">Two uploads are expected: the Canvas announcement and the assignment students worked on in lieu of class. Screenshots (PNG/JPG), PDFs, and Word/Pages exports all work. Files are embedded in the report you download — nothing is uploaded anywhere from this page.</p>
+
+            <h3>1 · Canvas announcement of the cancellation <span class="req">*</span></h3>
+            <div class="form-grid">
+                <div class="form-group"><label for="fAnnPosted">Posted (date and time)</label><input type="text" id="fAnnPosted" placeholder="e.g., 10/28 7:20 AM"></div>
+                <div class="form-group"><label for="fAnnText">Announcement text (optional — paste it)</label><textarea id="fAnnText" placeholder="Class is cancelled today. Please complete the Module 7 discussion board by..."></textarea></div>
+            </div>
+            <div class="drop" id="dropAnn" data-bucket="announcement"><strong>Drop the announcement screenshot here</strong> or click to choose · add more supporting files if useful</div>
+            <input type="file" id="fileAnn" multiple accept="image/*,.pdf,.doc,.docx,.txt,.rtf" class="hidden">
+            <ul class="file-list" id="listAnn"></ul>
+
+            <h3>2 · Assignment given in lieu of class <span class="req">*</span></h3>
+            <div class="form-grid">
+                <div class="form-group span2"><label for="fAsgDesc">What students did instead, and how it connects to the day's learning outcomes</label>
+                    <textarea id="fAsgDesc" placeholder="e.g., Module 7 discussion: students apply the Equal Protection tiers of scrutiny to two scenarios and reply to two classmates. Replaces the in-class case analysis; due before next session."></textarea></div>
+                <div class="form-group"><label for="fAsgMinutes">Approximate student time required (minutes)</label><input type="number" id="fAsgMinutes" min="0" max="600" placeholder="e.g., 75"></div>
+                <div class="form-group"><label for="fAsgDue">Due</label><input type="text" id="fAsgDue" placeholder="e.g., before next class, 10/30 11:59 PM"></div>
+            </div>
+            <div class="drop" id="dropAsg" data-bucket="assignment"><strong>Drop the assignment here</strong> (discussion prompt, paper assignment, quiz screenshot) · add more supporting files if useful</div>
+            <input type="file" id="fileAsg" multiple accept="image/*,.pdf,.doc,.docx,.txt,.rtf,.pptx" class="hidden">
+            <ul class="file-list" id="listAsg"></ul>
+            <div class="hint" id="sizeHint" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="panel">
+            <h2>Anything else</h2>
+            <div class="form-group"><label for="fNotes">Notes for the chair (optional)</label><textarea id="fNotes" placeholder="Context, make-up plans, anything the chair should know."></textarea></div>
+            <label class="check-label"><input type="checkbox" id="fReachOut"> I'd like the chair to reach out about resources or options (schedule, accommodation, EAP, caregiving, commute).</label>
+            <label class="check-label" style="margin-top:8px;"><input type="checkbox" id="fAttest"> <span>I confirm this is accurate, students were notified, and the class did not meet unsupervised. <span class="req">*</span></span></label>
+
+            <div class="actions">
+                <button class="primary-go" id="btnGenerate">Download report file</button>
+                <button class="secondary" id="btnEmail">Open email to chair</button>
+                <button class="secondary" id="btnPreview">Preview</button>
+                <span style="flex:1"></span>
+                <button class="quiet" id="btnCopySection" title="Keep date, reason, handbook steps and files; clear only the course and the announcement text">Same day, another section</button>
+                <button class="quiet" id="btnClearForm">Clear form</button>
+            </div>
+            <div class="hint" style="margin-top:10px;">
+                <strong>Then:</strong> attach the downloaded <code>.html</code> file to your email to the chair (the email button pre-fills the subject and summary; browsers can't attach files automatically). The report opens in any browser and prints to one or two pages. The chair imports it into the department log on this same page.
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= LOG (chair) ================= -->
+    <section id="tab-log" class="tabpane hidden">
+        <div class="note">
+            <strong>Department log.</strong> Drop the report files faculty send you (the <code>.html</code> files this page generates) and this builds the record: per instructor, per section, per reason, with the handbook flags a dean will ask about. Everything stays in this browser; save the log file to keep it, and share the CSV or the printed summary, not the raw reports.
+        </div>
+        <div class="drop" id="dropLog"><strong>Drop report files here</strong> (several at once is fine) or click to choose · also accepts a saved log file</div>
+        <input type="file" id="fileLog" multiple accept=".html,.htm,.json" class="hidden">
+
+        <div class="actions no-print" style="margin:14px 0;">
+            <button class="secondary" id="btnSaveLog">Save log file</button>
+            <button class="secondary" id="btnExportCsv">Export CSV</button>
+            <button class="secondary" id="btnPrintSummary">Print summary</button>
+            <span style="flex:1"></span>
+            <button class="quiet" id="btnClearLog">Clear log</button>
+        </div>
+
+        <div class="stats" id="logStats"></div>
+
+        <div class="panel">
+            <h2>Patterns</h2>
+            <div class="analysis-grid" id="logAnalysis"></div>
+        </div>
+
+        <div class="panel">
+            <h2>Records</h2>
+            <div class="filters no-print">
+                <div class="form-group"><label>Instructor</label><select id="filtInst"><option value="">All</option></select></div>
+                <div class="form-group"><label>Reason</label><select id="filtReason"><option value="">All</option></select></div>
+                <div class="form-group"><label>From</label><input type="date" id="filtFrom"></div>
+                <div class="form-group"><label>To</label><input type="date" id="filtTo"></div>
+                <div class="form-group"><label>Show</label><select id="filtFlag"><option value="">All records</option><option value="flagged">Flagged only</option><option value="reach">Asked for outreach</option></select></div>
+            </div>
+            <div class="table-scroll"><table id="logTable"></table></div>
+        </div>
+    </section>
+
+    <!-- ================= PROCESS & RESOURCES ================= -->
+    <section id="tab-process" class="tabpane hidden">
+        <div class="panel">
+            <h2>Suggested reporting process</h2>
+            <ol class="steps">
+                <li><strong>Before class, if at all possible:</strong> call or text the chair (dean or VPAA if the chair is unreachable). Full-time faculty submit the leave request in the leave management system; if that can't happen first, do it immediately on return.</li>
+                <li><strong>Tell students the same way every time:</strong> a Canvas announcement with the word “cancelled,” the replacement assignment, and its due date. Ask the front desk to post a door sign for in-person sections.</li>
+                <li><strong>Give the session's work, not busywork:</strong> the assignment should carry the day's outcome and take roughly the class period. Online discussions, a short analysis, a recorded lecture with a response, or a Don't Cancel That Class workshop all qualify.</li>
+                <li><strong>Within two business days:</strong> complete the <em>Report a cancellation</em> tab, download the report file, and email it to the chair. One report per section affected.</li>
+                <li><strong>Chair, monthly:</strong> import reports into the log, review flags (missing leave request, late notice, repeat sections, no artifacts), check in with anyone who asked for outreach, and send the dean the CSV or printed summary.</li>
+                <li><strong>Dean, each term:</strong> compare cancellations per section across departments; use the reason mix to decide where resources (sub pools, DCTC capacity, flexible modality) would reduce cancellations.</li>
+            </ol>
+        </div>
+
+        <div class="panel">
+            <h2>Don't Cancel That Class</h2>
+            <div class="note plum">
+                <p><strong>How the program works where it exists.</strong> A faculty member who knows in advance that they'll miss a session asks Student Affairs (often the Dean of Students office, counseling, the library, or career services) to send a presenter during the regular class time. Students still meet, attendance still counts, and the session covers something they need anyway: study and test-taking strategies, research and citation, résumé and career planning, financial literacy, wellness and stress, Title IX and bystander awareness, transfer planning. Programs typically ask for one to two weeks' notice and a short request form.</p>
+                <p id="dctcStatusLine"><strong>At this college:</strong> <span id="dctcStatus">Confirmation pending. The dean has been asked whether Student Affairs offers this and whether this campus uses it. Fill in the contact below in Settings once known.</span></p>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>Contact</label><div class="sans" id="dctcContactShow" style="font-size:14px;">—</div></div>
+                <div class="form-group"><label>Request form / link</label><div class="sans" id="dctcLinkShow" style="font-size:14px;">—</div></div>
+                <div class="form-group"><label>Notice required</label><div class="sans" id="dctcNoticeShow" style="font-size:14px;">—</div></div>
+            </div>
+            <div class="hint">If the college doesn't have a program, this page is a reasonable brief for proposing one: Student Affairs already has the presenters; what's missing is a request form and a calendar.</div>
+        </div>
+
+        <div class="panel">
+            <h2>Resources the department can connect you with</h2>
+            <div class="note amber">
+                Reasons are collected so the chair can help, not just count. Depending on what's going on, that can mean a temporary modality change, swapping a section, a sub pool for planned absences, an ADA accommodation conversation with HR, the Employee Assistance Program, FMLA (through HR, never through this form), or simply knowing who to call at 7 AM. Check “I'd like the chair to reach out” on the report, or just ask.
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>Chair</label><div class="sans" id="chairShow" style="font-size:14px;">—</div></div>
+                <div class="form-group"><label>Dean</label><div class="sans" id="deanShow" style="font-size:14px;">—</div></div>
+                <div class="form-group"><label>HR / Employee Assistance</label><div class="sans" id="hrShow" style="font-size:14px;">—</div></div>
+                <div class="form-group"><label>Leave management system</label><div class="sans" id="leaveShow" style="font-size:14px;">—</div></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>What the Faculty Handbook says</h2>
+            <blockquote class="sans" style="font-size:13px;line-height:1.55;color:var(--ink);border-left:3px solid var(--line);padding-left:14px;">
+                <p><strong>Faculty Absence from Class.</strong> A full-time faculty member who must miss class shall be required to submit a request in the current leave management system. A faculty member's absence must be approved by the appropriate divisional dean and by the vice president of academic affairs before the absence occurs, if at all possible. If the situation prevents the submission of the leave request before the absence occurs, then the leave request shall be submitted immediately after the faculty member's return to the campus. In any event, the department chair (or, in his or her absence, the divisional dean or the vice president of academic affairs) shall be notified by telephone or by other means that the instructor will not be able to meet classes.</p>
+                <p style="margin-top:8px;">An instructor shall not allow a class to meet without supervision or without notification of the absence of the instructor.</p>
+            </blockquote>
+        </div>
+    </section>
+
+    <!-- ================= SETTINGS ================= -->
+    <section id="tab-settings" class="tabpane hidden">
+        <div class="panel">
+            <h2>Department settings</h2>
+            <p class="hint" style="margin-bottom:12px;">These appear on every report and on the Process &amp; resources tab. To hand faculty a pre-configured link, fill these in and click <em>Copy link with settings</em> — the values ride along in the URL, so nothing has to be installed or shared separately.</p>
+            <div class="form-grid">
+                <div class="form-group"><label for="sDept">Department</label><input type="text" id="sDept" placeholder="e.g., Social Sciences"></div>
+                <div class="form-group"><label for="sCampus">Campus / division</label><input type="text" id="sCampus" placeholder="e.g., Trinity River"></div>
+                <div class="form-group"><label for="sTerm">Term</label><input type="text" id="sTerm" placeholder="e.g., Fall 2026"></div>
+                <div class="form-group"><label for="sChair">Chair name</label><input type="text" id="sChair"></div>
+                <div class="form-group"><label for="sChairEmail">Chair email (reports go here)</label><input type="email" id="sChairEmail"></div>
+                <div class="form-group"><label for="sChairPhone">Chair phone (for the 7 AM call)</label><input type="text" id="sChairPhone"></div>
+                <div class="form-group"><label for="sDean">Dean name</label><input type="text" id="sDean"></div>
+                <div class="form-group"><label for="sDeanEmail">Dean email (backup notification)</label><input type="email" id="sDeanEmail"></div>
+                <div class="form-group"><label for="sHr">HR / EAP contact</label><input type="text" id="sHr" placeholder="name, phone, or link"></div>
+                <div class="form-group"><label for="sLeave">Leave management system</label><input type="text" id="sLeave" placeholder="name or link"></div>
+                <div class="form-group"><label for="sDctcContact">Don't Cancel That Class — contact</label><input type="text" id="sDctcContact" placeholder="pending confirmation from the dean"></div>
+                <div class="form-group"><label for="sDctcLink">Don't Cancel That Class — request link</label><input type="text" id="sDctcLink"></div>
+                <div class="form-group"><label for="sDctcNotice">Don't Cancel That Class — notice required</label><input type="text" id="sDctcNotice" placeholder="e.g., 10 business days"></div>
+                <div class="form-group span2"><label for="sDctcStatus">Don't Cancel That Class — status line shown to faculty</label><input type="text" id="sDctcStatus" placeholder="e.g., Available through Student Affairs; request at least two weeks ahead."></div>
+            </div>
+            <div class="actions">
+                <button class="secondary" id="btnCopyLink">Copy link with settings</button>
+                <button class="quiet" id="btnResetSettings">Reset settings</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div id="toastHost"></div>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+const LS_KEY = 'cancelledClassTrackerV1';
+const SETTINGS_KEYS = ['dept','campus','term','chair','chairEmail','chairPhone','dean','deanEmail','hr','leave','dctcContact','dctcLink','dctcNotice','dctcStatus'];
+const SETTING_IDS = { dept:'sDept', campus:'sCampus', term:'sTerm', chair:'sChair', chairEmail:'sChairEmail', chairPhone:'sChairPhone', dean:'sDean', deanEmail:'sDeanEmail', hr:'sHr', leave:'sLeave', dctcContact:'sDctcContact', dctcLink:'sDctcLink', dctcNotice:'sDctcNotice', dctcStatus:'sDctcStatus' };
+const URL_KEYS = { dept:'dept', campus:'campus', term:'term', chair:'chair', chairEmail:'email', chairPhone:'phone', dean:'dean', deanEmail:'deanemail', hr:'hr', leave:'leave', dctcContact:'dctc', dctcLink:'dctclink', dctcNotice:'dctcnotice', dctcStatus:'dctcstatus' };
+const MAX_TOTAL_BYTES = 18 * 1024 * 1024;   // embedded as base64 → ~24 MB file; email attachment limits are usually 25 MB
+
+let settings = {};
+let files = { announcement: [], assignment: [] };   // { name, type, size, dataUrl }
+let log = [];                                        // imported records
+let logSort = { key: 'date', dir: -1 };
+let modalCleanup = null;
+
+const $ = id => document.getElementById(id);
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+function toast(msg, kind) {
+    const t = document.createElement('div');
+    t.className = 'toast' + (kind ? ' ' + kind : '');
+    t.textContent = msg;
+    $('toastHost').appendChild(t);
+    setTimeout(() => t.remove(), 4600);
+}
+function fmtBytes(n) { return n < 1024 * 1024 ? Math.round(n / 1024) + ' KB' : (n / 1024 / 1024).toFixed(1) + ' MB'; }
+function fmtDate(iso) { if (!iso) return ''; const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }); }
+function weekdayOf(iso) { if (!iso) return ''; const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString([], { weekday: 'long' }); }
+function toMin(t) { if (!t || !/^\d{1,2}:\d{2}/.test(t)) return null; const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+function uid() { return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8); }
+
+/* ============================================================
+   TABS
+   ============================================================ */
+function showTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('hidden', p.id !== 'tab-' + name));
+    if (name === 'log') renderLog();
+    if (name === 'process') renderResources();
+    try { history.replaceState(null, '', location.pathname + location.search + '#' + name); } catch (e) {}
+}
+
+/* ============================================================
+   SETTINGS — localStorage + URL pre-fill
+   ============================================================ */
+function readSettingsForm() {
+    SETTINGS_KEYS.forEach(k => settings[k] = $(SETTING_IDS[k]).value.trim());
+}
+function writeSettingsForm() {
+    SETTINGS_KEYS.forEach(k => $(SETTING_IDS[k]).value = settings[k] || '');
+}
+function applyUrlSettings() {
+    const p = new URLSearchParams(location.search);
+    let n = 0;
+    SETTINGS_KEYS.forEach(k => { const v = p.get(URL_KEYS[k]); if (v != null && v !== '') { settings[k] = v; n++; } });
+    if (n) $('prefillNote').textContent = 'Settings pre-filled from this link' + (settings.dept ? ' · ' + settings.dept : '');
+    return n;
+}
+function settingsLink() {
+    readSettingsForm();
+    const p = new URLSearchParams();
+    SETTINGS_KEYS.forEach(k => { if (settings[k]) p.set(URL_KEYS[k], settings[k]); });
+    return location.origin + location.pathname + (p.toString() ? '?' + p.toString() : '') + '#report';
+}
+function refreshMasthead() {
+    const bits = [settings.dept, settings.campus, settings.term].filter(Boolean);
+    $('mastheadSub').textContent = bits.length ? bits.join(' · ') : 'Report · Log · Resources';
+}
+function renderResources() {
+    const show = (id, v, link) => {
+        const el = $(id);
+        el.textContent = '';
+        if (!v) { el.textContent = '—'; return; }
+        if (link && /^https?:\/\//i.test(v)) { const a = document.createElement('a'); a.href = v; a.target = '_blank'; a.rel = 'noopener'; a.textContent = v; el.appendChild(a); }
+        else el.textContent = v;
+    };
+    show('dctcContactShow', settings.dctcContact);
+    show('dctcLinkShow', settings.dctcLink, true);
+    show('dctcNoticeShow', settings.dctcNotice);
+    show('chairShow', [settings.chair, settings.chairEmail, settings.chairPhone].filter(Boolean).join(' · '));
+    show('deanShow', [settings.dean, settings.deanEmail].filter(Boolean).join(' · '));
+    show('hrShow', settings.hr, true);
+    show('leaveShow', settings.leave, true);
+    if (settings.dctcStatus) $('dctcStatus').textContent = settings.dctcStatus;
+    $('dctcWhere').textContent = settings.dctcContact ? 'Contact: ' + settings.dctcContact + '. More on the Process & resources tab.' : 'Details and contact are on the Process & resources tab.';
+}
+
+/* ============================================================
+   AUTOSAVE (draft + settings + log)
+   ============================================================ */
+function formState() {
+    const g = id => $(id).value;
+    return {
+        name: g('fName'), email: g('fEmail'), type: g('fType'), date: g('fDate'), course: g('fCourse'), modality: g('fModality'),
+        start: g('fStart'), end: g('fEnd'),
+        kind: document.querySelector('input[name=fKind]:checked').value, late: g('fLate'), early: g('fEarly'),
+        reason: g('fReason'), reasonOther: g('fReasonOther'),
+        leave: g('fLeave'), notified: g('fNotified'), notifiedHow: g('fNotifiedHow'), notifiedWhen: g('fNotifiedWhen'),
+        announced: $('fAnnounced').checked, emailed: $('fEmailed').checked, doorSign: $('fDoorSign').checked, unsupervised: $('fUnsupervised').checked,
+        coverage: g('fCoverage'), coverageDetail: g('fCoverageDetail'),
+        dctc: (document.querySelector('input[name=fDctc]:checked') || {}).value || 'noNotice',
+        annPosted: g('fAnnPosted'), annText: g('fAnnText'),
+        asgDesc: g('fAsgDesc'), asgMinutes: g('fAsgMinutes'), asgDue: g('fAsgDue'),
+        notes: g('fNotes'), reachOut: $('fReachOut').checked, attest: $('fAttest').checked
+    };
+}
+function applyFormState(s) {
+    const set = (id, v) => { if (v != null) $(id).value = v; };
+    set('fName', s.name); set('fEmail', s.email); set('fType', s.type); set('fDate', s.date); set('fCourse', s.course); set('fModality', s.modality);
+    set('fStart', s.start); set('fEnd', s.end); set('fLate', s.late); set('fEarly', s.early);
+    const k = document.querySelector('input[name=fKind][value="' + (s.kind || 'full') + '"]'); if (k) k.checked = true;
+    set('fReason', s.reason); set('fReasonOther', s.reasonOther);
+    set('fLeave', s.leave); set('fNotified', s.notified); set('fNotifiedHow', s.notifiedHow); set('fNotifiedWhen', s.notifiedWhen);
+    $('fAnnounced').checked = !!s.announced; $('fEmailed').checked = !!s.emailed; $('fDoorSign').checked = !!s.doorSign; $('fUnsupervised').checked = !!s.unsupervised;
+    set('fCoverage', s.coverage); set('fCoverageDetail', s.coverageDetail);
+    const d = document.querySelector('input[name=fDctc][value="' + (s.dctc || 'noNotice') + '"]'); if (d) d.checked = true;
+    set('fAnnPosted', s.annPosted); set('fAnnText', s.annText);
+    set('fAsgDesc', s.asgDesc); set('fAsgMinutes', s.asgMinutes); set('fAsgDue', s.asgDue);
+    set('fNotes', s.notes); $('fReachOut').checked = !!s.reachOut; $('fAttest').checked = false;   // attestation is never carried over
+    refreshConditionalFields();
+}
+function saveLocal() {
+    try {
+        readSettingsForm();
+        const data = { savedAt: Date.now(), settings, draft: formState(), files, log: logForStorage() };
+        localStorage.setItem(LS_KEY, JSON.stringify(data));
+        $('autosaveStatus').innerHTML = '<span class="dot"></span>Autosaved ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    } catch (e) {
+        $('autosaveStatus').textContent = 'Autosave off (browser storage full — large files)';
+    }
+}
+// The log can hold many reports with embedded images; keep artifacts out of localStorage
+// (they live in the report files and in saved log files) so autosave stays small.
+function logForStorage() { return log.map(r => ({ ...r, artifacts: stripData(r.artifacts), _reportHtml: undefined })); }
+function stripData(a) { if (!a) return a; const out = {}; for (const k in a) out[k] = (a[k] || []).map(f => ({ name: f.name, type: f.type, size: f.size })); return out; }
+let saveTimer = null;
+function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveLocal, 400); }
+
+function restoreLocal() {
+    let s = null;
+    try { s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { return; }
+    if (!s) return;
+    const urlCount = Object.keys(settings).filter(k => settings[k]).length;
+    settings = { ...(s.settings || {}), ...(urlCount ? settings : {}) };   // a link's settings win over stored ones
+    if (s.draft) applyFormState(s.draft);
+    if (s.files) files = { announcement: s.files.announcement || [], assignment: s.files.assignment || [] };
+    if (Array.isArray(s.log)) log = s.log;
+    renderFiles();
+    if (s.draft && (s.draft.name || s.draft.course)) {
+        const host = $('bannerHost');
+        const b = document.createElement('div');
+        b.className = 'banner no-print';
+        b.innerHTML = '<span>A draft report from ' + esc(new Date(s.savedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })) + ' was restored.</span><span><button class="quiet" id="bannerClear">Start a new report</button></span>';
+        host.appendChild(b);
+        b.querySelector('#bannerClear').addEventListener('click', () => { clearForm(true); b.remove(); });
+    }
+}
+
+/* ============================================================
+   FORM BEHAVIOUR
+   ============================================================ */
+function refreshConditionalFields() {
+    const kind = document.querySelector('input[name=fKind]:checked').value;
+    $('partialFields').classList.toggle('hidden', kind === 'full');
+    $('lateWrap').classList.toggle('hidden', !(kind === 'late' || kind === 'both'));
+    $('earlyWrap').classList.toggle('hidden', !(kind === 'early' || kind === 'both'));
+    $('otherWrap').classList.toggle('hidden', $('fReason').value !== 'Other');
+    const m = minutesMissed(formState());
+    const sched = scheduledMinutes(formState());
+    $('minutesHint').textContent = sched ? (m != null ? m + ' of ' + sched + ' scheduled minutes missed' : 'Scheduled session: ' + sched + ' minutes') : 'Add the scheduled start and end so the log can total instructional minutes lost.';
+}
+function scheduledMinutes(s) {
+    const a = toMin(s.start), b = toMin(s.end);
+    return a != null && b != null && b > a ? b - a : null;
+}
+function minutesMissed(s) {
+    const sched = scheduledMinutes(s);
+    if (s.kind === 'full') return sched;
+    const late = (s.kind === 'late' || s.kind === 'both') ? (parseInt(s.late, 10) || 0) : 0;
+    const early = (s.kind === 'early' || s.kind === 'both') ? (parseInt(s.early, 10) || 0) : 0;
+    const m = late + early;
+    if (!m) return null;
+    return sched ? Math.min(m, sched) : m;
+}
+function kindLabel(s) {
+    if (s.kind === 'full') return 'Entire session';
+    const bits = [];
+    if (s.kind === 'late' || s.kind === 'both') bits.push('started ' + (s.late || '?') + ' min late');
+    if (s.kind === 'early' || s.kind === 'both') bits.push('ended ' + (s.early || '?') + ' min early');
+    return bits.join(', ').replace(/^./, c => c.toUpperCase());
+}
+function reasonLabel(s) { return s.reason === 'Other' && s.reasonOther ? 'Other — ' + s.reasonOther : s.reason; }
+const LEAVE_LABELS = { before: 'Submitted before the absence', after: 'To be submitted on return', na: 'Not required', no: 'Not submitted' };
+const NOTIFIED_LABELS = { before: 'Before the class', during: 'After the class had started', after: 'After the class ended', no: 'Not yet' };
+const COVERAGE_LABELS = { async: 'Asynchronous assignment', sub: 'Colleague covered', guest: 'Guest speaker / recorded lecture', dctc: "Don't Cancel That Class session", makeup: 'Make-up session scheduled', none: 'No replacement activity' };
+const DCTC_LABELS = { requested: 'Requested', noNotice: 'Not possible — no advance notice', declined: 'Had notice, chose another plan', unaware: 'Was not aware of the program' };
+
+function clearForm(keepIdentity) {
+    const name = $('fName').value, email = $('fEmail').value, type = $('fType').value;
+    document.querySelectorAll('#tab-report input[type=text], #tab-report input[type=email], #tab-report input[type=date], #tab-report input[type=time], #tab-report input[type=number], #tab-report textarea').forEach(el => el.value = '');
+    document.querySelectorAll('#tab-report input[type=checkbox]').forEach(el => el.checked = false);
+    document.querySelectorAll('#tab-report select').forEach(el => el.selectedIndex = 0);
+    document.querySelector('input[name=fKind][value=full]').checked = true;
+    document.querySelector('input[name=fDctc][value=noNotice]').checked = true;
+    files = { announcement: [], assignment: [] };
+    if (keepIdentity) { $('fName').value = name; $('fEmail').value = email; $('fType').value = type; }
+    renderFiles();
+    refreshConditionalFields();
+    scheduleSave();
+}
+
+/* ---------- files ---------- */
+function readFiles(fileList, bucket) {
+    const incoming = [...fileList];
+    if (!incoming.length) return;
+    let total = totalBytes();
+    let done = 0;
+    incoming.forEach(f => {
+        if (total + f.size > MAX_TOTAL_BYTES) { toast(f.name + ' would push the report past ' + fmtBytes(MAX_TOTAL_BYTES) + '. Compress the image or attach it separately.', 'warn'); return; }
+        total += f.size;
+        const r = new FileReader();
+        r.onload = e => {
+            files[bucket].push({ name: f.name, type: f.type || 'application/octet-stream', size: f.size, dataUrl: e.target.result });
+            if (++done === incoming.length || true) { renderFiles(); scheduleSave(); }
+        };
+        r.readAsDataURL(f);
+    });
+}
+function totalBytes() { return [...files.announcement, ...files.assignment].reduce((s, f) => s + f.size, 0); }
+function renderFiles() {
+    [['announcement', 'listAnn'], ['assignment', 'listAsg']].forEach(([bucket, listId]) => {
+        const ul = $(listId);
+        ul.innerHTML = '';
+        files[bucket].forEach((f, i) => {
+            const li = document.createElement('li');
+            if (/^image\//.test(f.type)) { const img = document.createElement('img'); img.className = 'thumb'; img.src = f.dataUrl; img.alt = ''; li.appendChild(img); }
+            else { const ic = document.createElement('div'); ic.className = 'icon'; ic.textContent = (f.name.split('.').pop() || 'file').toUpperCase().slice(0, 4); li.appendChild(ic); }
+            const meta = document.createElement('div'); meta.className = 'meta';
+            meta.innerHTML = '<div class="name"></div><div class="size"></div>';
+            meta.querySelector('.name').textContent = f.name;
+            meta.querySelector('.size').textContent = fmtBytes(f.size);
+            const rm = document.createElement('button'); rm.className = 'quiet'; rm.textContent = 'Remove';
+            rm.addEventListener('click', () => { files[bucket].splice(i, 1); renderFiles(); scheduleSave(); });
+            li.append(meta, rm);
+            ul.appendChild(li);
+        });
+    });
+    const t = totalBytes();
+    $('sizeHint').textContent = t ? 'Attached: ' + fmtBytes(t) + ' of ' + fmtBytes(MAX_TOTAL_BYTES) + ' (the report file will be about a third larger).' : '';
+}
+function wireDrop(dropId, inputId, bucket) {
+    const dz = $(dropId), inp = $(inputId);
+    dz.addEventListener('click', () => inp.click());
+    dz.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inp.click(); } });
+    dz.tabIndex = 0;
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); bucket ? readFiles(e.dataTransfer.files, bucket) : importLogFiles(e.dataTransfer.files); });
+    inp.addEventListener('change', e => { bucket ? readFiles(e.target.files, bucket) : importLogFiles(e.target.files); e.target.value = ''; });
+    // Paste a screenshot straight from the clipboard into the announcement/assignment zone
+    if (bucket) dz.addEventListener('paste', e => { const items = [...(e.clipboardData?.files || [])]; if (items.length) readFiles(items, bucket); });
+}
+
+/* ============================================================
+   RECORD + REPORT FILE
+   ============================================================ */
+function validate(s) {
+    const missing = [];
+    if (!s.name) missing.push('instructor name');
+    if (!s.date) missing.push('date');
+    if (!s.course) missing.push('course and section');
+    if (!s.reason) missing.push('reason');
+    if (s.reason === 'Other' && !s.reasonOther) missing.push('description of the other reason');
+    if ((s.kind === 'late' || s.kind === 'both') && !s.late) missing.push('minutes late');
+    if ((s.kind === 'early' || s.kind === 'both') && !s.early) missing.push('minutes early');
+    if (!files.announcement.length) missing.push('announcement screenshot');
+    if (!files.assignment.length && s.coverage === 'async') missing.push('assignment artifact');
+    if (!s.attest) missing.push('attestation checkbox');
+    return missing;
+}
+function buildRecord() {
+    const s = formState();
+    readSettingsForm();
+    return {
+        schema: 'cct-report', version: 1, id: uid(), createdAt: new Date().toISOString(),
+        department: settings.dept || '', campus: settings.campus || '', term: settings.term || '',
+        instructor: { name: s.name, email: s.email, type: s.type },
+        date: s.date, weekday: weekdayOf(s.date), course: s.course, modality: s.modality,
+        scheduled: { start: s.start, end: s.end, minutes: scheduledMinutes(s) },
+        absence: { kind: s.kind, kindLabel: kindLabel(s), late: s.late ? +s.late : null, early: s.early ? +s.early : null, minutesMissed: minutesMissed(s) },
+        reason: { code: s.reason, other: s.reasonOther, label: reasonLabel(s) },
+        handbook: {
+            leave: s.leave, leaveLabel: LEAVE_LABELS[s.leave],
+            notified: s.notified, notifiedLabel: NOTIFIED_LABELS[s.notified], notifiedHow: s.notifiedHow, notifiedWhen: s.notifiedWhen,
+            announced: s.announced, emailed: s.emailed, doorSign: s.doorSign, unsupervised: s.unsupervised
+        },
+        coverage: { code: s.coverage, label: COVERAGE_LABELS[s.coverage], detail: s.coverageDetail },
+        dctc: { code: s.dctc, label: DCTC_LABELS[s.dctc] },
+        announcement: { postedAt: s.annPosted, text: s.annText },
+        assignment: { description: s.asgDesc, minutes: s.asgMinutes ? +s.asgMinutes : null, due: s.asgDue },
+        artifacts: { announcement: files.announcement, assignment: files.assignment },
+        notes: s.notes, reachOut: s.reachOut, attested: s.attest
+    };
+}
+function reportFileName(rec) {
+    const safe = v => String(v || '').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_');
+    const sec = (rec.course.match(/\d{4,5}\s*$/) || [''])[0].trim();
+    return 'Cancelled_Class_' + safe(rec.instructor.name) + '_' + rec.date + (sec ? '_' + sec : '') + '.html';
+}
+function flagsFor(rec) {
+    const f = [];
+    if (rec.instructor.type === 'FT' && (rec.handbook.leave === 'no')) f.push('No leave request');
+    if (rec.handbook.notified === 'no') f.push('Chair not notified');
+    else if (rec.handbook.notified === 'during' || rec.handbook.notified === 'after') f.push('Late notice');
+    if (!rec.handbook.announced && !rec.handbook.emailed) f.push('No student notice recorded');
+    if (!(rec.artifacts.announcement || []).length) f.push('No announcement artifact');
+    if (rec.coverage.code === 'async' && !(rec.artifacts.assignment || []).length) f.push('No assignment artifact');
+    if (rec.coverage.code === 'none') f.push('No replacement activity');
+    return f;
+}
+
+function artifactHtml(list) {
+    if (!list || !list.length) return '<p class="muted">None attached.</p>';
+    return list.map(f => {
+        const label = esc(f.name) + ' <span class="muted">(' + fmtBytes(f.size) + ')</span>';
+        if (/^image\//.test(f.type)) return '<figure><img src="' + f.dataUrl + '" alt="' + esc(f.name) + '"><figcaption>' + label + '</figcaption></figure>';
+        if (f.type === 'application/pdf') return '<figure><embed src="' + f.dataUrl + '" type="application/pdf"><figcaption><a href="' + f.dataUrl + '" download="' + esc(f.name) + '">' + label + '</a></figcaption></figure>';
+        return '<p><a href="' + f.dataUrl + '" download="' + esc(f.name) + '">⬇ ' + label + '</a></p>';
+    }).join('');
+}
+function row(k, v) { return v ? '<tr><th>' + esc(k) + '</th><td>' + v + '</td></tr>' : ''; }
+function renderReportHtml(rec) {
+    const flags = flagsFor(rec);
+    const yes = b => b ? '✓' : '—';
+    const body =
+        '<header><div class="eyebrow">' + esc([rec.department, rec.campus, rec.term].filter(Boolean).join(' · ') || 'Cancelled Class Report') + '</div>' +
+        '<h1>Cancelled Class Report</h1>' +
+        '<div class="lead">' + esc(rec.instructor.name) + ' · ' + esc(rec.course) + ' · ' + esc(rec.weekday + ', ' + fmtDate(rec.date)) + '</div></header>' +
+        '<section><h2>Session</h2><table>' +
+        row('Instructor', esc(rec.instructor.name) + (rec.instructor.email ? ' &lt;' + esc(rec.instructor.email) + '&gt;' : '') + ' · ' + ({ FT: 'Full-time', ADJ: 'Adjunct', DC: 'Dual-credit / other' }[rec.instructor.type] || '')) +
+        row('Course / section', esc(rec.course) + ' · ' + esc(rec.modality)) +
+        row('Date', esc(rec.weekday + ', ' + fmtDate(rec.date))) +
+        row('Scheduled', rec.scheduled.start ? esc(rec.scheduled.start + ' – ' + rec.scheduled.end) + (rec.scheduled.minutes ? ' (' + rec.scheduled.minutes + ' min)' : '') : '') +
+        row('Missed', esc(rec.absence.kindLabel) + (rec.absence.minutesMissed != null ? ' · ' + rec.absence.minutesMissed + ' instructional minutes' : '')) +
+        row('Reason', esc(rec.reason.label)) +
+        '</table></section>' +
+        '<section><h2>Handbook steps</h2><table>' +
+        row('Leave request', esc(rec.handbook.leaveLabel)) +
+        row('Chair notified', esc(rec.handbook.notifiedLabel) + (rec.handbook.notifiedHow ? ' · ' + esc(rec.handbook.notifiedHow) : '') + (rec.handbook.notifiedWhen ? ' · ' + esc(rec.handbook.notifiedWhen) : '')) +
+        row('Students notified', 'Canvas announcement ' + yes(rec.handbook.announced) + ' &nbsp; Email ' + yes(rec.handbook.emailed) + ' &nbsp; Door sign ' + yes(rec.handbook.doorSign) + ' &nbsp; Not unsupervised ' + yes(rec.handbook.unsupervised)) +
+        row('Coverage', esc(rec.coverage.label) + (rec.coverage.detail ? ' · ' + esc(rec.coverage.detail) : '')) +
+        row("Don't Cancel That Class", esc(rec.dctc.label)) +
+        '</table>' + (flags.length ? '<p class="flags">Review: ' + esc(flags.join(' · ')) + '</p>' : '<p class="ok">All handbook steps recorded.</p>') + '</section>' +
+        '<section><h2>Canvas announcement</h2>' +
+        (rec.announcement.postedAt ? '<p><strong>Posted:</strong> ' + esc(rec.announcement.postedAt) + '</p>' : '') +
+        (rec.announcement.text ? '<blockquote>' + esc(rec.announcement.text).replace(/\n/g, '<br>') + '</blockquote>' : '') +
+        artifactHtml(rec.artifacts.announcement) + '</section>' +
+        '<section><h2>Assignment in lieu of class</h2>' +
+        (rec.assignment.description ? '<p>' + esc(rec.assignment.description).replace(/\n/g, '<br>') + '</p>' : '') +
+        '<p class="muted">' + [rec.assignment.minutes ? '≈ ' + rec.assignment.minutes + ' student minutes' : '', rec.assignment.due ? 'Due ' + esc(rec.assignment.due) : ''].filter(Boolean).join(' · ') + '</p>' +
+        artifactHtml(rec.artifacts.assignment) + '</section>' +
+        (rec.notes ? '<section><h2>Notes for the chair</h2><p>' + esc(rec.notes).replace(/\n/g, '<br>') + '</p></section>' : '') +
+        (rec.reachOut ? '<section class="reach">The instructor asked the chair to reach out about resources or options.</section>' : '') +
+        '<footer>Submitted ' + esc(new Date(rec.createdAt).toLocaleString()) + ' · report id ' + esc(rec.id) + ' · Attested by the instructor: ' + (rec.attested ? 'yes' : 'no') +
+        '<br>Reasons are shared with the chair and dean only. This report does not replace the leave request.</footer>';
+
+    const css = 'body{font-family:Georgia,serif;color:#22303a;max-width:860px;margin:0 auto;padding:28px 24px;line-height:1.45}' +
+        'header{border-bottom:2px solid #14344f;padding-bottom:10px;margin-bottom:18px}.eyebrow{font:600 11px "Segoe UI",Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;color:#5b6b77}' +
+        'h1{font-weight:normal;font-size:26px;color:#14344f;margin:4px 0}.lead{font-family:"Segoe UI",Arial,sans-serif;font-size:14px;color:#5b6b77}' +
+        'h2{font-weight:normal;font-size:17px;color:#0e6e73;border-bottom:1px solid #d8e1e4;padding-bottom:4px;margin:20px 0 10px}' +
+        'table{border-collapse:collapse;width:100%;font-family:"Segoe UI",Arial,sans-serif;font-size:13px}th{text-align:left;width:170px;color:#5b6b77;font-weight:600;padding:5px 8px 5px 0;vertical-align:top}td{padding:5px 0}' +
+        'tr{border-bottom:1px solid #eef2f3}.muted{color:#5b6b77;font-size:12px}.flags{font:600 13px "Segoe UI",Arial,sans-serif;color:#b3372f;background:#faecea;padding:8px 12px;border-radius:4px}.ok{font:13px "Segoe UI",Arial,sans-serif;color:#2e7d4f}' +
+        'blockquote{border-left:3px solid #0e6e73;background:#e8f4f4;padding:10px 14px;margin:8px 0;font-size:14px}' +
+        'figure{margin:12px 0}figure img{max-width:100%;border:1px solid #d8e1e4;border-radius:4px}figure embed{width:100%;height:520px;border:1px solid #d8e1e4}figcaption{font:12px "Segoe UI",Arial,sans-serif;color:#5b6b77;margin-top:4px}' +
+        '.reach{background:#fdf6e9;border-left:3px solid #c77f1f;padding:10px 14px;font:13px "Segoe UI",Arial,sans-serif;margin-top:18px}' +
+        'footer{margin-top:28px;font:11px "Segoe UI",Arial,sans-serif;color:#5b6b77;border-top:1px solid #d8e1e4;padding-top:8px}' +
+        '@media print{body{padding:0}figure{break-inside:avoid}figure embed{height:420px}}';
+    // The JSON block is what the department log reads back; a closing script tag inside strings is escaped.
+    const json = JSON.stringify(rec).replace(/<\/script/gi, '<\\/script');
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' +
+        esc('Cancelled Class — ' + rec.instructor.name + ' — ' + rec.date) + '</title><style>' + css + '</style></head><body>' + body +
+        '\n<script type="application/json" id="cct-record">' + json + '<\/script></body></html>';
+}
+function downloadText(name, text, type) {
+    const blob = new Blob([text], { type: type || 'text/html;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function openHtml(html) {
+    const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+    const w = window.open(url, '_blank');
+    if (!w) { toast('Pop-up blocked — allow pop-ups for this page to open the report.', 'warn'); return false; }
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    return true;
+}
+function generateReport(previewOnly) {
+    const s = formState();
+    const missing = validate(s);
+    if (missing.length && !previewOnly) { toast('Still needed: ' + missing.join(', ') + '.', 'warn'); return null; }
+    const rec = buildRecord();
+    const html = renderReportHtml(rec);
+    if (previewOnly) {
+        if (missing.length) toast('Preview only — still needed before download: ' + missing.join(', ') + '.', 'warn');
+        openHtml(html);
+        return rec;
+    }
+    downloadText(reportFileName(rec), html);
+    rememberCourse(rec.course);
+    toast('Report downloaded — attach it to your email to ' + (settings.chair || 'the chair') + '.');
+    return rec;
+}
+function rememberCourse(course) {
+    try {
+        const key = LS_KEY + ':courses';
+        const list = JSON.parse(localStorage.getItem(key) || '[]').filter(c => c !== course);
+        list.unshift(course);
+        localStorage.setItem(key, JSON.stringify(list.slice(0, 12)));
+        fillCourseMemory();
+    } catch (e) {}
+}
+function fillCourseMemory() {
+    try {
+        const list = JSON.parse(localStorage.getItem(LS_KEY + ':courses') || '[]');
+        $('courseMemory').innerHTML = list.map(c => '<option value="' + esc(c) + '">').join('');
+    } catch (e) {}
+}
+function emailChair() {
+    const s = formState();
+    readSettingsForm();
+    const to = settings.chairEmail || '';
+    const subject = 'Cancelled class — ' + (s.course || 'course') + ' — ' + (s.date ? fmtDate(s.date) : 'date');
+    const lines = [
+        (settings.chair ? 'Dr./Prof. ' + settings.chair.split(' ').pop() + ',' : 'Hello,'), '',
+        'My ' + (s.course || '[course/section]') + ' session on ' + (s.date ? weekdayOf(s.date) + ', ' + fmtDate(s.date) : '[date]') + ' ' + (s.kind === 'full' ? 'did not meet' : 'was shortened (' + kindLabel(s).toLowerCase() + ')') + ' — ' + (reasonLabel(s) || '[reason]').toLowerCase() + '.',
+        'Students were notified via Canvas' + (s.annPosted ? ' at ' + s.annPosted : '') + ' and given ' + (s.asgDesc ? 'the following in lieu of class: ' + s.asgDesc.split('\n')[0] : 'an assignment in lieu of class') + '.',
+        'Leave request: ' + (LEAVE_LABELS[s.leave] || '').toLowerCase() + '.', '',
+        'The full report with artifacts is attached (Cancelled_Class_*.html).', '',
+        s.name || ''
+    ];
+    const href = 'mailto:' + encodeURIComponent(to) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(lines.join('\n'));
+    window.location.href = href;
+    if (!to) toast('No chair email in Settings — add it so this is addressed automatically.', 'warn');
+}
+
+/* ============================================================
+   DEPARTMENT LOG
+   ============================================================ */
+function importLogFiles(fileList) {
+    const list = [...fileList];
+    if (!list.length) return;
+    let added = 0, dupes = 0, bad = 0, pending = list.length;
+    const finish = () => {
+        if (--pending) return;
+        renderLog(); scheduleSave();
+        toast('Imported ' + added + ' report(s)' + (dupes ? ', ' + dupes + ' already in the log' : '') + (bad ? ', ' + bad + ' unreadable' : ''));
+    };
+    list.forEach(f => {
+        const r = new FileReader();
+        r.onload = e => {
+            const text = String(e.target.result);
+            let recs = [];
+            const isJson = /^\s*[\[{]/.test(text);
+            try {
+                if (isJson) {
+                    const j = JSON.parse(text);
+                    recs = Array.isArray(j) ? j : (j.schema === 'cct-log' ? j.records : [j]);
+                } else {
+                    const m = text.match(/<script type="application\/json" id="cct-record">([\s\S]*?)<\/script>/);
+                    if (m) recs = [JSON.parse(m[1].replace(/<\\\/script/gi, '<\/script'))];
+                }
+            } catch (err) { recs = []; }
+            recs = recs.filter(x => x && x.schema === 'cct-report' && x.id);
+            if (!recs.length) bad++;
+            recs.forEach(rec => {
+                if (log.some(x => x.id === rec.id)) { dupes++; return; }
+                if (!isJson) rec._reportHtml = text;    // keep the original report so "Open" shows exactly what was submitted
+                else delete rec._reportHtml;
+                log.push(rec); added++;
+            });
+            finish();
+        };
+        r.readAsText(f);
+    });
+}
+function filteredLog() {
+    const inst = $('filtInst').value, reason = $('filtReason').value, from = $('filtFrom').value, to = $('filtTo').value, flag = $('filtFlag').value;
+    return log.filter(r =>
+        (!inst || r.instructor.name === inst) && (!reason || r.reason.code === reason) &&
+        (!from || r.date >= from) && (!to || r.date <= to) &&
+        (flag !== 'flagged' || flagsFor(r).length) && (flag !== 'reach' || r.reachOut));
+}
+function sectionKey(r) { return (r.course || '').trim().toLowerCase(); }
+function barRow(label, count, max, color, val) {
+    const w = Math.max(5, (count / Math.max(max, 1)) * 110);
+    return '<div class="bar-row"><span class="bar-label" title="' + esc(label) + '">' + esc(label) + '</span><span class="bar" style="width:' + w + 'px;background:' + color + ';"></span><span class="bar-val">' + esc(val) + '</span></div>';
+}
+function tally(rows, keyFn) { const t = {}; rows.forEach(r => { const k = keyFn(r) || '—'; t[k] = (t[k] || 0) + 1; }); return Object.entries(t).sort((a, b) => b[1] - a[1]); }
+function card(title, color, bg, inner) { return '<div class="analysis-card" style="background:' + bg + ';border-left-color:' + color + ';"><h4 style="color:' + color + ';">' + esc(title) + '</h4><div class="body">' + inner + '</div></div>'; }
+
+function renderLog() {
+    // filter selects
+    const instSel = $('filtInst'), reasonSel = $('filtReason');
+    const keepI = instSel.value, keepR = reasonSel.value;
+    instSel.innerHTML = '<option value="">All</option>' + [...new Set(log.map(r => r.instructor.name))].sort().map(n => '<option>' + esc(n) + '</option>').join('');
+    reasonSel.innerHTML = '<option value="">All</option>' + [...new Set(log.map(r => r.reason.code))].sort().map(n => '<option>' + esc(n) + '</option>').join('');
+    instSel.value = keepI; reasonSel.value = keepR;
+
+    const rows = filteredLog();
+    const minutes = rows.reduce((s, r) => s + (r.absence.minutesMissed || 0), 0);
+    const full = rows.filter(r => r.absence.kind === 'full').length;
+    const flagged = rows.filter(r => flagsFor(r).length).length;
+    const repeat = tally(rows, sectionKey).filter(([, n]) => n >= 2);
+    const reach = rows.filter(r => r.reachOut).length;
+    $('logStats').innerHTML =
+        '<div class="stat"><div class="stat-value">' + rows.length + '</div><div class="stat-label">Reports</div></div>' +
+        '<div class="stat"><div class="stat-value">' + full + '</div><div class="stat-label">Full sessions cancelled</div></div>' +
+        '<div class="stat"><div class="stat-value">' + (minutes >= 60 ? (minutes / 60).toFixed(1) + ' h' : minutes + ' m') + '</div><div class="stat-label">Instructional time lost</div></div>' +
+        '<div class="stat"><div class="stat-value">' + repeat.length + '</div><div class="stat-label">Sections with 2+</div></div>' +
+        '<div class="stat"><div class="stat-value">' + flagged + '</div><div class="stat-label">Need review</div></div>' +
+        '<div class="stat"><div class="stat-value">' + reach + '</div><div class="stat-label">Asked for outreach</div></div>';
+
+    let a = '';
+    const byInst = tally(rows, r => r.instructor.name);
+    a += card('By instructor', 'var(--teal)', 'var(--teal-wash)', byInst.length ? byInst.map(([k, n]) => {
+        const mins = rows.filter(r => r.instructor.name === k).reduce((s, r) => s + (r.absence.minutesMissed || 0), 0);
+        return barRow(k, n, byInst[0][1], n >= 3 ? 'var(--danger)' : n === 2 ? 'var(--amber)' : 'var(--teal)', n + (mins ? ' · ' + mins + ' min' : ''));
+    }).join('') : 'No records yet.');
+    const byReason = tally(rows, r => r.reason.code);
+    a += card('By reason', 'var(--plum)', 'var(--plum-wash)', byReason.map(([k, n]) => barRow(k, n, byReason[0][1], 'var(--plum)', String(n))).join('') || '—');
+    const bySection = tally(rows, r => r.course);
+    a += card('By section', 'var(--amber)', 'var(--amber-wash)', bySection.map(([k, n]) => barRow(k, n, bySection[0][1], n >= 2 ? 'var(--danger)' : 'var(--amber)', String(n))).join('') || '—');
+    const byDay = tally(rows, r => r.weekday);
+    const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    byDay.sort((x, y) => dayOrder.indexOf(x[0]) - dayOrder.indexOf(y[0]));
+    const byMonth = tally(rows, r => (r.date || '').slice(0, 7)).sort();
+    a += card('By weekday and month', 'var(--navy-2)', '#eef3f8',
+        byDay.map(([k, n]) => barRow(k, n, Math.max(...byDay.map(x => x[1]), 1), 'var(--navy-2)', String(n))).join('') +
+        (byMonth.length ? '<div style="margin-top:8px;border-top:1px solid var(--line);padding-top:6px;">' + byMonth.map(([k, n]) => barRow(k, n, Math.max(...byMonth.map(x => x[1]), 1), 'var(--teal)', String(n))).join('') + '</div>' : ''));
+    const byCov = tally(rows, r => r.coverage.label);
+    const dctc = tally(rows, r => r.dctc.label);
+    a += card('Coverage and DCTC', 'var(--ok)', 'var(--ok-wash)',
+        byCov.map(([k, n]) => barRow(k, n, byCov[0]?.[1] || 1, 'var(--ok)', String(n))).join('') +
+        (dctc.length ? '<div style="margin-top:8px;border-top:1px solid var(--line);padding-top:6px;"><div style="font-weight:600;margin-bottom:3px;">Don\'t Cancel That Class</div>' + dctc.map(([k, n]) => barRow(k, n, dctc[0][1], 'var(--plum)', String(n))).join('') + '</div>' : ''));
+    const flagTally = {};
+    rows.forEach(r => flagsFor(r).forEach(f => flagTally[f] = (flagTally[f] || 0) + 1));
+    const ft = Object.entries(flagTally).sort((x, y) => y[1] - x[1]);
+    a += card('Handbook flags', 'var(--danger)', 'var(--danger-wash)', ft.length ? ft.map(([k, n]) => barRow(k, n, ft[0][1], 'var(--danger)', String(n))).join('') : '<span style="color:var(--ok)">No flags in these records.</span>');
+    $('logAnalysis').innerHTML = a;
+
+    // table
+    const cols = [
+        ['date', 'Date', r => r.date], ['instructor', 'Instructor', r => r.instructor.name], ['course', 'Course / section', r => r.course],
+        ['missed', 'Missed', r => r.absence.minutesMissed || 0], ['reason', 'Reason', r => r.reason.label], ['coverage', 'Coverage', r => r.coverage.label],
+        ['leave', 'Leave', r => r.handbook.leave], ['notice', 'Chair notice', r => r.handbook.notified], ['artifacts', 'Artifacts', r => (r.artifacts.announcement || []).length + (r.artifacts.assignment || []).length],
+        ['flags', 'Review', r => flagsFor(r).length]
+    ];
+    const col = cols.find(c => c[0] === logSort.key) || cols[0];
+    rows.sort((x, y) => { const a = col[2](x), b = col[2](y); const c = typeof a === 'number' && typeof b === 'number' ? a - b : String(a).localeCompare(String(b)); return (c || String(x.date).localeCompare(String(y.date))) * logSort.dir; });
+    const table = $('logTable');
+    table.innerHTML = '';
+    const thead = document.createElement('thead'); const tr = document.createElement('tr');
+    cols.forEach(([key, label]) => {
+        const th = document.createElement('th'); th.textContent = label + (logSort.key === key ? (logSort.dir > 0 ? ' ▲' : ' ▼') : '');
+        th.addEventListener('click', () => { if (logSort.key === key) logSort.dir = -logSort.dir; else logSort = { key, dir: 1 }; renderLog(); });
+        tr.appendChild(th);
+    });
+    tr.appendChild(document.createElement('th'));
+    thead.appendChild(tr); table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    rows.forEach(r => {
+        const flags = flagsFor(r);
+        const td = (html, cls) => { const d = document.createElement('td'); d.innerHTML = html; if (cls) d.className = cls; return d; };
+        const trr = document.createElement('tr');
+        trr.append(
+            td(esc(fmtDate(r.date)) + '<br><span class="badge plain">' + esc((r.weekday || '').slice(0, 3)) + '</span>'),
+            td(esc(r.instructor.name) + (r.reachOut ? '<br><span class="badge warn">asked for outreach</span>' : '')),
+            td(esc(r.course) + '<br><span class="badge plain">' + esc(r.modality || '') + '</span>'),
+            td(esc(r.absence.kindLabel) + (r.absence.minutesMissed != null ? '<br><span class="badge plain">' + r.absence.minutesMissed + ' min</span>' : '')),
+            td(esc(r.reason.label)),
+            td(esc(r.coverage.label) + (r.coverage.detail ? '<br><span class="badge plain">' + esc(r.coverage.detail) + '</span>' : '')),
+            td('<span class="badge ' + (r.handbook.leave === 'no' ? 'bad' : r.handbook.leave === 'after' ? 'warn' : 'ok') + '">' + esc(r.handbook.leaveLabel) + '</span>'),
+            td('<span class="badge ' + (r.handbook.notified === 'before' ? 'ok' : r.handbook.notified === 'no' ? 'bad' : 'warn') + '">' + esc(r.handbook.notifiedLabel) + '</span>' + (r.handbook.notifiedWhen ? '<br><span class="badge plain">' + esc(r.handbook.notifiedWhen) + '</span>' : '')),
+            td(((r.artifacts.announcement || []).length) + ' ann · ' + ((r.artifacts.assignment || []).length) + ' asg'),
+            td(flags.length ? flags.map(f => '<span class="flag">' + esc(f) + '</span>').join('') : '<span class="badge ok">complete</span>')
+        );
+        const act = document.createElement('td');
+        const open = document.createElement('button'); open.className = 'quiet'; open.textContent = 'Open';
+        open.title = 'Open the full report with artifacts';
+        open.addEventListener('click', () => openHtml(r._reportHtml || renderReportHtml(r)));
+        const rm = document.createElement('button'); rm.className = 'quiet'; rm.textContent = '×'; rm.title = 'Remove from log';
+        rm.addEventListener('click', () => { if (!confirm('Remove this report from the log?')) return; log = log.filter(x => x.id !== r.id); renderLog(); scheduleSave(); });
+        act.append(open, document.createTextNode(' '), rm);
+        trr.appendChild(act);
+        tbody.appendChild(trr);
+    });
+    table.appendChild(tbody);
+    if (!rows.length) { const cap = document.createElement('caption'); cap.style.cssText = 'caption-side:bottom;padding:12px;color:var(--muted);font-size:13px;'; cap.textContent = log.length ? 'No records match these filters.' : 'No reports imported yet.'; table.appendChild(cap); }
+}
+
+function csvField(v) { return '"' + String(v ?? '').replace(/"/g, '""') + '"'; }
+function exportCsv() {
+    const rows = filteredLog();
+    if (!rows.length) { toast('Nothing to export.', 'warn'); return; }
+    const head = ['Date', 'Weekday', 'Instructor', 'Email', 'Appointment', 'Department', 'Campus', 'Term', 'Course/Section', 'Modality', 'Scheduled start', 'Scheduled end', 'Scheduled minutes', 'Absence', 'Minutes missed', 'Reason', 'Reason detail', 'Leave request', 'Chair notified', 'Notified how', 'Notified when', 'Canvas announcement', 'Email to students', 'Door sign', 'Not unsupervised', 'Coverage', 'Coverage detail', 'DCTC', 'Announcement posted', 'Assignment', 'Assignment minutes', 'Assignment due', 'Announcement files', 'Assignment files', 'Asked for outreach', 'Flags', 'Notes', 'Report id', 'Submitted'];
+    let out = '﻿' + head.map(csvField).join(',') + '\n';
+    rows.forEach(r => {
+        out += [r.date, r.weekday, r.instructor.name, r.instructor.email, r.instructor.type, r.department, r.campus, r.term, r.course, r.modality,
+            r.scheduled.start, r.scheduled.end, r.scheduled.minutes, r.absence.kindLabel, r.absence.minutesMissed, r.reason.code, r.reason.other,
+            r.handbook.leaveLabel, r.handbook.notifiedLabel, r.handbook.notifiedHow, r.handbook.notifiedWhen,
+            r.handbook.announced ? 'Yes' : 'No', r.handbook.emailed ? 'Yes' : 'No', r.handbook.doorSign ? 'Yes' : 'No', r.handbook.unsupervised ? 'Yes' : 'No',
+            r.coverage.label, r.coverage.detail, r.dctc.label, r.announcement.postedAt, r.assignment.description, r.assignment.minutes, r.assignment.due,
+            (r.artifacts.announcement || []).map(f => f.name).join('; '), (r.artifacts.assignment || []).map(f => f.name).join('; '),
+            r.reachOut ? 'Yes' : 'No', flagsFor(r).join('; '), r.notes, r.id, r.createdAt].map(csvField).join(',') + '\n';
+    });
+    const name = ((settings.dept || 'Department') + '_cancelled_classes_' + (settings.term || '') + '_' + new Date().toISOString().slice(0, 10)).replace(/[^\w\-]+/g, '_') + '.csv';
+    downloadText(name, out, 'text/csv;charset=utf-8;');
+    toast('Exported ' + rows.length + ' record(s). Reason detail and notes are included — share with the dean, not the department.');
+}
+function saveLogFile() {
+    if (!log.length) { toast('The log is empty.', 'warn'); return; }
+    const includeArtifacts = confirm('Include embedded artifacts (screenshots, PDFs)?\n\nOK = full archive (large file, keeps everything).\nCancel = data only (small; artifacts stay in the original report files).');
+    const records = includeArtifacts ? log.map(r => ({ ...r, _reportHtml: undefined })) : log.map(r => ({ ...r, artifacts: stripData(r.artifacts), _reportHtml: undefined }));
+    const data = { schema: 'cct-log', version: 1, savedAt: new Date().toISOString(), settings, records };
+    const name = ((settings.dept || 'Department') + '_cancelled_class_log_' + new Date().toISOString().slice(0, 10)).replace(/[^\w\-]+/g, '_') + '.json';
+    downloadText(name, JSON.stringify(data), 'application/json');
+    toast('Log saved (' + records.length + ' records' + (includeArtifacts ? ', with artifacts' : ', data only') + ')');
+}
+
+/* ============================================================
+   WIRE-UP
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));
+
+    // Settings first: URL wins over storage, storage over blank
+    applyUrlSettings();
+    restoreLocal();
+    writeSettingsForm();
+    refreshMasthead();
+    renderResources();
+    fillCourseMemory();
+    SETTINGS_KEYS.forEach(k => $(SETTING_IDS[k]).addEventListener('input', () => { readSettingsForm(); refreshMasthead(); renderResources(); scheduleSave(); }));
+    $('btnCopyLink').addEventListener('click', () => {
+        const link = settingsLink();
+        navigator.clipboard?.writeText(link).then(() => toast('Link copied — send it to faculty; the settings travel with it.')).catch(() => prompt('Copy this link:', link));
+    });
+    $('btnResetSettings').addEventListener('click', () => { if (!confirm('Clear all department settings?')) return; settings = {}; writeSettingsForm(); refreshMasthead(); renderResources(); scheduleSave(); });
+
+    // Report form
+    document.querySelectorAll('#tab-report input, #tab-report select, #tab-report textarea').forEach(el => {
+        el.addEventListener('input', () => { refreshConditionalFields(); scheduleSave(); });
+        el.addEventListener('change', () => { refreshConditionalFields(); scheduleSave(); });
+    });
+    wireDrop('dropAnn', 'fileAnn', 'announcement');
+    wireDrop('dropAsg', 'fileAsg', 'assignment');
+    wireDrop('dropLog', 'fileLog', null);
+    document.addEventListener('paste', e => {
+        // Pasting a screenshot anywhere on the report tab goes to whichever upload zone is nearer the focus
+        if ($('tab-report').classList.contains('hidden')) return;
+        const imgs = [...(e.clipboardData?.files || [])].filter(f => /^image\//.test(f.type));
+        if (!imgs.length) return;
+        const active = document.activeElement;
+        const bucket = active && active.closest && active.closest('#dropAsg, #fAsgDesc, #fAsgMinutes, #fAsgDue, #fileAsg') ? 'assignment' : 'announcement';
+        readFiles(imgs, bucket);
+        toast('Screenshot added to the ' + bucket + ' artifacts');
+    });
+    $('btnGenerate').addEventListener('click', () => generateReport(false));
+    $('btnPreview').addEventListener('click', () => generateReport(true));
+    $('btnEmail').addEventListener('click', emailChair);
+    $('btnClearForm').addEventListener('click', () => { if (confirm('Clear the whole form, including attached files?')) clearForm(false); });
+    $('btnCopySection').addEventListener('click', () => {
+        // Same day, another section: keep everything except course and announcement text/files
+        $('fCourse').value = ''; $('fAnnText').value = ''; $('fAnnPosted').value = ''; $('fAttest').checked = false;
+        files.announcement = [];
+        renderFiles(); refreshConditionalFields(); scheduleSave();
+        $('fCourse').focus();
+        toast('Enter the next section; date, reason, handbook steps and the assignment were kept.');
+    });
+    refreshConditionalFields();
+
+    // Log
+    ['filtInst', 'filtReason', 'filtFrom', 'filtTo', 'filtFlag'].forEach(id => $(id).addEventListener('change', renderLog));
+    $('btnExportCsv').addEventListener('click', exportCsv);
+    $('btnSaveLog').addEventListener('click', saveLogFile);
+    $('btnPrintSummary').addEventListener('click', () => { showTab('log'); window.print(); });
+    $('btnClearLog').addEventListener('click', () => { if (!confirm('Remove every record from the log in this browser? Saved log files and the original reports are not affected.')) return; log = []; renderLog(); scheduleSave(); });
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalCleanup) modalCleanup(); });
+
+    const hash = (location.hash || '').replace('#', '');
+    showTab(['report', 'log', 'process', 'settings'].includes(hash) ? hash : 'report');
+});
+</script>
+</body>
+</html>
