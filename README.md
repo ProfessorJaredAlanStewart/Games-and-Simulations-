@@ -27,7 +27,7 @@ Generators and games for reviewing key concepts before exams or as in-class acti
 
 - [Federal Government Crossword Generator](https://jaredalanstewart.com/Games-and-Simulations-/Federal%20Government%20Crossword%20Generator.html) — randomized crossword puzzles on federal government concepts.
 - [Texas Government Crossword Generator](https://jaredalanstewart.com/Games-and-Simulations-/Texas%20Government%20Crossword%20Generator.html) — randomized crosswords on Texas government topics.
-- [Texas Government Quiz Builder](https://jaredalanstewart.com/Games-and-Simulations-/Texas%20Government%20Quiz%20Builder.html) — build and take custom quizzes for exam prep or quick knowledge checks.
+- [Texas Government Quiz Builder](https://jaredalanstewart.com/Games-and-Simulations-/Texas%20Government%20Quiz%20Builder.html) — build quizzes and exams from the Texas Trailblazer Trek test bank; export to Canvas (QTI), print versioned forms with answer keys, project a review, or share a student practice link.
 - [Texas Jeopardy — Classroom Edition](https://jaredalanstewart.com/Games-and-Simulations-/Texas%20Jeopardy%20Classroom%20Edition.html) — a full Jeopardy-style board for team-based review.
 - [Wheel of Fortune — Texas Government](https://jaredalanstewart.com/Games-and-Simulations-/Wheel_of_Fortune_Texas_Government.html) — spin and solve Texas government puzzles.
 - [Wheel of Fortune — Federal Government](https://jaredalanstewart.com/Games-and-Simulations-/Wheel_of_Fortune_Federal_Government.html) — spin and solve federal government puzzles.
